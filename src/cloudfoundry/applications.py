@@ -7,8 +7,9 @@ class ApplicationsManager(EntityManager):
         super(ApplicationsManager, self).__init__(target_endpoint, credentials_manager)
 
     def list(self, space):
-        return self.credentials_manager.get('%s%s' %
-                                            (self.target_endpoint, space['entity']['apps_url']))
+        for resource in super(ApplicationsManager, self)._list('%s%s' % (self.target_endpoint,
+                                                                         space['entity']['apps_url'])):
+            yield resource
 
     def start(self, application, async=False):
         return self.credentials_manager.put('%s%s?stage_async=%s' %

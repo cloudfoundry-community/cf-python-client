@@ -6,4 +6,5 @@ class OrganizationManager(EntityManager):
         super(OrganizationManager, self).__init__(target_endpoint, credentials_manager)
 
     def list(self):
-        return self.credentials_manager.get('%s/v2/organizations' % self.target_endpoint)
+        for resource in super(OrganizationManager, self)._list('%s/v2/organizations' % self.target_endpoint):
+            yield resource

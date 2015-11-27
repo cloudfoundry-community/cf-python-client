@@ -48,16 +48,18 @@ if __name__ == '__main__':
     client.init_with_credentials('buce8373', 'ben666')
     searched_app_name = 'static_test'
     matched_org, matched_space, matched_app = None, None, None
-    for organization in client.organization.list()['resources']:
+    for organization in client.organization.list():
         _logger.debug('organization - %s - %s' % (organization['metadata']['guid'], organization['entity']['name']))
-        for space in client.space.list(organization)['resources']:
+        for space in client.space.list(organization):
             _logger.debug('     space - %s - %s' % (space['metadata']['guid'], space['entity']['name']))
-            for application in client.applications.list(space)['resources']:
+            for application in client.applications.list(space):
                 _logger.debug('         application - %s - %s' % (application['metadata']['guid'],
                                                                   application['entity']['name']))
                 if application['entity']['name'] == searched_app_name:
                     matched_org, matched_space, matched_app = organization, space, application
     if matched_app is not None:
         _logger.debug(json.dumps(matched_app))
-        _logger.debug(json.dumps(client.services.list_instances(matched_space)))
+        _logger.debug(json.dumps([
+            instance['entity']['name'] for instance in client.services.list_instances(matched_space)
+        ]))
         _logger.debug(json.dumps(client.applications.start(matched_app)))

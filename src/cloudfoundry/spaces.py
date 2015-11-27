@@ -6,5 +6,6 @@ class SpaceManager(EntityManager):
         super(SpaceManager, self).__init__(target_endpoint, credentials_manager)
 
     def list(self, organization):
-        return self.credentials_manager.get('%s%s' %
-                                            (self.target_endpoint, organization['entity']['spaces_url']))
+        for resource in super(SpaceManager, self)._list('%s%s' % (self.target_endpoint,
+                                                                  organization['entity']['spaces_url'])):
+            yield resource
