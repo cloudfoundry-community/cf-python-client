@@ -1,4 +1,3 @@
-
 import base64
 import httplib
 import logging
@@ -35,20 +34,30 @@ class CredentialsManager(object):
             raise s
 
     def get(self, url, **kwargs):
-        return self._bearer_request(caller.get, url, **kwargs)
+        return self._bearer_request(caller.get, url, True, **kwargs)
+
+    def post(self, url, **kwargs):
+        return self._bearer_request(caller.post, url, True, **kwargs)
 
     def put(self, url, **kwargs):
-        return self._bearer_request(caller.get, url, **kwargs)
+        return self._bearer_request(caller.get, url, True, **kwargs)
 
-    def _bearer_request(self, method, url, **kwargs):
+    def delete(self, url, **kwargs):
+        return self._bearer_request(caller.delete, url, False, **kwargs)
+
+    def _bearer_request(self, method, url, json_output, **kwargs):
         if self.credentials is None:
             raise InvalidCredentials()
         try:
-            return method(url,
-                          headers=dict(
-                              Authorization='Bearer %s' %
-                                            self.credentials['access_token']),
-                          **kwargs).json()
+            response = method(url,
+                              headers=dict(
+                                  Authorization='Bearer %s' %
+                                                self.credentials['access_token']),
+                              **kwargs)
+            if json_output:
+                return response.json()
+            else:
+                return response.text
 
         except InvalidStatusCode, s:
             if s.status_code == httplib.UNAUTHORIZED:
@@ -56,11 +65,15 @@ class CredentialsManager(object):
                 self.refresh_token()
                 try:
                     _logger.debug('token refreshed')
-                    return method(url,
-                                  headers=dict(
-                                      Authorization='Bearer %s' %
-                                                    self.credentials['access_token']),
-                                  **kwargs).json()
+                    response = method(url,
+                                      headers=dict(
+                                          Authorization='Bearer %s' %
+                                                        self.credentials['access_token']),
+                                      **kwargs)
+                    if json_output:
+                        return response.json()
+                    else:
+                        return response.text
                 except InvalidStatusCode, s:
                     if s.status_code == httplib.UNAUTHORIZED:
                         _logger.debug('token still invalid. erasing it')

@@ -1,9 +1,19 @@
 import requests
+import json
 
 
 class InvalidStatusCode(Exception):
-    def __init__(self, status_code):
+    def __init__(self, status_code, body):
         self.status_code = status_code
+        self.body = body
+
+    def __str__(self):
+        if self.body is None:
+            return '%d' % self.status_code
+        elif type(self.body) == str:
+            return '%d : %s' % (self.status_code, self.body)
+        else:
+            return '%d : %s' % (self.status_code, json.dumps(self.body))
 
 
 _proxy = None
@@ -39,12 +49,23 @@ class _Caller(object):
                                                  verify=not self._skip_verifications,
                                                  **kwargs))
 
+    def delete(self, url, **kwargs):
+        return self._check_response(requests.delete(url,
+                                                    proxies=self._proxy,
+                                                    verify=not self._skip_verifications,
+                                                    **kwargs))
+
     @staticmethod
     def _check_response(response):
         if response.status_code / 100 == 2:
             return response
         else:
-            raise InvalidStatusCode(response.status_code)
+            try:
+                body = response.json()
+            except Exception, _:
+                body = response.text
+            raise InvalidStatusCode(response.status_code, body)
+
 
 caller = _Caller()
 
