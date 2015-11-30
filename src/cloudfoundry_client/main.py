@@ -7,7 +7,7 @@ import json
 from cloudfoundry_client.client import CloudFoundryClient
 
 
-__all__ = ['main']
+__all__ = ['main', 'build_client_from_configuration']
 
 _logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ def _read_value_from_user(prompt, error_message=None, validator=None, default=''
                 sys.stderr.write('\"%s\": %s\n' % (answer_value, error_message))
 
 
-def _load_client_from_configuration():
+def build_client_from_configuration():
     dir_conf = os.path.join(os.path.expanduser('~'))
     if not os.path.isdir(dir_conf):
         if os.path.exists(dir_conf):
@@ -65,7 +65,7 @@ def _load_client_from_configuration():
         except:
             sys.stderr.write('Could not restore configuration. Cleaning and recreating\n')
             os.remove(config_file)
-            _load_client_from_configuration()
+            build_client_from_configuration()
 
 
 def organizations(client, arguments):
@@ -109,7 +109,7 @@ def applications(client, arguments):
 def main():
     logging.basicConfig(level=logging.INFO,
                         format='%(message)s')
-    client = _load_client_from_configuration()
+    client = build_client_from_configuration()
     parser = argparse.ArgumentParser(add_help=True);
     subparsers = parser.add_subparsers(help='commands', dest='action')
     subparsers.add_parser('organizations', help='List organizations')
