@@ -1,9 +1,10 @@
 import os
 import ConfigParser
 
-from cloudfoundry.client import CloudFoundryClient
+from cloudfoundry_client.client import CloudFoundryClient
 
 _client = None
+
 
 def build_client_from_configuration():
     global _client

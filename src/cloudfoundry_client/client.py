@@ -1,7 +1,7 @@
 import logging
 
-from cloudfoundry.calls import caller
-from cloudfoundry.credentials import CredentialsManager
+from cloudfoundry_client.calls import caller
+from cloudfoundry_client.credentials import CredentialsManager
 from organizations import OrganizationManager
 from spaces import SpaceManager
 from services import ServiceManager

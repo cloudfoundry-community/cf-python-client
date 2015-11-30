@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 src_dir = 'src'
-package_name = 'cloudfoundry-client'
+package_name = 'cloudfoundry_client'
 
 static_files = ['README.md']
 
@@ -16,8 +16,6 @@ setup(name=package_name,
       url='http://github.com/antechrestos/cf-python-client',
       classifiers=[
           "Programming Language :: Python",
-          "Development Status :: 1 - Planning",
-          "License :: OSI Approved",
           "Natural Language :: English",
           "Operating System :: OS Independent",
           "Programming Language :: Python :: 2.7",
@@ -25,7 +23,7 @@ setup(name=package_name,
       ],
       entry_points={
           'console_scripts': [
-              'cloudfoundry-client = cloudfoundry.main:main',
+              'cloudfoundry-client = cloudfoundry_client.main:main',
           ],
       },
 

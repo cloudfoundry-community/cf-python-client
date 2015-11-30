@@ -1,4 +1,4 @@
-from cloudfoundry.entities import EntityManager
+from cloudfoundry_client.entities import EntityManager
 
 
 class OrganizationManager(EntityManager):

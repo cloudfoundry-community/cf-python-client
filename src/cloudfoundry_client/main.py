@@ -4,7 +4,7 @@ import sys
 import os
 import logging
 import json
-from cloudfoundry.client import CloudFoundryClient
+from cloudfoundry_client.client import CloudFoundryClient
 
 
 __all__ = ['main']

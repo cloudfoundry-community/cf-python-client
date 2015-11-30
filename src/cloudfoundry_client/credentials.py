@@ -5,7 +5,7 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-from cloudfoundry.calls import caller, InvalidStatusCode
+from cloudfoundry_client.calls import caller, InvalidStatusCode
 
 
 class InvalidCredentials(Exception):

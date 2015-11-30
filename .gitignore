@@ -3,5 +3,5 @@
 test/sandbox.py
 test/test.properties
 build/
-cloudfoundry.egg-info/
+cloudfoundry_client.egg-info/
 dist/

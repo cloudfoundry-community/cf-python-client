@@ -1,6 +1,6 @@
 import json
 from urllib import quote
-from cloudfoundry.entities import EntityManager
+from cloudfoundry_client.entities import EntityManager
 
 
 class ServiceManager(EntityManager):
