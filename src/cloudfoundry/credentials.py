@@ -23,15 +23,20 @@ class CredentialsManager(object):
         _logger.debug('init_with_credentials - %s', login)
         self._credentials_request(dict(grant_type='password', username=login, password=password))
 
+    def init_with_tokens(self, access_token, refresh_token):
+        self.credentials = dict(access_token=access_token, refresh_token=refresh_token)
+
     def init_with_refresh(self, refresh_token):
         self._credentials_request(dict(grant_type='refresh_token', scope='', refresh_token=refresh_token))
 
+    def init_with_refresh(self, refresh_token):
+        self._credentials_request(dict(grant_type='refresh_token', scope='', refresh_token=refresh_token))
+
+    def access_token(self):
+        return self.credentials['access_token'] if self.credentials is not None else None
+
     def refresh_token(self):
-        try:
-            self.init_with_refresh(self.credentials['refresh_token'])
-        except InvalidStatusCode, s:
-            self.credentials = None
-            raise s
+        return self.credentials['refresh_token'] if self.credentials is not None else None
 
     def get(self, url, **kwargs):
         return self._bearer_request(caller.get, url, True, **kwargs)
@@ -62,7 +67,7 @@ class CredentialsManager(object):
         except InvalidStatusCode, s:
             if s.status_code == httplib.UNAUTHORIZED:
                 _logger.debug('token expired. refreshing it')
-                self.refresh_token()
+                self._refresh_access_token()
                 try:
                     _logger.debug('token refreshed')
                     response = method(url,
@@ -81,6 +86,13 @@ class CredentialsManager(object):
                     raise
             else:
                 raise
+
+    def _refresh_access_token(self):
+        try:
+            self.init_with_refresh(self.credentials['refresh_token'])
+        except InvalidStatusCode, s:
+            self.credentials = None
+            raise s
 
     def _credentials_request(self, data):
         response = caller.post('%s/oauth/token' % self.info['authorization_endpoint'],

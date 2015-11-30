@@ -1,3 +1,7 @@
 .idea/
 *.pyc
-src/cloudfoundry/sandbox.py
+test/sandbox.py
+test/test.properties
+build/
+cloudfoundry.egg-info/
+dist/

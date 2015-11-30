@@ -1,5 +1,9 @@
 import requests
 import json
+import logging
+
+# hide underneath logs
+logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARN)
 
 
 class InvalidStatusCode(Exception):
@@ -30,6 +34,10 @@ class _Caller(object):
 
     def skip_verifications(self, skip_verifications):
         self._skip_verifications = skip_verifications
+        if skip_verifications:
+            from requests.packages.urllib3.exceptions import InsecureRequestWarning
+            import warnings
+            warnings.filterwarnings('ignore', 'Unverified HTTPS request is being made.*', InsecureRequestWarning)
 
     def get(self, url, **kwargs):
         return self._check_response(requests.get(url,

@@ -1,5 +1,4 @@
 import logging
-import json
 
 from cloudfoundry.calls import caller
 from cloudfoundry.credentials import CredentialsManager
@@ -22,10 +21,6 @@ class CloudFoundryClient(object):
     def __init__(self, target_endpoint, client_id='cf', client_secret='', proxy=None, skip_verification=False):
         caller.proxy(proxy)
         caller.skip_verifications(skip_verification)
-        if skip_verification:
-            from requests.packages.urllib3.exceptions import InsecureRequestWarning
-            import warnings
-            warnings.filterwarnings('ignore', 'Unverified HTTPS request is being made.*', InsecureRequestWarning)
         self.target_endpoint = target_endpoint
         self.info = caller.get('%s/v2/info' % self.target_endpoint).json()
         self.credentials_manager = CredentialsManager(self.info, client_id, client_secret)
@@ -39,4 +34,6 @@ class CloudFoundryClient(object):
 
     def init_with_refresh(self, refresh_token):
         self.credentials_manager.init_with_refresh(refresh_token)
+
+
 
