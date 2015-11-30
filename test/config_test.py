@@ -4,7 +4,9 @@ import ConfigParser
 from cloudfoundry_client.client import CloudFoundryClient
 
 _client = None
-
+_org_guid = None
+_space_guid = None
+_app_guid = None
 
 def build_client_from_configuration():
     global _client
@@ -31,5 +33,8 @@ def build_client_from_configuration():
                                     skip_verification=skip_verification)
         client.credentials_manager.init_with_credentials(cfg.get('authentification', 'login'),
                                                          cfg.get('authentification', 'password'))
+        client.org_guid = cfg.get('test_data', 'org_guid')
+        client.space_guid = cfg.get('test_data', 'space_guid')
+        client.app_guid = cfg.get('test_data', 'app_guid')
         _client = client
     return _client
