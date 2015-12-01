@@ -11,7 +11,3 @@ class TestOrganizations(unittest.TestCase):
         for _ in build_client_from_configuration().organization.list():
             cpt += 1
         _logger.debug('test organization list - %d found', cpt)
-
-
-if __name__ == '__main__':
-    unittest.main()

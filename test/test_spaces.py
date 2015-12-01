@@ -12,7 +12,3 @@ class TestSpaces(unittest.TestCase):
         for _ in client.space.list(client.org_guid):
             cpt += 1
         _logger.debug('test spaces list - %d found', cpt)
-
-
-if __name__ == '__main__':
-    unittest.main()
