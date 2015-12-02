@@ -45,7 +45,7 @@ class CredentialsManager(object):
         return self._bearer_request(caller.post, url, True, **kwargs)
 
     def put(self, url, **kwargs):
-        return self._bearer_request(caller.get, url, True, **kwargs)
+        return self._bearer_request(caller.put, url, True, **kwargs)
 
     def delete(self, url, **kwargs):
         return self._bearer_request(caller.delete, url, False, **kwargs)

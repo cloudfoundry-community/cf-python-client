@@ -1,6 +1,13 @@
 import json
+import httplib
+import logging
 from urllib import quote
+from time import sleep
+
+from cloudfoundry_client.calls import InvalidStatusCode
 from cloudfoundry_client.entities import EntityManager
+
+_logger = logging.getLogger(__name__)
 
 
 class ApplicationsManager(EntityManager):
@@ -29,14 +36,40 @@ class ApplicationsManager(EntityManager):
         return super(ApplicationsManager, self)._get_one('%s/v2/apps/%s/instances' %
                                                          (self.target_endpoint, application_guid))
 
-    def start(self, application_guid, async=False):
-        return self.credentials_manager.put('%s/v2/apps/%s?stage_async=%s' %
-                                            (self.target_endpoint, application_guid, json.dumps(async)),
-                                            json=dict(state='STARTED'))
+    def start(self, application_guid, async=False, check_time=0.5):
+        result = self.credentials_manager.put('%s/v2/apps/%s?stage_async=%s' %
+                                              (self.target_endpoint, application_guid, json.dumps(async)),
+                                              json=dict(state='STARTED'))
+        if not async:
+            all_running = False
+            while not all_running:
+                sleep(check_time)
+                all_running = True
+                instances = self.get_instances(application_guid)
+                _logger.debug('start - %s', json.dumps(instances))
+                for instance_number, instance in instances.items():
+                    if instance['state'] != 'RUNNING':
+                        all_running = False
+                        if instance['state'] != 'STARTING':
+                            raise InvalidStatusCode(httplib.BAD_REQUEST,
+                                                    'Invalid application status %s' % instance['state'])
+        return result
 
-    def stop(self, application_guid, async=False):
-        return self.credentials_manager.put('%s/v2/apps/%s?stage_async=%s' %
-                                            (self.target_endpoint, application_guid, json.dumps(async)),
-                                            json=dict(state='STOPPED'))
+    def stop(self, application_guid, async=False, check_time=0.5):
+        result = self.credentials_manager.put('%s/v2/apps/%s?stage_async=%s' %
+                                              (self.target_endpoint, application_guid, json.dumps(async)),
+                                              json=dict(state='STOPPED'))
+        if not async:
+            some_running = True
+            while some_running:
+                sleep(check_time)
+                try:
+                    instances = self.get_instances(application_guid)
+                    _logger.debug('stop - %s', json.dumps(instances))
+                except InvalidStatusCode, ex:
+                    if ex.status_code == httplib.BAD_REQUEST:
+                        some_running = False
+        return result
+
 
 

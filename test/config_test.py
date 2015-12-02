@@ -46,6 +46,7 @@ def build_client_from_configuration():
         client.service_guid = cfg.get('test_data', 'service_guid')
         client.service_name = cfg.get('test_data', 'service_name')
         client.plan_guid = cfg.get('test_data', 'plan_guid')
+        client.creation_parameters = eval(cfg.get('test_data', 'creation_parameters'))
         _client = client
 
     return _client

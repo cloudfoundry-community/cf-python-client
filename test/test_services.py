@@ -41,3 +41,22 @@ class TestServices(unittest.TestCase):
             for _ in client.service.list_bindings_by_application(application['metadata']['guid']):
                 cpt += 1
             self.assertEqual(cpt, binding_by_app.get(application['metadata']['guid'], 0))
+
+    def test_create_delete(self):
+        client = build_client_from_configuration()
+        result = client.service.create_instance(client.space_guid, 'test_name', client.plan_guid,
+                                                client.creation_parameters)
+        client.service.delete_instance(result['metadata']['guid'])
+
+    def test_create_bind_unbind_delete(self):
+
+        client = build_client_from_configuration()
+        instance = client.service.create_instance(client.space_guid, 'test_name', client.plan_guid,
+                                                client.creation_parameters)
+        try:
+            binding = client.service.bind_application(client.app_guid, instance['metadata']['guid'])
+            _logger.debug(json.dumps(binding))
+            client.service.unbind_application(binding['metadata']['guid'])
+            _logger.debug("binding deleted")
+        finally:
+            client.service.delete_instance(instance['metadata']['guid'])

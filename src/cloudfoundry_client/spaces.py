@@ -9,3 +9,6 @@ class SpaceManager(EntityManager):
         for resource in super(SpaceManager, self)._list('%s/v2/organizations/%s/spaces' % (self.target_endpoint,
                                                                                            org_uid)):
             yield resource
+
+    def get_by_id(self, space_guid):
+        return super(SpaceManager, self)._get_one('%s/v2/spaces/%s' % (self.target_endpoint, space_guid))
