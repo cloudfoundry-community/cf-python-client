@@ -43,6 +43,14 @@ class ServiceManager(EntityManager):
                                                                                                   space_guid,
                                                                                                   query))
 
+    def update_instance(self, instance_guid, parameters):
+        request = dict(parameters=parameters, tags=[])
+        return self.credentials_manager.put(
+            '%s/v2/service_instances/%s?accepts_incomplete=true' % (self.target_endpoint,
+                                                                    instance_guid),
+            json=request)
+
+
     def delete_instance(self, instance_guid, async=False):
         self.credentials_manager.delete('%s/v2/service_instances/%s?accepts_incomplete=true&async=%s' %
                                         (self.target_endpoint, instance_guid, json.dumps(async)))

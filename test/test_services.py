@@ -42,10 +42,12 @@ class TestServices(unittest.TestCase):
                 cpt += 1
             self.assertEqual(cpt, binding_by_app.get(application['metadata']['guid'], 0))
 
-    def test_create_delete(self):
+    def test_create_update_delete(self):
         client = build_client_from_configuration()
         result = client.service.create_instance(client.space_guid, 'test_name', client.plan_guid,
                                                 client.creation_parameters)
+        result_updated = client.service.update_instance(result['metadata']['guid'], client.creation_parameters)
+        _logger.debug(json.dumps(result_updated))
         client.service.delete_instance(result['metadata']['guid'])
 
     def test_create_bind_unbind_delete(self):
