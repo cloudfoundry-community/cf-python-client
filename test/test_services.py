@@ -22,7 +22,9 @@ class TestServices(unittest.TestCase):
     def test_list_plans(self):
         cpt = 0
         client = build_client_from_configuration()
-        for _ in client.service.list_plans(client.service_guid):
+        for plan in client.service.list_plans(client.service_guid):
+            if cpt == 0:
+                _logger.debug(json.dumps(plan))
             cpt += 1
         _logger.debug('test plan list - %d found', cpt)
 
