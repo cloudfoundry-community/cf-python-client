@@ -26,6 +26,13 @@ class TestApplications(unittest.TestCase):
                 stats = client.application.get_stats(application['metadata']['guid'])
                 self.assertIsNotNone(stats)
                 self.assertEquals(len(stats), application['entity']['instances'])
+                self.assertEquals(len(stats), application['entity']['instances'])
+                env = client.application.get_env(application['metadata']['guid'])
+                self.assertIsNotNone(env)
+                self.assertIsNotNone(env.get('application_env_json', None))
+                self.assertIsNotNone(env['application_env_json'].get('VCAP_APPLICATION', None))
+                self.assertGreater(len(env['application_env_json']['VCAP_APPLICATION'].get('application_uris', [])), 0)
+                _logger.debug(env)
             cpt += 1
 
         _logger.debug('test applications list - %d found', cpt)

@@ -36,6 +36,10 @@ class ApplicationsManager(EntityManager):
         return super(ApplicationsManager, self)._get_one('%s/v2/apps/%s/instances' %
                                                          (self.target_endpoint, application_guid))
 
+    def get_env(self, application_guid):
+        return super(ApplicationsManager, self)._get_one('%s/v2/apps/%s/env' %
+                                                         (self.target_endpoint, application_guid))
+
     def start(self, application_guid, async=False, check_time=0.5):
         result = self.credentials_manager.put('%s/v2/apps/%s?stage_async=%s' %
                                               (self.target_endpoint, application_guid, json.dumps(async)),
