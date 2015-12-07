@@ -19,5 +19,5 @@ class OrganizationManager(EntityManager):
 
     def get_by_name(self, name):
         query = quote('name:%s' % name)
-        return super(OrganizationManager, self)._get_one('%s/v2/organizations?q=%s' % (self.target_endpoint,
+        return super(OrganizationManager, self)._get_first('%s/v2/organizations?q=%s' % (self.target_endpoint,
                                                                                        query))
