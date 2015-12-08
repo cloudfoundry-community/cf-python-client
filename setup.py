@@ -4,7 +4,6 @@ src_dir = 'src'
 package_directory = 'cloudfoundry_client'
 package_name = 'cloudfoundry-client'
 
-static_files = ['README.md']
 
 __version__ = None
 version_file = '%s/%s/__init__.py' % (src_dir, package_directory)
@@ -37,9 +36,6 @@ setup(name=package_name,
               'cloudfoundry-client = %s.main:main' % package_directory,
           ],
       },
-
-      include_package_data=True,
       package_dir={package_directory: '%s/%s' % (src_dir, package_directory)},
-      package_data={package_directory: static_files},
       install_requires=[requirement.rstrip(' \r\n') for requirement in open('requirements.txt').readlines()]
       )
