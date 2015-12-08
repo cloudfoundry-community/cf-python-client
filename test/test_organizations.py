@@ -12,11 +12,10 @@ class TestOrganizations(unittest.TestCase):
         client = build_client_from_configuration()
         for organization in client.organization.list():
             if cpt == 0:
-                client.organization.get_by_id(organization['metadata']['guid'])
-                organization = client.organization.get_by_name(organization['entity']['name'])
-                if organization is None:
-                    raise AssertionError("error - organization not found by name")
-                else:
-                    _logger.debug(json.dumps(organization))
+                organization = client.organization.get(organization['metadata']['guid'])
+                self.assertIsNotNone(organization)
+                organization = client.organization.get_first(name=organization['entity']['name'])
+                self.assertIsNotNone(organization)
+                _logger.debug(json.dumps(organization))
             cpt += 1
         _logger.debug('test organization list - %d found', cpt)

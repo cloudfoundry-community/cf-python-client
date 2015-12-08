@@ -5,85 +5,48 @@ from cloudfoundry_client.entities import EntityManager
 
 class ServiceManager(EntityManager):
     def __init__(self, target_endpoint, credentials_manager):
-        super(ServiceManager, self).__init__(target_endpoint, credentials_manager)
+        super(ServiceManager, self).__init__(target_endpoint, credentials_manager, '/v2/services')
 
-    def list_services(self, space_guid):
-        for resource in super(ServiceManager, self)._list('%s/v2/spaces/%s/services' % (self.target_endpoint,
-                                                                                        space_guid)):
-            yield resource
 
-    def get_service_by_name(self, space_guid, service_name):
-        query = quote('label:%s' % service_name)
-        return super(ServiceManager, self)._get_first('%s/v2/spaces/%s/services?q=%s' % (self.target_endpoint,
-                                                                                         space_guid, query))
+class ServicePlanManager(EntityManager):
+    def __init__(self, target_endpoint, credentials_manager):
+        super(ServicePlanManager, self).__init__(target_endpoint, credentials_manager, '/v2/service_plans')
 
-    def list_plans(self, service_guid):
-        query = quote('service_guid:%s' % service_guid)
-        for resource in super(ServiceManager, self)._list('%s/v2/service_plans?q=%s' % (self.target_endpoint, query)):
-            yield resource
 
-    def create_instance(self, space_guid, instance_name, plan_guid, parameters):
+class ServiceInstanceManager(EntityManager):
+    def __init__(self, target_endpoint, credentials_manager):
+        super(ServiceInstanceManager, self).__init__(target_endpoint, credentials_manager, '/v2/service_instances')
+
+    def create(self, space_guid, instance_name, plan_guid, parameters):
         request = dict(name=instance_name,
                        space_guid=space_guid,
                        service_plan_guid=plan_guid,
                        parameters=parameters)
-        return self.credentials_manager.post(
-            '%s/v2/service_instances?accepts_incomplete=true' % self.target_endpoint,
-            json=request)
+        return super(ServiceInstanceManager, self)._create(request)
 
-
-    def list_instances(self, space_guid):
-        for resource in super(ServiceManager, self)._list('%s/v2/spaces/%s/service_instances' % (self.target_endpoint,
-                                                                                                 space_guid)):
-            yield resource
-
-    def get_instance_by_name(self, space_guid, instance_name):
-        query = quote('name:%s' % instance_name)
-        return super(ServiceManager, self)._get_first('%s/v2/spaces/%s/service_instances?q=%s' % (self.target_endpoint,
-                                                                                                  space_guid,
-                                                                                                  query))
-
-    def update_instance(self, instance_guid, parameters):
+    def update(self, instance_guid, parameters):
         request = dict(parameters=parameters, tags=[])
-        return self.credentials_manager.put(
-            '%s/v2/service_instances/%s?accepts_incomplete=true' % (self.target_endpoint,
-                                                                    instance_guid),
-            json=request)
+        return super(ServiceInstanceManager, self)._update(instance_guid, request)
+
+    def remove(self, instance_guid):
+        super(ServiceInstanceManager, self)._remove(instance_guid)
 
 
-    def delete_instance(self, instance_guid, async=False):
-        self.credentials_manager.delete('%s/v2/service_instances/%s?accepts_incomplete=true&async=%s' %
-                                        (self.target_endpoint, instance_guid, json.dumps(async)))
+class ServiceBindingManager(EntityManager):
+    def __init__(self, target_endpoint, credentials_manager):
+        super(ServiceBindingManager, self).__init__(target_endpoint, credentials_manager, '/v2/service_bindings')
 
-    def bind_application(self, app_guid, instance_guid, parameters=None):
+    def create(self, app_guid, instance_guid, parameters=None):
         request = dict(app_guid=app_guid,
                        service_instance_guid=instance_guid)
         if parameters is None:
             request['parameters'] = {}
         else:
             request['parameters'] = parameters
-        return self.credentials_manager.post('%s/v2/service_bindings' % self.target_endpoint,
-                                             json=request)
+        return super(ServiceBindingManager, self)._create(request)
 
-    def list_bindings_by_application(self, application_guid):
-        for resource in super(ServiceManager, self)._list('%s/v2/apps/%s/service_bindings' % (self.target_endpoint,
-                                                                                              application_guid)):
-            yield resource
-
-    def list_bindings_by_instance(self, instance_id):
-        for resource in super(ServiceManager, self) \
-                ._list('%s/v2/service_instances/%s/service_bindings' % (self.target_endpoint,
-                                                                        instance_id)):
-            yield resource
-
-    def get_binding(self, instance_id, app_guid):
-        query = quote('app_guid:%s' % app_guid)
-        return super(ServiceManager, self)._get_first(
-            '%s/v2/service_instances/%s/service_bindings?q=%s' % (self.target_endpoint, instance_id, query))
-
-    def unbind_application(self, binding_id, async=False):
-        self.credentials_manager.delete('%s/v2/service_bindings/%s?async=%s' %
-                                        (self.target_endpoint, binding_id, json.dumps(async)))
+    def remove(self, binding_id):
+        super(ServiceBindingManager, self)._remove(binding_id)
 
 
 

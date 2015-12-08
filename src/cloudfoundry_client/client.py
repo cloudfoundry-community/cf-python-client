@@ -4,7 +4,7 @@ from cloudfoundry_client.calls import caller
 from cloudfoundry_client.credentials import CredentialsManager
 from organizations import OrganizationManager
 from spaces import SpaceManager
-from services import ServiceManager
+from services import ServiceManager, ServicePlanManager, ServiceInstanceManager, ServiceBindingManager
 from applications import ApplicationsManager
 
 _logger = logging.getLogger(__name__)
@@ -27,6 +27,9 @@ class CloudFoundryClient(object):
         self.organization = OrganizationManager(self.target_endpoint, self.credentials_manager)
         self.space = SpaceManager(self.target_endpoint, self.credentials_manager)
         self.service = ServiceManager(self.target_endpoint, self.credentials_manager)
+        self.service_plan = ServicePlanManager(self.target_endpoint, self.credentials_manager)
+        self.service_instance = ServiceInstanceManager(self.target_endpoint, self.credentials_manager)
+        self.service_binding = ServiceBindingManager(self.target_endpoint, self.credentials_manager)
         self.application = ApplicationsManager(self.target_endpoint, self.credentials_manager)
 
     def init_with_credentials(self, login, password):

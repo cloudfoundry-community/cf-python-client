@@ -38,27 +38,33 @@ class CredentialsManager(object):
     def refresh_token(self):
         return self.credentials['refresh_token'] if self.credentials is not None else None
 
-    def get(self, url, **kwargs):
-        return self._bearer_request(caller.get, url, True, **kwargs)
+    def get(self, url):
+        return self._bearer_request(caller.get, url, True)
 
-    def post(self, url, **kwargs):
-        return self._bearer_request(caller.post, url, True, **kwargs)
+    def post(self, url, data):
+        return self._bearer_request(caller.post, url, True, data)
 
-    def put(self, url, **kwargs):
-        return self._bearer_request(caller.put, url, True, **kwargs)
+    def put(self, url, data):
+        return self._bearer_request(caller.put, url, True, data)
 
-    def delete(self, url, **kwargs):
-        return self._bearer_request(caller.delete, url, False, **kwargs)
+    def delete(self, url):
+        return self._bearer_request(caller.delete, url, False)
 
-    def _bearer_request(self, method, url, json_output, **kwargs):
+    def _bearer_request(self, method, url, json_output, data_json=None):
         if self.credentials is None:
             raise InvalidCredentials()
         try:
-            response = method(url,
-                              headers=dict(
-                                  Authorization='Bearer %s' %
-                                                self.credentials['access_token']),
-                              **kwargs)
+            if data_json is None:
+                response = method(url,
+                                  headers=dict(
+                                      Authorization='Bearer %s' %
+                                                    self.credentials['access_token']))
+            else:
+                response = method(url,
+                                  headers=dict(
+                                      Authorization='Bearer %s' %
+                                                    self.credentials['access_token']),
+                                  json=data_json)
             if json_output:
                 return response.json()
             else:
@@ -74,7 +80,7 @@ class CredentialsManager(object):
                                       headers=dict(
                                           Authorization='Bearer %s' %
                                                         self.credentials['access_token']),
-                                      **kwargs)
+                                      json=data_json)
                     if json_output:
                         return response.json()
                     else:

@@ -75,7 +75,7 @@ def organizations(client, arguments):
 
 def spaces(client, arguments):
     def list_space(org_guid):
-        for space in client.space.list(org_guid):
+        for space in client.space.list(organization_guid=org_guid):
             _logger.info('%s - %s', space['metadata']['guid'], space['entity']['name'])
 
     if len(arguments.organization_id) > 0:
@@ -88,18 +88,18 @@ def spaces(client, arguments):
 
 def applications(client, arguments):
     def list_app_of_space(space_guid):
-        for app in client.application.list(space_guid):
+        for app in client.application.list(space_guid=space_guid):
             _logger.info('      - %s - %s', app['metadata']['guid'], app['entity']['name'])
 
     def list_app_of_org(org_guid):
-        for space in client.space.list(org_guid):
+        for space in client.space.list(organization_guid=org_guid):
             _logger.info('  Space - %s - %s', space['metadata']['guid'], space['entity']['name'])
             list_app_of_space(space['metadata']['guid'])
 
-    if len(arguments.organization_id) > 0:
-        list_app_of_org(arguments.organization_id)
-    elif len(arguments.space_id) > 0:
+    if len(arguments.space_id) > 0:
         list_app_of_space(arguments.space_id)
+    elif len(arguments.organization_id) > 0:
+        list_app_of_org(arguments.organization_id)
     else:
         for organization in client.organization.list():
             _logger.info('Organization - %s - %s', organization['metadata']['guid'], organization['entity']['name'])
