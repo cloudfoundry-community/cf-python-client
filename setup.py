@@ -1,12 +1,23 @@
 from setuptools import setup, find_packages
 
 src_dir = 'src'
-package_name = 'cloudfoundry_client'
+package_directory = 'cloudfoundry_client'
+package_name = 'cloudfoundry-client'
 
 static_files = ['README.md']
 
+__version__ = None
+version_file = '%s/%s/__init__.py' % (src_dir, package_directory)
+with open(version_file, 'r') as f:
+    for line in f.readlines():
+        if line.find('__version__') >= 0:
+            exec line
+
+if __version__ is None:
+    raise AssertionError('Failed to load version from %s' % version_file)
+
 setup(name=package_name,
-      version='0.0.1',
+      version=__version__,
       zip_safe=True,
       packages=find_packages(where=src_dir),
       author='Benjamin Einaudi',
@@ -23,12 +34,12 @@ setup(name=package_name,
       ],
       entry_points={
           'console_scripts': [
-              'cloudfoundry-client = cloudfoundry_client.main:main',
+              'cloudfoundry-client = %s.main:main' % package_directory,
           ],
       },
 
       include_package_data=True,
-      package_dir={package_name: '%s/%s' % (src_dir, package_name)},
-      package_data={package_name: static_files},
+      package_dir={package_directory: '%s/%s' % (src_dir, package_directory)},
+      package_data={package_directory: static_files},
       install_requires=[requirement.rstrip(' \r\n') for requirement in open('requirements.txt').readlines()]
       )
