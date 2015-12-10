@@ -13,8 +13,8 @@ class InvalidCredentials(Exception):
 
 
 class CredentialsManager(object):
-    def __init__(self, info, client_id, client_secret):
-        self.info = info
+    def __init__(self, authorization_endpoint, client_id, client_secret):
+        self.authorization_endpoint = authorization_endpoint
         self.credentials = None
         self.client_id = client_id
         self.client_secret = client_secret
@@ -101,7 +101,7 @@ class CredentialsManager(object):
             raise s
 
     def _credentials_request(self, data):
-        response = caller.post('%s/oauth/token' % self.info['authorization_endpoint'],
+        response = caller.post('%s/oauth/token' % self.authorization_endpoint,
                                data=data,
                                headers=dict(Authorization=
                                             'Basic %s' % base64.b64encode(

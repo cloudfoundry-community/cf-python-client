@@ -1,5 +1,3 @@
-import json
-from urllib import quote
 from cloudfoundry_client.entities import EntityManager
 
 

@@ -1,7 +1,6 @@
 import json
 import httplib
 import logging
-from urllib import quote
 from time import sleep
 
 from cloudfoundry_client.calls import InvalidStatusCode
