@@ -1,6 +1,7 @@
 import requests
 import json
 import logging
+from requests.exceptions import ConnectionError as NativeConnectionError
 
 # hide underneath logs
 logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.WARN)
@@ -18,6 +19,10 @@ class InvalidStatusCode(Exception):
             return '%d : %s' % (self.status_code, self.body)
         else:
             return '%d : %s' % (self.status_code, json.dumps(self.body))
+
+
+class ConnectionError(Exception):
+    pass
 
 
 _proxy = None
@@ -40,28 +45,40 @@ class _Caller(object):
             warnings.filterwarnings('ignore', 'Unverified HTTPS request is being made.*', InsecureRequestWarning)
 
     def get(self, url, **kwargs):
-        return self._check_response(requests.get(url,
-                                                 proxies=self._proxy,
-                                                 verify=not self._skip_verifications,
-                                                 **kwargs))
+        try:
+            return self._check_response(requests.get(url,
+                                                     proxies=self._proxy,
+                                                     verify=not self._skip_verifications,
+                                                     **kwargs))
+        except NativeConnectionError, _:
+            raise ConnectionError()
 
     def post(self, url, data=None, json=None, **kwargs):
-        return self._check_response(requests.post(url, data=data, json=json,
-                                                  proxies=self._proxy,
-                                                  verify=not self._skip_verifications,
-                                                  **kwargs))
+        try:
+            return self._check_response(requests.post(url, data=data, json=json,
+                                                      proxies=self._proxy,
+                                                      verify=not self._skip_verifications,
+                                                      **kwargs))
+        except NativeConnectionError, _:
+            raise ConnectionError()
 
     def put(self, url, data=None, json=None, **kwargs):
-        return self._check_response(requests.put(url, data=data, json=json,
-                                                 proxies=self._proxy,
-                                                 verify=not self._skip_verifications,
-                                                 **kwargs))
+        try:
+            return self._check_response(requests.put(url, data=data, json=json,
+                                                     proxies=self._proxy,
+                                                     verify=not self._skip_verifications,
+                                                     **kwargs))
+        except NativeConnectionError, _:
+            raise ConnectionError()
 
     def delete(self, url, **kwargs):
-        return self._check_response(requests.delete(url,
-                                                    proxies=self._proxy,
-                                                    verify=not self._skip_verifications,
-                                                    **kwargs))
+        try:
+            return self._check_response(requests.delete(url,
+                                                        proxies=self._proxy,
+                                                        verify=not self._skip_verifications,
+                                                        **kwargs))
+        except NativeConnectionError, _:
+            raise ConnectionError()
 
     @staticmethod
     def _check_response(response):

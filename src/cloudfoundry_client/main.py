@@ -4,6 +4,8 @@ import sys
 import os
 import logging
 import json
+import re
+from cloudfoundry_client.calls import ConnectionError
 from cloudfoundry_client.client import CloudFoundryClient
 
 
@@ -62,67 +64,67 @@ def build_client_from_configuration():
                 client.credentials_manager.init_with_tokens(configuration['access_token'],
                                                             configuration['refresh_token'])
                 return client
-        except:
-            sys.stderr.write('Could not restore configuration. Cleaning and recreating\n')
-            os.remove(config_file)
-            build_client_from_configuration()
-
-
-def organizations(client, arguments):
-    for organization in client.organization.list():
-        _logger.info('%s - %s', organization['metadata']['guid'], organization['entity']['name'])
-
-
-def spaces(client, arguments):
-    def list_space(org_guid):
-        for space in client.space.list(organization_guid=org_guid):
-            _logger.info('%s - %s', space['metadata']['guid'], space['entity']['name'])
-
-    if len(arguments.organization_id) > 0:
-        list_space(arguments.organization_id)
-    else:
-        for organization in client.organization.list():
-            _logger.info('Organization - %s - %s', organization['metadata']['guid'], organization['entity']['name'])
-            list_space(organization['metadata']['guid'])
-
-
-def applications(client, arguments):
-    def list_app_of_space(space_guid):
-        for app in client.application.list(space_guid=space_guid):
-            _logger.info('      - %s - %s', app['metadata']['guid'], app['entity']['name'])
-
-    def list_app_of_org(org_guid):
-        for space in client.space.list(organization_guid=org_guid):
-            _logger.info('  Space - %s - %s', space['metadata']['guid'], space['entity']['name'])
-            list_app_of_space(space['metadata']['guid'])
-
-    if len(arguments.space_id) > 0:
-        list_app_of_space(arguments.space_id)
-    elif len(arguments.organization_id) > 0:
-        list_app_of_org(arguments.organization_id)
-    else:
-        for organization in client.organization.list():
-            _logger.info('Organization - %s - %s', organization['metadata']['guid'], organization['entity']['name'])
-            list_app_of_org(organization['metadata']['guid'])
+        except Exception, ex:
+            if type(ex) == ConnectionError:
+                raise
+            else:
+                sys.stderr.write('Could not restore configuration. Cleaning and recreating\n')
+                os.remove(config_file)
+                build_client_from_configuration()
 
 
 def main():
     logging.basicConfig(level=logging.INFO,
                         format='%(message)s')
     client = build_client_from_configuration()
-    parser = argparse.ArgumentParser(add_help=True);
+    parser = argparse.ArgumentParser(add_help=True)
     subparsers = parser.add_subparsers(help='commands', dest='action')
-    subparsers.add_parser('organizations', help='List organizations')
-    spaces_parser = subparsers.add_parser('spaces', help='List spaces')
-    spaces_parser.add_argument('-organization_id', action='store', dest='organization_id', type=str, default='',
-                               help='Organization id')
-    apps_parser = subparsers.add_parser('applications', help='List applications')
-    apps_parser.add_argument('-organization_id', action='store', dest='organization_id', type=str, default='',
-                             help='Organization id')
-    apps_parser.add_argument('-space_id', action='store', dest='space_id', type=str, default='',
-                             help='Space id')
+    commands = dict()
+    commands['organization'] = dict(list=(), name='name', allow_retrieve_by_name=True)
+    commands['space'] = dict(list=('organization_guid',), name='name', allow_retrieve_by_name=True)
+    commands['application'] = dict(list=('organization_guid', 'space_guid',), name='name', allow_retrieve_by_name=True)
+    commands['service'] = dict(list=(), name='label', allow_retrieve_by_name=True)
+    commands['service_plan'] = dict(list=('service_guid', 'service_instance_guid'), name='name',
+                                    allow_retrieve_by_name=False)
+    commands['service_instance'] = dict(list=('organization_guid', 'space_guid', 'service_plan_guid'), name='name',
+                                        allow_retrieve_by_name=False)
+    commands['service_binding'] = dict(list=('app_guid', 'service_instance_guid'), name=None,
+                                       allow_retrieve_by_name=False)
+
+    for domain, command_description in commands.items():
+        list_parser = subparsers.add_parser('list_%ss' % domain, help='List %ss' % domain)
+        for filter_parameter in command_description['list']:
+            list_parser.add_argument('-%s' % filter_parameter, action='store', dest=filter_parameter, type=str,
+                                     default=None, help='Filter with %s' % filter_parameter)
+        get_parser = subparsers.add_parser('get_%s' % domain, help='Get a %s' % domain)
+        get_parser.add_argument('id', metavar='ids', type=str, nargs=1,
+                                help='The id. Can be UUID or name (first found then)'
+                                if command_description['allow_retrieve_by_name'] else 'The id (UUID)')
+
     arguments = parser.parse_args()
-    globals()[arguments.action](client, arguments)
+    if arguments.action.find('list_') == 0:
+        domain = arguments.action[len('list_'): len(arguments.action) - 1]
+        filter_list = dict()
+        for filter_parameter in commands[domain]['list']:
+            filter_value = getattr(arguments, filter_parameter)
+            if filter_value is not None:
+                filter_list[filter_parameter] = filter_value
+        for entity in getattr(client, domain).list(**filter_list):
+            name_property = commands[domain]['name']
+            if name_property is not None:
+                print('%s - %s' % (entity['metadata']['guid'], entity['entity'][name_property]))
+            else:
+                print(entity['metadata']['guid'])
+    elif arguments.action.find('get_') == 0:
+        domain = arguments.action[len('get_'):]
+        if not(commands[domain]['allow_retrieve_by_name'])\
+                or re.match('[\d|a-z]{8}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{12}', arguments.id[0].lower()) \
+                is not None:
+            print(json.dumps(getattr(client, domain).get(arguments.id[0]), indent=1))
+        else:
+            filter_get = dict()
+            filter_get[commands[domain]['name']] = arguments.id[0]
+            print(json.dumps(getattr(client, domain).get_first(**filter_get), indent=1))
 
 
 if __name__ == "__main__":
