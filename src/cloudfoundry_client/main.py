@@ -80,16 +80,19 @@ def main():
     parser = argparse.ArgumentParser(add_help=True)
     subparsers = parser.add_subparsers(help='commands', dest='action')
     commands = dict()
-    commands['organization'] = dict(list=(), name='name', allow_retrieve_by_name=True)
-    commands['space'] = dict(list=('organization_guid',), name='name', allow_retrieve_by_name=True)
-    commands['application'] = dict(list=('organization_guid', 'space_guid',), name='name', allow_retrieve_by_name=True)
-    commands['service'] = dict(list=(), name='label', allow_retrieve_by_name=True)
+    commands['organization'] = dict(list=(), name='name', allow_retrieve_by_name=True, allow_creation=True)
+    commands['space'] = dict(list=('organization_guid',), name='name', allow_retrieve_by_name=True, allow_creation=True)
+    commands['application'] = dict(list=('organization_guid', 'space_guid',), name='name',
+                                   allow_retrieve_by_name=True, allow_creation=True)
+    commands['service'] = dict(list=(), name='label', allow_retrieve_by_name=True, allow_creation=True)
     commands['service_plan'] = dict(list=('service_guid', 'service_instance_guid'), name='name',
-                                    allow_retrieve_by_name=False)
+                                    allow_retrieve_by_name=False,  allow_creation=False)
     commands['service_instance'] = dict(list=('organization_guid', 'space_guid', 'service_plan_guid'), name='name',
-                                        allow_retrieve_by_name=False)
+                                        allow_retrieve_by_name=False, allow_creation=True)
     commands['service_binding'] = dict(list=('app_guid', 'service_instance_guid'), name=None,
-                                       allow_retrieve_by_name=False)
+                                       allow_retrieve_by_name=False, allow_creation=True)
+    commands['service_broker'] = dict(list=('name', 'space_guid'), name=None,
+                                      allow_retrieve_by_name=False, allow_creation=True)
 
     for domain, command_description in commands.items():
         list_parser = subparsers.add_parser('list_%ss' % domain, help='List %ss' % domain)
@@ -100,6 +103,10 @@ def main():
         get_parser.add_argument('id', metavar='ids', type=str, nargs=1,
                                 help='The id. Can be UUID or name (first found then)'
                                 if command_description['allow_retrieve_by_name'] else 'The id (UUID)')
+        if command_description['allow_creation']:
+            create_parser = subparsers.add_parser('create_%s' % domain, help='Create a %s' % domain)
+            create_parser.add_argument('-path', action='store', dest='path',
+                                       help='The path of the json file containing the %s' % domain)
 
     arguments = parser.parse_args()
     if arguments.action.find('list_') == 0:
@@ -117,14 +124,17 @@ def main():
                 print(entity['metadata']['guid'])
     elif arguments.action.find('get_') == 0:
         domain = arguments.action[len('get_'):]
-        if not(commands[domain]['allow_retrieve_by_name'])\
+        if not (commands[domain]['allow_retrieve_by_name']) \
                 or re.match('[\d|a-z]{8}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{12}', arguments.id[0].lower()) \
-                is not None:
+                        is not None:
             print(json.dumps(getattr(client, domain).get(arguments.id[0]), indent=1))
         else:
             filter_get = dict()
             filter_get[commands[domain]['name']] = arguments.id[0]
             print(json.dumps(getattr(client, domain).get_first(**filter_get), indent=1))
+    elif arguments.action.find('create_') == 0:
+        domain = arguments.action[len('create_'):]
+        print(json.dumps(getattr(client, domain).create_from_resource_file(arguments.path)))
 
 
 if __name__ == "__main__":
