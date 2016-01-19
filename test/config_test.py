@@ -43,6 +43,7 @@ def build_client_from_configuration():
         client.org_guid = cfg.get('test_data', 'org_guid')
         client.space_guid = cfg.get('test_data', 'space_guid')
         client.app_guid = cfg.get('test_data', 'app_guid')
+        client.log_app_guid = cfg.get('test_data', 'log_app_guid')
         client.service_guid = cfg.get('test_data', 'service_guid')
         client.service_name = cfg.get('test_data', 'service_name')
         client.plan_guid = cfg.get('test_data', 'plan_guid')

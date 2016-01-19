@@ -38,19 +38,19 @@ class CredentialsManager(object):
     def refresh_token(self):
         return self.credentials['refresh_token'] if self.credentials is not None else None
 
-    def get(self, url):
-        return self._bearer_request(caller.get, url, True)
+    def get(self, url, json_output=True):
+        return self._bearer_request(caller.get, url, None, json_output)
 
-    def post(self, url, data):
-        return self._bearer_request(caller.post, url, True, data)
+    def post(self, url, data, json_output=True):
+        return self._bearer_request(caller.post, url, data, json_output)
 
-    def put(self, url, data):
-        return self._bearer_request(caller.put, url, True, data)
+    def put(self, url, data, json_output=True):
+        return self._bearer_request(caller.put, url, data, json_output)
 
-    def delete(self, url):
-        return self._bearer_request(caller.delete, url, False)
+    def delete(self, url, json_output=False):
+        return self._bearer_request(caller.delete, url, None, json_output)
 
-    def _bearer_request(self, method, url, json_output, data_json=None):
+    def _bearer_request(self, method, url, data_json, json_output):
         if self.credentials is None:
             raise InvalidCredentials()
         try:

@@ -10,6 +10,7 @@ from cloudfoundry_client.v2.service_instances import ServiceInstanceManager
 from cloudfoundry_client.v2.service_bindings import ServiceBindingManager
 from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager
 from cloudfoundry_client.v2.applications import ApplicationsManager
+from cloudfoundry_client.v2.loggregator import LoggregatorManager
 
 _logger = logging.getLogger(__name__)
 
@@ -25,19 +26,19 @@ class CloudFoundryClient(object):
     def __init__(self, target_endpoint, client_id='cf', client_secret='', proxy=None, skip_verification=False):
         caller.proxy(proxy)
         caller.skip_verifications(skip_verification)
-        self.target_endpoint = target_endpoint
-        self.info = caller.get('%s/info' % self.target_endpoint).json()
-        if self.info['version'] != 2:
-            raise AssertionError('Only version 2 is supported for now. Found %d' % self.info['version'])
-        self.credentials_manager = CredentialsManager(self.info['authorization_endpoint'], client_id, client_secret)
-        self.organization = OrganizationManager(self.target_endpoint, self.credentials_manager)
-        self.space = SpaceManager(self.target_endpoint, self.credentials_manager)
-        self.service = ServiceManager(self.target_endpoint, self.credentials_manager)
-        self.service_plan = ServicePlanManager(self.target_endpoint, self.credentials_manager)
-        self.service_instance = ServiceInstanceManager(self.target_endpoint, self.credentials_manager)
-        self.service_binding = ServiceBindingManager(self.target_endpoint, self.credentials_manager)
-        self.service_broker = ServiceBrokerManager(self.target_endpoint, self.credentials_manager)
-        self.application = ApplicationsManager(self.target_endpoint, self.credentials_manager)
+        info = caller.get('%s/v2/info' % target_endpoint).json()
+        if info['version'] != 2:
+            raise AssertionError('Only version 2 is supported for now. Found %d' % info['version'])
+        self.credentials_manager = CredentialsManager(info['authorization_endpoint'], client_id, client_secret)
+        self.organization = OrganizationManager(target_endpoint, self.credentials_manager)
+        self.space = SpaceManager(target_endpoint, self.credentials_manager)
+        self.service = ServiceManager(target_endpoint, self.credentials_manager)
+        self.service_plan = ServicePlanManager(target_endpoint, self.credentials_manager)
+        self.service_instance = ServiceInstanceManager(target_endpoint, self.credentials_manager)
+        self.service_binding = ServiceBindingManager(target_endpoint, self.credentials_manager)
+        self.service_broker = ServiceBrokerManager(target_endpoint, self.credentials_manager)
+        self.application = ApplicationsManager(target_endpoint, self.credentials_manager)
+        self.loggregator = LoggregatorManager(info['logging_endpoint'], self.credentials_manager)
 
     def init_with_credentials(self, login, password):
         self.credentials_manager.init_with_credentials(login, password)

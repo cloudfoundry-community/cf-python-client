@@ -105,8 +105,8 @@ def main():
                                 if command_description['allow_retrieve_by_name'] else 'The id (UUID)')
         if command_description['allow_creation']:
             create_parser = subparsers.add_parser('create_%s' % domain, help='Create a %s' % domain)
-            create_parser.add_argument('-path', action='store', dest='path', required=True,
-                                       help='The path of the json file containing the %s' % domain)
+            create_parser.add_argument('entity', metavar='entities', type=str, nargs=1,
+                                       help='Either a path of the json file containing the %s or a json object' % domain)
 
     arguments = parser.parse_args()
     if arguments.action.find('list_') == 0:
@@ -134,7 +134,19 @@ def main():
             print(json.dumps(getattr(client, domain).get_first(**filter_get), indent=1))
     elif arguments.action.find('create_') == 0:
         domain = arguments.action[len('create_'):]
-        print(json.dumps(getattr(client, domain).create_from_resource_file(arguments.path)))
+        data = None
+        if os.path.isfile(arguments.entity[0]):
+            with open(arguments.entity[0], 'r') as f:
+                try:
+                    data = json.load(f)
+                except ValueError, _:
+                    raise argparse.ArgumentError('entity', 'file %s does not contain valid json data' % arguments.entity[0])
+        else:
+            try:
+                data = json.loads(arguments.entity[0])
+            except ValueError, _:
+                raise argparse.ArgumentError('entity', 'must be either a valid json file path or a json object')
+        print(json.dumps(getattr(client, domain)._create(data)))
 
 
 if __name__ == "__main__":

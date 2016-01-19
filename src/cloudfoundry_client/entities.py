@@ -1,5 +1,5 @@
 from urllib import quote
-from json import load
+
 
 class EntityManager(object):
     def __init__(self, target_endpoint, credentials_manager, entity_uri):
@@ -17,11 +17,6 @@ class EntityManager(object):
 
     def _remove(self, resource_id):
         self.credentials_manager.delete('%s/%s' % (self.base_url, resource_id))
-
-    def create_from_resource_file(self, path):
-        with open(path, 'r') as f:
-            data = load(f)
-            return self._create(data)
 
     def list(self, **kwargs):
         response = self.credentials_manager.get(self._get_url_filtered(**kwargs))
