@@ -86,7 +86,7 @@ def main():
                                    allow_retrieve_by_name=True, allow_creation=True)
     commands['service'] = dict(list=(), name='label', allow_retrieve_by_name=True, allow_creation=True)
     commands['service_plan'] = dict(list=('service_guid', 'service_instance_guid'), name='name',
-                                    allow_retrieve_by_name=False,  allow_creation=False)
+                                    allow_retrieve_by_name=False, allow_creation=False)
     commands['service_instance'] = dict(list=('organization_guid', 'space_guid', 'service_plan_guid'), name='name',
                                         allow_retrieve_by_name=False, allow_creation=True)
     commands['service_binding'] = dict(list=('app_guid', 'service_instance_guid'), name=None,
@@ -105,7 +105,7 @@ def main():
                                 if command_description['allow_retrieve_by_name'] else 'The id (UUID)')
         if command_description['allow_creation']:
             create_parser = subparsers.add_parser('create_%s' % domain, help='Create a %s' % domain)
-            create_parser.add_argument('-path', action='store', dest='path',
+            create_parser.add_argument('-path', action='store', dest='path', required=True,
                                        help='The path of the json file containing the %s' % domain)
 
     arguments = parser.parse_args()
