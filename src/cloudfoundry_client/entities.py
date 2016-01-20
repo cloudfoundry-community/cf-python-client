@@ -19,7 +19,7 @@ class EntityManager(object):
         self.credentials_manager.delete('%s/%s' % (self.base_url, resource_id))
 
     def list(self, **kwargs):
-        response = self.credentials_manager.get(self._get_url_filtered(**kwargs))
+        response = self.credentials_manager.get(EntityManager._get_url_filtered(self.base_url, **kwargs))
         while True:
             for resource in response['resources']:
                 yield resource
@@ -29,7 +29,7 @@ class EntityManager(object):
                 response = self.credentials_manager.get(response['next_url'])
 
     def get_first(self, **kwargs):
-        response = self.credentials_manager.get(self._get_url_filtered(**kwargs))
+        response = self.credentials_manager.get(EntityManager._get_url_filtered(self.base_url, **kwargs))
         if len(response['resources']) > 0:
             return response['resources'][0]
         else:
@@ -41,6 +41,7 @@ class EntityManager(object):
         else:
             return self.credentials_manager.get('%s/%s/%s' % (self.base_url, entity_id, '/'.join(extra_paths)))
 
-    def _get_url_filtered(self, **kwargs):
-        return '%s?%s' % (self.base_url,
+    @staticmethod
+    def _get_url_filtered(url, **kwargs):
+        return '%s?%s' % (url,
                           "&".join('q=%s' % quote("%s:%s" % (k, v)) for k, v in kwargs.items()))

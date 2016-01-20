@@ -9,3 +9,14 @@ class ServicePlanManager(EntityManager):
 
     def create_from_resource_file(self, path):
         raise NotImplemented('No creation allowed')
+
+    def list_instance(self, service_plan_guid, **kwargs):
+        response = self.credentials_manager.get(
+            EntityManager._get_url_filtered('%s/%s/service_instances' % (self.base_url, service_plan_guid), **kwargs))
+        while True:
+            for resource in response['resources']:
+                yield resource
+            if response['next_url'] is None:
+                break
+            else:
+                response = self.credentials_manager.get(response['next_url'])
