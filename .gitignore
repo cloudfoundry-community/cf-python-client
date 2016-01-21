@@ -1,7 +1,8 @@
 .idea/
 *.pyc
-test/sandbox.py
-test/test.properties
+test/python/sandbox.py
+test/resources/test.properties
 build/
 cloudfoundry_client.egg-info/
 dist/
+generated/

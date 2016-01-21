@@ -1,6 +1,6 @@
 import logging
 
-from cloudfoundry_client.calls import caller
+from cloudfoundry_client.calls import caller, OutputFormat
 from cloudfoundry_client.credentials import CredentialsManager
 from cloudfoundry_client.v2.organizations import OrganizationManager
 from cloudfoundry_client.v2.spaces import SpaceManager
@@ -10,7 +10,7 @@ from cloudfoundry_client.v2.service_instances import ServiceInstanceManager
 from cloudfoundry_client.v2.service_bindings import ServiceBindingManager
 from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager
 from cloudfoundry_client.v2.applications import ApplicationsManager
-from cloudfoundry_client.v2.loggregator import LoggregatorManager
+from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
 
 _logger = logging.getLogger(__name__)
 
@@ -26,9 +26,11 @@ class CloudFoundryClient(object):
     def __init__(self, target_endpoint, client_id='cf', client_secret='', proxy=None, skip_verification=False):
         caller.proxy(proxy)
         caller.skip_verifications(skip_verification)
-        info = caller.get('%s/v2/info' % target_endpoint).json()
+        info = caller.get('%s/info' % target_endpoint, output_format=OutputFormat.JSON)
         if info['version'] != 2:
             raise AssertionError('Only version 2 is supported for now. Found %d' % info['version'])
+        # to get loggregator url
+        info = caller.get('%s/v2/info' % target_endpoint, output_format=OutputFormat.JSON)
         self.credentials_manager = CredentialsManager(info['authorization_endpoint'], client_id, client_secret)
         self.organization = OrganizationManager(target_endpoint, self.credentials_manager)
         self.space = SpaceManager(target_endpoint, self.credentials_manager)

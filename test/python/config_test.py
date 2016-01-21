@@ -1,7 +1,9 @@
 import os
 import ConfigParser
 import logging
+
 from cloudfoundry_client.client import CloudFoundryClient
+
 
 _client = None
 _org_guid = None
@@ -13,16 +15,31 @@ def _init_logging():
     logging.basicConfig(level=logging.DEBUG,
                         format='%(levelname)5s - %(name)s -  %(message)s')
 
+def get_resource_dir():
+    result = os.path.join(os.path.dirname(__file__), '..', 'resources')
+    if not (os.path.exists(result) and os.path.isdir(result)):
+        raise IOError('Directory %s must exist.' % result)
+    return result
+
+
+def get_resource(file_name):
+    result = os.path.join(get_resource_dir(), file_name)
+    if not (os.path.exists(result) and os.path.isfile(result) and os.access(result, os.R_OK)):
+        raise IOError('File %s must exist.' % result)
+    return result
+
+
+def get_build_dir():
+    result = os.path.join(os.path.dirname(__file__), '..', '..', 'dist')
+    return result
+
 
 def build_client_from_configuration():
     global _client
     if _client is None:
         _init_logging()
-        path = os.path.join(os.path.dirname(__file__), 'test.properties')
-        if not (os.path.exists(path) and os.path.isfile(path) and os.access(path, os.R_OK)):
-            raise IOError('File %s must exist. Please use provided template')
         cfg = ConfigParser.ConfigParser()
-        cfg.read(path)
+        cfg.read(get_resource('test.properties'))
         proxy = None
         try:
             http = cfg.get('proxy', 'http')

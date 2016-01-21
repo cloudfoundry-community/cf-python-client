@@ -73,6 +73,14 @@ def build_client_from_configuration():
                 build_client_from_configuration()
 
 
+def is_guid(s):
+    return re.match('[\d|a-z]{8}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{12}', s.lower()) is not None
+
+
+def log_recent(client, application_guid):
+    for message in client.loggregator.get_recent(application_guid):
+        _logger.info(message.message)
+
 def main():
     logging.basicConfig(level=logging.INFO,
                         format='%(message)s')
@@ -93,7 +101,9 @@ def main():
                                        allow_retrieve_by_name=False, allow_creation=True)
     commands['service_broker'] = dict(list=('name', 'space_guid'), name=None,
                                       allow_retrieve_by_name=False, allow_creation=True)
-
+    recent_parser = subparsers.add_parser('recent_logs', help='Recent  logs')
+    recent_parser.add_argument('id', metavar='ids', type=str, nargs=1,
+                               help='The id. Can be UUID or name (first found then)')
     for domain, command_description in commands.items():
         list_parser = subparsers.add_parser('list_%ss' % domain, help='List %ss' % domain)
         for filter_parameter in command_description['list']:
@@ -109,7 +119,16 @@ def main():
                                        help='Either a path of the json file containing the %s or a json object' % domain)
 
     arguments = parser.parse_args()
-    if arguments.action.find('list_') == 0:
+    if arguments.action == 'recent_logs':
+        if is_guid(arguments.id[0]):
+            log_recent(client, arguments.id[0])
+        else:
+            application = client.application.get_first(name=arguments.id[0])
+            if application is not None:
+                log_recent(client, application['metadata']['guid'])
+            else:
+                raise Exception('Application not found %s' % arguments.id[0])
+    elif arguments.action.find('list_') == 0:
         domain = arguments.action[len('list_'): len(arguments.action) - 1]
         filter_list = dict()
         for filter_parameter in commands[domain]['list']:
@@ -125,8 +144,7 @@ def main():
     elif arguments.action.find('get_') == 0:
         domain = arguments.action[len('get_'):]
         if not (commands[domain]['allow_retrieve_by_name']) \
-                or re.match('[\d|a-z]{8}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{12}', arguments.id[0].lower()) \
-                        is not None:
+                or is_guid(arguments.id[0]):
             print(json.dumps(getattr(client, domain).get(arguments.id[0]), indent=1))
         else:
             filter_get = dict()
@@ -140,7 +158,8 @@ def main():
                 try:
                     data = json.load(f)
                 except ValueError, _:
-                    raise argparse.ArgumentError('entity', 'file %s does not contain valid json data' % arguments.entity[0])
+                    raise argparse.ArgumentError('entity',
+                                                 'file %s does not contain valid json data' % arguments.entity[0])
         else:
             try:
                 data = json.loads(arguments.entity[0])
