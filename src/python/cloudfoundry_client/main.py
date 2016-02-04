@@ -5,8 +5,10 @@ import os
 import logging
 import json
 import re
-from cloudfoundry_client.calls import ConnectionError
+import httplib
+from cloudfoundry_client.calls import ConnectionError, InvalidStatusCode
 from cloudfoundry_client.client import CloudFoundryClient
+
 
 
 __all__ = ['main', 'build_client_from_configuration']
@@ -81,6 +83,7 @@ def log_recent(client, application_guid):
     for message in client.loggregator.get_recent(application_guid):
         _logger.info(message.message)
 
+
 def main():
     logging.basicConfig(level=logging.INFO,
                         format='%(message)s')
@@ -88,19 +91,22 @@ def main():
     parser = argparse.ArgumentParser(add_help=True)
     subparsers = parser.add_subparsers(help='commands', dest='action')
     commands = dict()
-    commands['organization'] = dict(list=(), name='name', allow_retrieve_by_name=True, allow_creation=True)
-    commands['space'] = dict(list=('organization_guid',), name='name', allow_retrieve_by_name=True, allow_creation=True)
+    commands['organization'] = dict(list=(), name='name', allow_retrieve_by_name=True, allow_creation=True,
+                                    allow_deletion=True)
+    commands['space'] = dict(list=('organization_guid',), name='name', allow_retrieve_by_name=True, allow_creation=True,
+                             allow_deletion=True)
     commands['application'] = dict(list=('organization_guid', 'space_guid',), name='name',
-                                   allow_retrieve_by_name=True, allow_creation=True)
-    commands['service'] = dict(list=(), name='label', allow_retrieve_by_name=True, allow_creation=True)
+                                   allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True)
+    commands['service'] = dict(list=(), name='label', allow_retrieve_by_name=True, allow_creation=True,
+                               allow_deletion=True)
     commands['service_plan'] = dict(list=('service_guid', 'service_instance_guid'), name='name',
-                                    allow_retrieve_by_name=False, allow_creation=False)
+                                    allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False)
     commands['service_instance'] = dict(list=('organization_guid', 'space_guid', 'service_plan_guid'), name='name',
-                                        allow_retrieve_by_name=False, allow_creation=True)
+                                        allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True)
     commands['service_binding'] = dict(list=('app_guid', 'service_instance_guid'), name=None,
-                                       allow_retrieve_by_name=False, allow_creation=True)
-    commands['service_broker'] = dict(list=('name', 'space_guid'), name=None,
-                                      allow_retrieve_by_name=False, allow_creation=True)
+                                       allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True)
+    commands['service_broker'] = dict(list=('name', 'space_guid'), name='name',
+                                      allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True)
     recent_parser = subparsers.add_parser('recent_logs', help='Recent  logs')
     recent_parser.add_argument('id', metavar='ids', type=str, nargs=1,
                                help='The id. Can be UUID or name (first found then)')
@@ -117,6 +123,11 @@ def main():
             create_parser = subparsers.add_parser('create_%s' % domain, help='Create a %s' % domain)
             create_parser.add_argument('entity', metavar='entities', type=str, nargs=1,
                                        help='Either a path of the json file containing the %s or a json object' % domain)
+        if command_description['allow_deletion']:
+            delete_parser = subparsers.add_parser('delete_%s' % domain, help='Delete a %s' % domain)
+            delete_parser.add_argument('id', metavar='ids', type=str, nargs=1,
+                                       help='The id. Can be UUID or name (first found then)'
+                                       if command_description['allow_retrieve_by_name'] else 'The id (UUID)')
 
     arguments = parser.parse_args()
     if arguments.action == 'recent_logs':
@@ -127,7 +138,7 @@ def main():
             if application is not None:
                 log_recent(client, application['metadata']['guid'])
             else:
-                raise Exception('Application not found %s' % arguments.id[0])
+                raise InvalidStatusCode(httplib.NOT_FOUND, 'application with name %s' % arguments.id[0])
     elif arguments.action.find('list_') == 0:
         domain = arguments.action[len('list_'): len(arguments.action) - 1]
         filter_list = dict()
@@ -143,13 +154,18 @@ def main():
                 print(entity['metadata']['guid'])
     elif arguments.action.find('get_') == 0:
         domain = arguments.action[len('get_'):]
-        if not (commands[domain]['allow_retrieve_by_name']) \
-                or is_guid(arguments.id[0]):
+        if is_guid(arguments.id[0]):
             print(json.dumps(getattr(client, domain).get(arguments.id[0]), indent=1))
-        else:
+        elif commands[domain]['allow_retrieve_by_name']:
             filter_get = dict()
             filter_get[commands[domain]['name']] = arguments.id[0]
-            print(json.dumps(getattr(client, domain).get_first(**filter_get), indent=1))
+            entity = getattr(client, domain).get_first(**filter_get)
+            if entity is None:
+                raise InvalidStatusCode(httplib.NOT_FOUND, '%s with name %s' % (domain, arguments.id[0]))
+            else:
+                print(json.dumps(entity, indent=1))
+        else:
+            raise ValueError('id: %s: does not allow search by name' % domain)
     elif arguments.action.find('create_') == 0:
         domain = arguments.action[len('create_'):]
         data = None
@@ -158,14 +174,27 @@ def main():
                 try:
                     data = json.load(f)
                 except ValueError, _:
-                    raise argparse.ArgumentError('entity',
-                                                 'file %s does not contain valid json data' % arguments.entity[0])
+                    raise ValueError('entity: file %s does not contain valid json data' % arguments.entity[0])
         else:
             try:
                 data = json.loads(arguments.entity[0])
             except ValueError, _:
-                raise argparse.ArgumentError('entity', 'must be either a valid json file path or a json object')
+                raise ValueError('entity: must be either a valid json file path or a json object')
         print(json.dumps(getattr(client, domain)._create(data)))
+    elif arguments.action.find('delete_') == 0:
+        domain = arguments.action[len('create_'):]
+        if is_guid(arguments.id[0]):
+            print(getattr(client, domain)._remove(arguments.id[0]))
+        elif commands[domain]['allow_retrieve_by_name']:
+            filter_get = dict()
+            filter_get[commands[domain]['name']] = arguments.id[0]
+            entity = getattr(client, domain).get_first(**filter_get)
+            if entity is None:
+                raise InvalidStatusCode(httplib.NOT_FOUND, '%s with name %s' % (domain, arguments.id[0]))
+            else:
+                print(getattr(client, domain)._remove(entity['metadata']['guid']))
+        else:
+            raise ValueError('id: %s: does not allow search by name' % domain)
 
 
 if __name__ == "__main__":
