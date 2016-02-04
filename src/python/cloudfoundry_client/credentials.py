@@ -64,6 +64,7 @@ class CredentialsManager(object):
                 self._refresh_access_token()
                 try:
                     _logger.debug('token refreshed')
+                    parameters['headers']['Authorization'] = 'Bearer %s' % self.credentials['access_token']
                     return method(url, **parameters)
                 except InvalidStatusCode, s:
                     if s.status_code == httplib.UNAUTHORIZED:
