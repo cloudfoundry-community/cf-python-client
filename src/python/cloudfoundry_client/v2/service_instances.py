@@ -18,5 +18,8 @@ class ServiceInstanceManager(EntityManager):
         request = dict(parameters=parameters, tags=[])
         return super(ServiceInstanceManager, self)._update(instance_guid, request)
 
+    def list_permissions(self, instance_guid):
+        return super(ServiceInstanceManager, self)._get_one('%s/%s/permissions' % (self.base_url, instance_guid))
+
     def remove(self, instance_guid):
         super(ServiceInstanceManager, self)._remove(instance_guid)

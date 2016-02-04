@@ -26,5 +26,8 @@ class TestServiceInstances(unittest.TestCase):
                     client.service_instance.get_first(space_guid=instance['entity']['space_guid']))
                 self.assertIsNotNone(
                     client.service_instance.get(instance['metadata']['guid']))
+                self.assertIsNotNone(
+                    client.service_instance.list_permissions(instance['metadata']['guid']))
             cpt += 1
         _logger.debug('test_get - %d found', cpt)
+
