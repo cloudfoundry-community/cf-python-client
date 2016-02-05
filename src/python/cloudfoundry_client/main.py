@@ -97,9 +97,9 @@ def main():
                              allow_deletion=True)
     commands['application'] = dict(list=('organization_guid', 'space_guid',), name='name',
                                    allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True)
-    commands['service'] = dict(list=(), name='label', allow_retrieve_by_name=True, allow_creation=True,
+    commands['service'] = dict(list=('service_broker_guid',), name='label', allow_retrieve_by_name=True, allow_creation=True,
                                allow_deletion=True)
-    commands['service_plan'] = dict(list=('service_guid', 'service_instance_guid'), name='name',
+    commands['service_plan'] = dict(list=('service_guid', 'service_instance_guid', 'service_broker_guid'), name='name',
                                     allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False)
     commands['service_instance'] = dict(list=('organization_guid', 'space_guid', 'service_plan_guid'), name='name',
                                         allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True)
@@ -184,7 +184,7 @@ def main():
     elif arguments.action.find('delete_') == 0:
         domain = arguments.action[len('create_'):]
         if is_guid(arguments.id[0]):
-            print(getattr(client, domain)._remove(arguments.id[0]))
+            getattr(client, domain)._remove(arguments.id[0])
         elif commands[domain]['allow_retrieve_by_name']:
             filter_get = dict()
             filter_get[commands[domain]['name']] = arguments.id[0]
@@ -192,7 +192,7 @@ def main():
             if entity is None:
                 raise InvalidStatusCode(httplib.NOT_FOUND, '%s with name %s' % (domain, arguments.id[0]))
             else:
-                print(getattr(client, domain)._remove(entity['metadata']['guid']))
+                getattr(client, domain)._remove(entity['metadata']['guid'])
         else:
             raise ValueError('id: %s: does not allow search by name' % domain)
 
