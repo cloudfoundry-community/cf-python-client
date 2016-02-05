@@ -36,12 +36,15 @@ class EntityManager(object):
             return None
 
     def get(self, entity_id, *extra_paths):
-        if len(extra_paths) == 0 :
+        if len(extra_paths) == 0:
             return self.credentials_manager.get('%s/%s' % (self.base_url, entity_id))
         else:
             return self.credentials_manager.get('%s/%s/%s' % (self.base_url, entity_id, '/'.join(extra_paths)))
 
     @staticmethod
     def _get_url_filtered(url, **kwargs):
-        return '%s?%s' % (url,
-                          "&".join('q=%s' % quote("%s:%s" % (k, v)) for k, v in kwargs.items()))
+        if len(kwargs) > 0:
+            return '%s?%s' % (url,
+                              "&".join('q=%s' % quote("%s IN %s" % (k, v)) for k, v in kwargs.items()))
+        else:
+            return url
