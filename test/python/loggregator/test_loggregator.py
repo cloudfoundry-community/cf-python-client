@@ -1,6 +1,5 @@
 import unittest
 import logging
-import logmessage_pb2
 from config_test import build_client_from_configuration
 
 _logger = logging.getLogger(__name__)

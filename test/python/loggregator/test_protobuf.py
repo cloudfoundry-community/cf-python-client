@@ -1,6 +1,6 @@
 import unittest
 import logging
-import logmessage_pb2
+from cloudfoundry_client.loggregator.logmessage_pb2 import LogMessage
 from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
 import os
 from config_test import get_resource, get_build_dir, build_client_from_configuration, get_resource_dir
@@ -15,9 +15,9 @@ class TestProtobuf(unittest.TestCase):
         build_client_from_configuration()
         self.expected_nb_parts = 5946
         self.boundary = '7e061f8d6ec00677d6f6b17fcafec9eef2e3a2360e557f72e3e1116efcec'
-        self.first_message = logmessage_pb2.LogMessage()
+        self.first_message = LogMessage()
         self.first_message.message = 'Updated app with guid 3048d795-f031-435f-85e8-71dce339e869 ({"state"=>"STOPPED"})'
-        self.first_message.message_type = logmessage_pb2.LogMessage.OUT
+        self.first_message.message_type = LogMessage.OUT
         self.first_message.timestamp = 1453887321557121799
         self.first_message.app_id = '3048d795-f031-435f-85e8-71dce339e869'
         self.first_message.source_id = '0'
@@ -56,13 +56,13 @@ class TestProtobuf(unittest.TestCase):
         for part in LoggregatorManager._read_multi_part_response(TestProtobuf.file_reader(
                 get_resource('logs_recents.bin'), 128),
                 self.boundary):
-            message = logmessage_pb2.LogMessage()
+            message = LogMessage()
             message.ParseFromString(part)
 
     def test_load_unload(self):
         res = self.first_message.SerializeToString()
         _logger.debug("Message serialized successfully")
-        message_read = logmessage_pb2.LogMessage()
+        message_read = LogMessage()
         message_read.ParseFromString(res)
         _logger.debug("Message deserialized successfully")
         self.assertEqual(message_read.message, self.first_message.message)

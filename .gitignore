@@ -5,4 +5,4 @@ test/resources/test.properties
 build/
 cloudfoundry_client.egg-info/
 dist/
-generated/
+src/python/cloudfoundry_client/loggregator/logmessage_pb2.py

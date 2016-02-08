@@ -1,6 +1,6 @@
 import logging
 import re
-from cloudfoundry_client.message.logmessage_pb2 import LogMessage
+from cloudfoundry_client.loggregator.logmessage_pb2 import LogMessage
 from cloudfoundry_client.calls import OutputFormat
 _logger = logging.getLogger(__name__)
 
