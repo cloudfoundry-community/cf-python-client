@@ -1,6 +1,7 @@
 from setuptools import setup, find_packages, Command
 import subprocess
 import os
+import sys
 import shutil
 
 src_dir = 'src/python'
@@ -22,6 +23,17 @@ if __version__ is None:
 
 def purge_sub_dir(path):
     shutil.rmtree(os.path.join(os.path.dirname(__file__), path))
+
+# add generate command if install
+cpt_install = None
+for cpt_arg in xrange(1, len(sys.argv)):
+    if sys.argv[cpt_arg] == "generate":
+        break
+    elif sys.argv[cpt_arg] == "install":
+        cpt_install = cpt_arg
+        break
+if cpt_install is not None:
+    sys.argv.insert(cpt_install, 'generate')
 
 
 class GenerateCommand(Command):
