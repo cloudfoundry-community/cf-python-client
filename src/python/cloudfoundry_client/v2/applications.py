@@ -22,6 +22,9 @@ class ApplicationsManager(EntityManager):
     def get_env(self, application_guid):
         return super(ApplicationsManager, self).get(application_guid, 'env')
 
+    def get_routes(self, application_guid):
+        return super(ApplicationsManager, self).get(application_guid, 'routes')
+
     def start(self, application_guid, check_time=0.5):
         result = super(ApplicationsManager, self)._update(application_guid,
                                                           dict(state='STARTED'))
@@ -51,6 +54,7 @@ class ApplicationsManager(EntityManager):
                 if ex.status_code == httplib.BAD_REQUEST:
                     some_running = False
         return result
+
 
 
 

@@ -10,7 +10,6 @@ from cloudfoundry_client.calls import ConnectionError, InvalidStatusCode
 from cloudfoundry_client.client import CloudFoundryClient
 
 
-
 __all__ = ['main', 'build_client_from_configuration']
 
 _logger = logging.getLogger(__name__)
@@ -97,7 +96,8 @@ def main():
                              allow_deletion=True)
     commands['application'] = dict(list=('organization_guid', 'space_guid',), name='name',
                                    allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True)
-    commands['service'] = dict(list=('service_broker_guid',), name='label', allow_retrieve_by_name=True, allow_creation=True,
+    commands['service'] = dict(list=('service_broker_guid',), name='label', allow_retrieve_by_name=True,
+                               allow_creation=True,
                                allow_deletion=True)
     commands['service_plan'] = dict(list=('service_guid', 'service_instance_guid', 'service_broker_guid'), name='name',
                                     allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False)
@@ -107,9 +107,15 @@ def main():
                                        allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True)
     commands['service_broker'] = dict(list=('name', 'space_guid'), name='name',
                                       allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True)
-    recent_parser = subparsers.add_parser('recent_logs', help='Recent  logs')
-    recent_parser.add_argument('id', metavar='ids', type=str, nargs=1,
-                               help='The id. Can be UUID or name (first found then)')
+    application_commands = dict(recent_logs='Recent Logs',
+                                env='Environment',
+                                routes='Routes',
+                                instances='Instances',
+                                stats='Stats')
+    for command, command_description in application_commands.items():
+        command_parser = subparsers.add_parser(command, help=command_description)
+        command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
+                                    help='The id. Can be UUID or name (first found then)')
     for domain, command_description in commands.items():
         list_parser = subparsers.add_parser('list_%ss' % domain, help='List %ss' % domain)
         for filter_parameter in command_description['list']:
@@ -139,6 +145,16 @@ def main():
                 log_recent(client, application['metadata']['guid'])
             else:
                 raise InvalidStatusCode(httplib.NOT_FOUND, 'application with name %s' % arguments.id[0])
+    elif application_commands.get(arguments.action, None):
+        if is_guid(arguments.id[0]):
+            print(json.dumps(getattr(client.application, 'get_%s' % arguments.action)(arguments.id[0]), indent=1))
+        else:
+            filter_get = dict(name=arguments.id[0])
+            entity = getattr(client, domain).get_first(**filter_get)
+            if entity is None:
+                raise InvalidStatusCode(httplib.NOT_FOUND, 'application with name %s' % arguments.id[0])
+            else:
+                print(json.dumps(getattr(client.application, 'get_%s' % arguments.action)(entity['metadata']['id']), indent=1))
     elif arguments.action.find('list_') == 0:
         domain = arguments.action[len('list_'): len(arguments.action) - 1]
         filter_list = dict()
