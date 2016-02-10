@@ -107,13 +107,15 @@ def main():
                                        allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True)
     commands['service_broker'] = dict(list=('name', 'space_guid'), name='name',
                                       allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True)
-    application_commands = dict(recent_logs='Recent Logs',
-                                env='Environment',
-                                routes='Routes',
-                                instances='Instances',
-                                stats='Stats')
+    application_commands = dict(recent_logs=('get_recent_logs', 'Recent Logs',),
+                                env=('get_env', 'Environment',),
+                                routes=('get_routes', 'Routes',),
+                                instances=('get_routes', 'Instances',),
+                                stats=('get_stats', 'Stats',),
+                                start=('start', 'Start application',),
+                                stop=('stop', 'Stop application',))
     for command, command_description in application_commands.items():
-        command_parser = subparsers.add_parser(command, help=command_description)
+        command_parser = subparsers.add_parser(command, help=command_description[1])
         command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
                                     help='The id. Can be UUID or name (first found then)')
     for domain, command_description in commands.items():
@@ -145,16 +147,16 @@ def main():
                 log_recent(client, application['metadata']['guid'])
             else:
                 raise InvalidStatusCode(httplib.NOT_FOUND, 'application with name %s' % arguments.id[0])
-    elif application_commands.get(arguments.action, None):
+    elif application_commands.get(arguments.action, None) is not None:
         if is_guid(arguments.id[0]):
-            print(json.dumps(getattr(client.application, 'get_%s' % arguments.action)(arguments.id[0]), indent=1))
+            print(json.dumps(getattr(client.application, application_commands[arguments.action][0])(arguments.id[0]), indent=1))
         else:
             filter_get = dict(name=arguments.id[0])
-            entity = getattr(client, domain).get_first(**filter_get)
+            entity = client.application.get_first(**filter_get)
             if entity is None:
                 raise InvalidStatusCode(httplib.NOT_FOUND, 'application with name %s' % arguments.id[0])
             else:
-                print(json.dumps(getattr(client.application, 'get_%s' % arguments.action)(entity['metadata']['id']), indent=1))
+                print(json.dumps(getattr(client.application, application_commands[arguments.action][0])(entity['metadata']['id']), indent=1))
     elif arguments.action.find('list_') == 0:
         domain = arguments.action[len('list_'): len(arguments.action) - 1]
         filter_list = dict()
