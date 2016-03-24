@@ -24,7 +24,7 @@ def purge_sub_dir(path):
     shutil.rmtree(os.path.join(os.path.dirname(__file__), path))
 
 # add generate command if install
-generate_present = None
+generate_present = False
 for cpt_arg in xrange(1, len(sys.argv)):
     if sys.argv[cpt_arg] == "generate":
         generate_present = True
