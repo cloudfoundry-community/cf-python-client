@@ -26,11 +26,11 @@ class CloudFoundryClient(object):
     def __init__(self, target_endpoint, client_id='cf', client_secret='', proxy=None, skip_verification=False):
         caller.proxy(proxy)
         caller.skip_verifications(skip_verification)
-        info = caller.get('%s/info' % target_endpoint, output_format=OutputFormat.JSON)
-        if info['version'] != 2:
-            raise AssertionError('Only version 2 is supported for now. Found %d' % info['version'])
         # to get loggregator url
         info = caller.get('%s/v2/info' % target_endpoint, output_format=OutputFormat.JSON)
+        if not info['api_version'].startswith('2.'):
+            raise AssertionError('Only version 2 is supported for now. Found %s' % info['api_version'])
+
         self.credentials_manager = CredentialsManager(info['authorization_endpoint'], client_id, client_secret)
         self.organization = OrganizationManager(target_endpoint, self.credentials_manager)
         self.space = SpaceManager(target_endpoint, self.credentials_manager)
