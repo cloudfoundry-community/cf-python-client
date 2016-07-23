@@ -1,8 +1,8 @@
 .idea/
 *.pyc
-test/python/sandbox.py
-test/resources/test.properties
 build/
 cloudfoundry_client.egg-info/
 dist/
 src/python/cloudfoundry_client/loggregator/logmessage_pb2.py
+integration/python/sandbox.py
+integration/resources/test.properties

@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "guid": "906775ea-622e-4bc7-af5d-9aab3b652f81",
+    "url": "/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81",
+    "created_at": "2015-11-30T23:38:33Z",
+    "updated_at": "2015-11-30T23:38:33Z"
+  },
+  "entity": {
+    "name": "name-393",
+    "production": false,
+    "space_guid": "104f76eb-0d35-41e2-a04d-a6fe4a111c75",
+    "stack_guid": "63c555d8-3387-4a82-9c18-8f0ca48c756f",
+    "buildpack": null,
+    "detected_buildpack": null,
+    "environment_json": null,
+    "memory": 1024,
+    "instances": 1,
+    "disk_quota": 1024,
+    "state": "STOPPED",
+    "version": "6446e033-e3aa-4c03-948e-5b99ce01e231",
+    "command": null,
+    "console": false,
+    "debug": null,
+    "staging_task_id": null,
+    "package_state": "PENDING",
+    "health_check_type": "port",
+    "health_check_timeout": null,
+    "staging_failed_reason": null,
+    "staging_failed_description": null,
+    "diego": false,
+    "docker_image": null,
+    "package_updated_at": "2015-11-30T23:38:33Z",
+    "detected_start_command": "",
+    "enable_ssh": true,
+    "docker_credentials_json": {
+      "redacted_message": "[PRIVATE DATA HIDDEN]"
+    },
+    "ports": null,
+    "space_url": "/v2/spaces/104f76eb-0d35-41e2-a04d-a6fe4a111c75",
+    "stack_url": "/v2/stacks/63c555d8-3387-4a82-9c18-8f0ca48c756f",
+    "events_url": "/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81/events",
+    "service_bindings_url": "/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81/service_bindings",
+    "routes_url": "/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81/routes"
+  }
+}

@@ -1,9 +1,8 @@
-import os
 import ConfigParser
 import logging
+import os
 
 from cloudfoundry_client.client import CloudFoundryClient
-
 
 _client = None
 _org_guid = None
@@ -14,6 +13,7 @@ _app_guid = None
 def _init_logging():
     logging.basicConfig(level=logging.DEBUG,
                         format='%(levelname)5s - %(name)s -  %(message)s')
+
 
 def get_resource_dir():
     result = os.path.join(os.path.dirname(__file__), '..', 'resources')
@@ -55,8 +55,8 @@ def build_client_from_configuration():
             pass
         client = CloudFoundryClient(cfg.get('service', 'target_endpoint'), proxy=proxy,
                                     skip_verification=skip_verification)
-        client.credentials_manager.init_with_credentials(cfg.get('authentification', 'login'),
-                                                         cfg.get('authentification', 'password'))
+        client.credentials_manager.init_with_user_credentials(cfg.get('authentification', 'login'),
+                                                              cfg.get('authentification', 'password'))
         client.org_guid = cfg.get('test_data', 'org_guid')
         client.space_guid = cfg.get('test_data', 'space_guid')
         client.app_guid = cfg.get('test_data', 'app_guid')

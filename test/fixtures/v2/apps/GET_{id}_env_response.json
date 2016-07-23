@@ -1,0 +1,39 @@
+{
+  "staging_env_json": {
+    "STAGING_ENV": "staging_value"
+  },
+  "running_env_json": {
+    "RUNNING_ENV": "running_value"
+  },
+  "environment_json": {
+    "env_var": "env_val"
+  },
+  "system_env_json": {
+    "VCAP_SERVICES": {
+
+    }
+  },
+  "application_env_json": {
+    "VCAP_APPLICATION": {
+      "limits": {
+        "mem": 1024,
+        "disk": 1024,
+        "fds": 16384
+      },
+      "application_id": "7511dbcf-fe86-4650-88c0-a46f3894ad22",
+      "application_version": "45919b1d-422d-4953-a0a3-91d7fd2899bf",
+      "application_name": "name-243",
+      "application_uris": [
+
+      ],
+      "version": "45919b1d-422d-4953-a0a3-91d7fd2899bf",
+      "name": "name-243",
+      "space_name": "name-244",
+      "space_id": "885c392a-3502-4cff-a47d-49089b13b1b7",
+      "uris": [
+
+      ],
+      "users": null
+    }
+  }
+}

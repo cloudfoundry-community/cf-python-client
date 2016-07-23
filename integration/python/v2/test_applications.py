@@ -15,6 +15,7 @@ class TestApplications(unittest.TestCase):
         for application in client.application.list(space_guid=client.space_guid):
             _logger.debug('- %s' % application['entity']['name'])
             if cpt == 0:
+                _logger.debug('- %s' % application['metadata']['guid'])
                 self.assertIsNotNone(client.application.get_first(space_guid=client.space_guid,
                                                                   name=application['entity']['name']))
                 self.assertIsNotNone(client.application.get(application['metadata']['guid']))
@@ -23,15 +24,27 @@ class TestApplications(unittest.TestCase):
                     self.fail('Should not have been found')
                 except InvalidStatusCode, e:
                     self.assertEquals(e.status_code, httplib.NOT_FOUND)
-                instances = client.application.get_instances(application['metadata']['guid'])
-                self.assertIsNotNone(instances)
-                self.assertEquals(len(instances), application['entity']['instances'])
-                _logger.debug('instances = %s', json.dumps(instances))
-                stats = client.application.get_stats(application['metadata']['guid'])
-                self.assertIsNotNone(stats)
-                self.assertEquals(len(stats), application['entity']['instances'])
-                self.assertEquals(len(stats), application['entity']['instances'])
-                _logger.debug('stats = %s', json.dumps(stats))
+                try:
+                    instances = client.application.get_instances(application['metadata']['guid'])
+                    self.assertIsNotNone(instances)
+                    self.assertEquals(len(instances), application['entity']['instances'])
+                    _logger.debug('instances = %s', json.dumps(instances))
+                except InvalidStatusCode, e:
+                    #instance is stopped
+                    self.assertEquals(e.status_code, httplib.BAD_REQUEST)
+                    self.assertIsInstance(e.body, dict)
+                    self.assertEqual(e.body.get('error_code'), 'CF-InstancesError')
+                try:
+                    stats = client.application.get_stats(application['metadata']['guid'])
+                    self.assertIsNotNone(stats)
+                    self.assertEquals(len(stats), application['entity']['instances'])
+                    self.assertEquals(len(stats), application['entity']['instances'])
+                    _logger.debug('stats = %s', json.dumps(stats))
+                except InvalidStatusCode, e:
+                    # instance is stopped
+                    self.assertEquals(e.status_code, httplib.BAD_REQUEST)
+                    self.assertIsInstance(e.body, dict)
+                    self.assertEqual(e.body.get('error_code'), 'CF-AppStoppedStatsError')
                 env = client.application.get_env(application['metadata']['guid'])
                 self.assertIsNotNone(env)
                 self.assertIsNotNone(env.get('application_env_json', None))

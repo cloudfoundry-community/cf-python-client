@@ -1,0 +1,37 @@
+{
+  "total_results": 1,
+  "total_pages": 1,
+  "prev_url": null,
+  "next_url": null,
+  "resources": [
+    {
+      "metadata": {
+        "guid": "158d6a25-c04e-46a4-b02e-5a738ef469aa",
+        "url": "/v2/services/158d6a25-c04e-46a4-b02e-5a738ef469aa",
+        "created_at": "2015-11-30T23:38:55Z",
+        "updated_at": null
+      },
+      "entity": {
+        "label": "label-77",
+        "provider": null,
+        "url": null,
+        "description": "desc-192",
+        "long_description": null,
+        "version": null,
+        "info_url": null,
+        "active": true,
+        "bindable": true,
+        "unique_id": "4ab15c02-dee2-4f76-8f51-083f54e387a5",
+        "extra": null,
+        "tags": [
+        ],
+        "requires": [
+        ],
+        "documentation_url": null,
+        "service_broker_guid": "fe80520d-39ae-41c3-ad96-4541857bd285",
+        "plan_updateable": false,
+        "service_plans_url": "/v2/services/158d6a25-c04e-46a4-b02e-5a738ef469aa/service_plans"
+      }
+    }
+  ]
+}

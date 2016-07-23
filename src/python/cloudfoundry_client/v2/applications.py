@@ -1,33 +1,33 @@
-import json
 import httplib
+import json
 import logging
 from time import sleep
 
-from cloudfoundry_client.calls import InvalidStatusCode
-from cloudfoundry_client.entities import EntityManager
+from cloudfoundry_client.entities import EntityManager, InvalidStatusCode
 
 _logger = logging.getLogger(__name__)
 
 
-class ApplicationsManager(EntityManager):
+class ApplicationManager(EntityManager):
     def __init__(self, target_endpoint, credentials_manager):
-        super(ApplicationsManager, self).__init__(target_endpoint, credentials_manager, '/v2/apps')
+        super(ApplicationManager, self).__init__(target_endpoint, credentials_manager, '/v2/apps')
 
     def get_stats(self, application_guid):
-        return super(ApplicationsManager, self).get(application_guid, 'stats')
+        return super(ApplicationManager, self).get(application_guid, 'stats')
 
     def get_instances(self, application_guid):
-        return super(ApplicationsManager, self).get(application_guid, 'instances')
+        return super(ApplicationManager, self).get(application_guid, 'instances')
 
     def get_env(self, application_guid):
-        return super(ApplicationsManager, self).get(application_guid, 'env')
+        return super(ApplicationManager, self).get(application_guid, 'env')
 
-    def get_routes(self, application_guid):
-        return super(ApplicationsManager, self).get(application_guid, 'routes')
+    def list_routes(self, application_guid, **kwargs):
+        for route in super(ApplicationManager, self).list(application_guid, 'routes', **kwargs):
+            yield route
 
     def start(self, application_guid, check_time=0.5):
-        result = super(ApplicationsManager, self)._update(application_guid,
-                                                          dict(state='STARTED'))
+        result = super(ApplicationManager, self)._update(application_guid,
+                                                         dict(state='STARTED'))
         all_running = False
         while not all_running:
             sleep(check_time)
@@ -43,7 +43,7 @@ class ApplicationsManager(EntityManager):
         return result
 
     def stop(self, application_guid, check_time=0.5):
-        result = super(ApplicationsManager, self)._update(application_guid, dict(state='STOPPED'))
+        result = super(ApplicationManager, self)._update(application_guid, dict(state='STOPPED'))
         some_running = True
         while some_running:
             sleep(check_time)
@@ -54,7 +54,3 @@ class ApplicationsManager(EntityManager):
                 if ex.status_code == httplib.BAD_REQUEST:
                     some_running = False
         return result
-
-
-
-

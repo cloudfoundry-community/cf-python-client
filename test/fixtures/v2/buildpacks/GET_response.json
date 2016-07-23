@@ -1,0 +1,53 @@
+{
+  "total_results": 3,
+  "total_pages": 1,
+  "prev_url": null,
+  "next_url": null,
+  "resources": [
+    {
+      "metadata": {
+        "guid": "6e72c33b-dff0-4020-8603-bcd8a4eb05e4",
+        "url": "/v2/buildpacks/6e72c33b-dff0-4020-8603-bcd8a4eb05e4",
+        "created_at": "2015-11-30T23:38:26Z",
+        "updated_at": null
+      },
+      "entity": {
+        "name": "name_1",
+        "position": 1,
+        "enabled": true,
+        "locked": false,
+        "filename": "name-28"
+      }
+    },
+    {
+      "metadata": {
+        "guid": "11604957-8b85-4473-8e0f-50f884e69596",
+        "url": "/v2/buildpacks/11604957-8b85-4473-8e0f-50f884e69596",
+        "created_at": "2015-11-30T23:38:26Z",
+        "updated_at": null
+      },
+      "entity": {
+        "name": "name_2",
+        "position": 2,
+        "enabled": true,
+        "locked": false,
+        "filename": "name-29"
+      }
+    },
+    {
+      "metadata": {
+        "guid": "0b82f167-caf1-450c-acdc-a23d03f405c0",
+        "url": "/v2/buildpacks/0b82f167-caf1-450c-acdc-a23d03f405c0",
+        "created_at": "2015-11-30T23:38:26Z",
+        "updated_at": null
+      },
+      "entity": {
+        "name": "name_3",
+        "position": 3,
+        "enabled": true,
+        "locked": false,
+        "filename": "name-30"
+      }
+    }
+  ]
+}

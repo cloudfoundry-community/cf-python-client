@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "guid": "eaabd042-8f5c-44a2-9580-1e114c36bdcb",
+    "url": "/v2/service_bindings/eaabd042-8f5c-44a2-9580-1e114c36bdcb",
+    "created_at": "2015-11-30T23:38:46Z",
+    "updated_at": null
+  },
+  "entity": {
+    "app_guid": "c77953c8-6c35-46c7-816e-cf0c42ac2f52",
+    "service_instance_guid": "ef0bf611-82c6-4603-99fc-3a1a893109d0",
+    "credentials": {
+      "creds-key-376": "creds-val-376"
+    },
+    "binding_options": {
+
+    },
+    "gateway_data": null,
+    "gateway_name": "",
+    "syslog_drain_url": null,
+    "app_url": "/v2/apps/c77953c8-6c35-46c7-816e-cf0c42ac2f52",
+    "service_instance_url": "/v2/service_instances/ef0bf611-82c6-4603-99fc-3a1a893109d0"
+  }
+}

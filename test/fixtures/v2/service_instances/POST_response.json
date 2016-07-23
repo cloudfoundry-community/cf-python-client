@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "guid": "88685e66-4a7a-4351-9279-164a7145b25d",
+    "url": "/v2/service_instances/88685e66-4a7a-4351-9279-164a7145b25d",
+    "created_at": "2016-07-23T12:04:33Z",
+    "updated_at": null
+  },
+  "entity": {
+    "name": "test_name",
+    "credentials": {
+
+    },
+    "service_plan_guid": "ce1aeaa9-c5ef-417e-abf7-b16f07724aac",
+    "space_guid": "2d745a4b-67e3-4398-986e-2adbcf8f7ec9",
+    "gateway_data": null,
+    "dashboard_url": "https://elpaaso-logs.nd-paas.itn.ftgroup/en-US/app/search/flashtimeline?q=search%20index%3D%22*%22%20source%3D%22tcp:12345%22",
+    "type": "managed_service_instance",
+    "last_operation": {
+      "type": "create",
+      "state": "succeeded",
+      "description": "",
+      "updated_at": null,
+      "created_at": "2016-07-23T12:04:33Z"
+    },
+    "tags": [
+
+    ],
+    "space_url": "/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9",
+    "service_plan_url": "/v2/service_plans/ce1aeaa9-c5ef-417e-abf7-b16f07724aac",
+    "service_bindings_url": "/v2/service_instances/88685e66-4a7a-4351-9279-164a7145b25d/service_bindings",
+    "service_keys_url": "/v2/service_instances/88685e66-4a7a-4351-9279-164a7145b25d/service_keys",
+    "routes_url": "/v2/service_instances/88685e66-4a7a-4351-9279-164a7145b25d/routes"
+  }
+}

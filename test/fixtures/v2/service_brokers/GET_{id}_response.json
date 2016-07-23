@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "guid": "ade9730c-4ee5-4290-ad37-0b15cecd2ca6",
+    "url": "/v2/service_brokers/ade9730c-4ee5-4290-ad37-0b15cecd2ca6",
+    "created_at": "2015-11-30T23:38:45Z",
+    "updated_at": "2015-11-30T23:38:45Z"
+  },
+  "entity": {
+    "name": "name-1812",
+    "broker_url": "https://foo.com/url-55",
+    "auth_username": "auth_username-52",
+    "space_guid": "75bb8f26-d84e-4a62-82e7-312060a42c61"
+  }
+}

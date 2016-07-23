@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "guid": "5d8f3b0f-6b5b-487f-8fed-4c2d9b812a72",
+    "url": "/v2/service_plans/5d8f3b0f-6b5b-487f-8fed-4c2d9b812a72",
+    "created_at": "2015-11-30T23:38:44Z",
+    "updated_at": null
+  },
+  "entity": {
+    "name": "name-1787",
+    "free": false,
+    "description": "desc-146",
+    "service_guid": "6a4abae6-93e0-438b-aaa2-5ae67f3a069d",
+    "extra": null,
+    "unique_id": "26ea9cc7-bf96-4ca6-9c27-d9146f9c75da",
+    "public": true,
+    "active": true,
+    "service_url": "/v2/services/6a4abae6-93e0-438b-aaa2-5ae67f3a069d",
+    "service_instances_url": "/v2/service_plans/5d8f3b0f-6b5b-487f-8fed-4c2d9b812a72/service_instances"
+  }
+}

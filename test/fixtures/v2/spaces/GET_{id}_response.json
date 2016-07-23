@@ -1,0 +1,25 @@
+{
+  "metadata": {
+    "guid": "2d745a4b-67e3-4398-986e-2adbcf8f7ec9",
+    "url": "/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9",
+    "created_at": "2015-10-14T12:04:28Z",
+    "updated_at": null
+  },
+  "entity": {
+    "name": "autosleep",
+    "organization_guid": "d7d77408-a250-45e3-8de5-71fcf199bbab",
+    "space_quota_definition_guid": null,
+    "allow_ssh": true,
+    "organization_url": "/v2/organizations/d7d77408-a250-45e3-8de5-71fcf199bbab",
+    "developers_url": "/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9/developers",
+    "managers_url": "/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9/managers",
+    "auditors_url": "/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9/auditors",
+    "apps_url": "/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9/apps",
+    "routes_url": "/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9/routes",
+    "domains_url": "/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9/domains",
+    "service_instances_url": "/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9/service_instances",
+    "app_events_url": "/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9/app_events",
+    "events_url": "/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9/events",
+    "security_groups_url": "/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9/security_groups"
+  }
+}

@@ -1,3 +1,2 @@
-requests==2.5.1
 protobuf==2.6.1
-
+oauth2-client==0.0.11

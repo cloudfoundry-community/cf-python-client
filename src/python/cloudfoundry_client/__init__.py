@@ -7,4 +7,4 @@ __version__ = "0.0.9"
 
 from main import main, build_client_from_configuration
 from client import CloudFoundryClient
-from calls import InvalidStatusCode
+from entities import InvalidStatusCode
