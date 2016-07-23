@@ -16,6 +16,7 @@ class TestServiceBindings(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/service_bindings?q=service_instance_guid%20IN%20instance_guid',
             httplib.OK,
+            None,
             'v2', 'service_bindings', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
                      self.service_bindings.list(service_instance_guid='instance_guid'), 0)
@@ -26,6 +27,7 @@ class TestServiceBindings(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/service_bindings/route_id',
             httplib.OK,
+            None,
             'v2', 'service_bindings', 'GET_{id}_response.json')
         result = self.service_bindings.get('route_id')
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
@@ -35,6 +37,7 @@ class TestServiceBindings(unittest.TestCase):
         self.credential_manager.post.return_value = mock_response(
             '/v2/service_bindings',
             httplib.CREATED,
+            None,
             'v2', 'service_bindings', 'POST_response.json')
         service_bindiing = self.service_bindings.create('app_guid', 'instance_guid',
                                                         dict(the_service_broker='wants this object'))
@@ -48,6 +51,7 @@ class TestServiceBindings(unittest.TestCase):
     def test_delete(self):
         self.credential_manager.delete.return_value = mock_response(
             '/v2/service_bindings/binding_id',
-            httplib.NO_CONTENT)
+            httplib.NO_CONTENT,
+            None)
         self.service_bindings.remove('binding_id')
         self.credential_manager.delete.assert_called_with(self.credential_manager.delete.return_value.url)

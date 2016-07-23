@@ -16,6 +16,7 @@ class TestSpaces(unittest.TestCase):
     def test_list(self):
         self.credential_manager.get.return_value = mock_response('/v2/spaces?q=organization_guid%20IN%20org_id',
                                                                  httplib.OK,
+                                                                 None,
                                                                  'v2', 'spaces', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, self.spaces.list(organization_guid='org_id'), 0)
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
@@ -25,6 +26,7 @@ class TestSpaces(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/spaces/space_id',
             httplib.OK,
+            None,
             'v2', 'spaces', 'GET_{id}_response.json')
         result = self.spaces.get('space_id')
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)

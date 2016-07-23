@@ -16,6 +16,7 @@ class TestServicePlans(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/service_plans?q=service_guid%20IN%20service_id',
             httplib.OK,
+            None,
             'v2', 'service_plans', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, self.service_plans.list(service_guid='service_id'), 0)
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
@@ -25,6 +26,7 @@ class TestServicePlans(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/service_plans/plan_id',
             httplib.OK,
+            None,
             'v2', 'service_plans', 'GET_{id}_response.json')
         result = self.service_plans.get('plan_id')
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
@@ -34,6 +36,7 @@ class TestServicePlans(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/service_plans/plan_id/service_instances?q=space_guid%20IN%20space_id',
             httplib.OK,
+            None,
             'v2', 'apps', 'GET_{id}_routes_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
                      self.service_plans.list_instances('plan_id', space_guid='space_id'), 0)

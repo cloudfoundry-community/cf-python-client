@@ -27,7 +27,7 @@ class MockResponse(object):
 TARGET_ENDPOINT = "http://somewhere.org"
 
 
-def mock_response(uri, status_code, headers=None, *path_parts):
+def mock_response(uri, status_code, headers, *path_parts):
     global TARGET_ENDPOINT
     if len(path_parts) > 0:
         file_name = path_parts[len(path_parts) - 1]

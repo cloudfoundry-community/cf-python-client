@@ -15,6 +15,7 @@ class TestApplications(unittest.TestCase):
     def test_list(self):
         self.credential_manager.get.return_value = mock_response('/v2/apps',
                                                                  httplib.OK,
+                                                                 None,
                                                                  'v2', 'apps', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, self.applications.list(), 0)
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
@@ -24,6 +25,7 @@ class TestApplications(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/apps?q=space_guid%20IN%20space_guid&q=name%20IN%20application_name',
             httplib.OK,
+            None,
             'v2', 'apps', 'GET_space_guid_name_response.json')
         application = self.applications.get_first(space_guid='space_guid', name='application_name')
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
@@ -33,6 +35,7 @@ class TestApplications(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/apps/app_id/env',
             httplib.OK,
+            None,
             'v2', 'apps', 'GET_{id}_env_response.json')
         application = self.applications.get_env('app_id')
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
@@ -42,6 +45,7 @@ class TestApplications(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/apps/app_id/instances',
             httplib.OK,
+            None,
             'v2', 'apps', 'GET_{id}_instances_response.json')
         application = self.applications.get_instances('app_id')
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
@@ -51,6 +55,7 @@ class TestApplications(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/apps/app_id/stats',
             httplib.OK,
+            None,
             'v2', 'apps', 'GET_{id}_stats_response.json')
         application = self.applications.get_stats('app_id')
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
@@ -60,9 +65,10 @@ class TestApplications(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/apps/app_id/routes?q=route_guid%20IN%20route_id',
             httplib.OK,
+            None,
             'v2', 'apps', 'GET_{id}_routes_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
-                     self.applications.list_routes('app_id', route_guid='route_id'), 0)
+                     self.applications.list('app_id', 'routes', route_guid='route_id'), 0)
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
         self.assertEqual(cpt, 1)
 
@@ -70,6 +76,7 @@ class TestApplications(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/apps/app_id',
             httplib.OK,
+            None,
             'v2', 'apps', 'GET_{id}_response.json')
         application = self.applications.get('app_id')
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
@@ -79,10 +86,12 @@ class TestApplications(unittest.TestCase):
         self.credential_manager.put.return_value = mock_response(
             '/v2/apps/app_id',
             httplib.CREATED,
+            None,
             'v2', 'apps', 'PUT_{id}_response.json')
         self.credential_manager.get.return_value = mock_response(
             '/v2/apps/app_id/instances',
             httplib.OK,
+            None,
             'v2', 'apps', 'GET_{id}_instances_response.json')
 
         application = self.applications.start('app_id')
@@ -95,10 +104,11 @@ class TestApplications(unittest.TestCase):
         self.credential_manager.put.return_value = mock_response(
             '/v2/apps/app_id',
             httplib.CREATED,
+            None,
             'v2', 'apps', 'PUT_{id}_response.json')
         self.credential_manager.get.return_value = mock_response(
             '/v2/apps/app_id/instances',
-            httplib.BAD_REQUEST)
+            httplib.BAD_REQUEST, None)
 
         application = self.applications.stop('app_id')
         self.credential_manager.put.assert_called_with(self.credential_manager.put.return_value.url,

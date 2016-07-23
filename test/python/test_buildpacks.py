@@ -15,6 +15,7 @@ class TestBuildpacks(unittest.TestCase):
     def test_list(self):
         self.credential_manager.get.return_value = mock_response('/v2/buildpacks',
                                                                  httplib.OK,
+                                                                 None,
                                                                  'v2', 'buildpacks', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, self.buildpacks.list(), 0)
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
@@ -24,6 +25,7 @@ class TestBuildpacks(unittest.TestCase):
         self.credential_manager.put.return_value = mock_response(
             '/v2/buildpacks/build_pack_id',
             httplib.CREATED,
+            None,
             'v2', 'apps', 'PUT_{id}_response.json')
         result = self.buildpacks.update('build_pack_id', dict(enabled=False))
         self.credential_manager.put.assert_called_with(self.credential_manager.put.return_value.url,

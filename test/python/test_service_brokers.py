@@ -16,6 +16,7 @@ class TestServiceBrokers(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/service_brokers?q=space_guid%20IN%20space_guid',
             httplib.OK,
+            None,
             'v2', 'service_bindings', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
                      self.service_brokers.list(space_guid='space_guid'), 0)
@@ -26,6 +27,7 @@ class TestServiceBrokers(unittest.TestCase):
         self.credential_manager.get.return_value = mock_response(
             '/v2/service_brokers/broker_id',
             httplib.OK,
+            None,
             'v2', 'service_brokers', 'GET_{id}_response.json')
         result = self.service_brokers.get('broker_id')
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
@@ -35,6 +37,7 @@ class TestServiceBrokers(unittest.TestCase):
         self.credential_manager.post.return_value = mock_response(
             '/v2/service_brokers',
             httplib.CREATED,
+            None,
             'v2', 'service_brokers', 'POST_response.json')
         service_broker = self.service_brokers.create('url', 'name', 'username', 'P@sswd1')
         self.credential_manager.post.assert_called_with(self.credential_manager.post.return_value.url,
@@ -48,6 +51,7 @@ class TestServiceBrokers(unittest.TestCase):
         self.credential_manager.put.return_value = mock_response(
             '/v2/service_brokers/broker_id',
             httplib.OK,
+            None,
             'v2', 'service_brokers', 'PUT_{id}_response.json')
         service_broker = self.service_brokers.update('broker_id',
                                                      broker_url='new-url',
@@ -62,6 +66,7 @@ class TestServiceBrokers(unittest.TestCase):
     def test_delete(self):
         self.credential_manager.delete.return_value = mock_response(
             '/v2/service_brokers/broker_id',
-            httplib.NO_CONTENT)
+            httplib.NO_CONTENT,
+            None)
         self.service_brokers.remove('broker_id')
         self.credential_manager.delete.assert_called_with(self.credential_manager.delete.return_value.url)
