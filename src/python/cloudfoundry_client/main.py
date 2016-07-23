@@ -83,6 +83,19 @@ def is_guid(s):
     return re.match('[\d|a-z]{8}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{12}', s.lower()) is not None
 
 
+def resolve_id(argument, get_by_name, domain_name, allow_search_by_name):
+    if is_guid(argument):
+        return argument
+    elif allow_search_by_name:
+        result = get_by_name(argument)
+        if result is not None:
+            return result['metadata']['guid']
+        else:
+            raise InvalidStatusCode(httplib.NOT_FOUND, '%s with name %s' % (domain_name, argument))
+    else:
+        raise ValueError('id: %s: does not allow search by name' % domain_name)
+
+
 def log_recent(client, application_guid):
     for message in client.loggregator.get_recent(application_guid):
         _logger.info(message.message)
@@ -116,15 +129,21 @@ def main():
                                       allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True)
     commands['buildpack'] = dict(list=(), name='name',
                                  allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False)
+    commands['route'] = dict(list=(), name='host',
+                              allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False)
     application_commands = dict(recent_logs=('get_recent_logs', 'Recent Logs',),
                                 env=('get_env', 'Environment',),
-                                routes=('get_routes', 'Routes',),
-                                instances=('get_routes', 'Instances',),
+                                instances=('get_instances', 'Instances',),
                                 stats=('get_stats', 'Stats',),
                                 start=('start', 'Start application',),
                                 stop=('stop', 'Stop application',))
+    application_extra_list_commands = dict(routes=('Routes', 'host'))
     for command, command_description in application_commands.items():
         command_parser = subparsers.add_parser(command, help=command_description[1])
+        command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
+                                    help='The id. Can be UUID or name (first found then)')
+    for command, command_description in application_extra_list_commands.items():
+        command_parser = subparsers.add_parser(command, help=command_description[0])
         command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
                                     help='The id. Can be UUID or name (first found then)')
     for domain, command_description in commands.items():
@@ -148,27 +167,18 @@ def main():
 
     arguments = parser.parse_args()
     if arguments.action == 'recent_logs':
-        if is_guid(arguments.id[0]):
-            log_recent(client, arguments.id[0])
-        else:
-            application = client.application.get_first(name=arguments.id[0])
-            if application is not None:
-                log_recent(client, application['metadata']['guid'])
-            else:
-                raise InvalidStatusCode(httplib.NOT_FOUND, 'application with name %s' % arguments.id[0])
-    elif application_commands.get(arguments.action, None) is not None:
-        if is_guid(arguments.id[0]):
-            print(json.dumps(getattr(client.application, application_commands[arguments.action][0])(arguments.id[0]),
-                             indent=1))
-        else:
-            filter_get = dict(name=arguments.id[0])
-            entity = client.application.get_first(**filter_get)
-            if entity is None:
-                raise InvalidStatusCode(httplib.NOT_FOUND, 'application with name %s' % arguments.id[0])
-            else:
-                print(json.dumps(
-                    getattr(client.application, application_commands[arguments.action][0])(entity['metadata']['id']),
-                    indent=1))
+        resource_id = resolve_id(arguments.id[0], lambda x: client.application.get_first(name=x), 'application', True)
+        log_recent(client, resource_id)
+    elif application_commands.get(arguments.action) is not None:
+        resource_id = resolve_id(arguments.id[0], lambda x: client.application.get_first(name=x), 'application', True)
+        print(json.dumps(getattr(client.application, application_commands[arguments.action][0])(resource_id),
+                         indent=1))
+    elif application_extra_list_commands.get(arguments.action) is not None:
+
+        resource_id = resolve_id(arguments.id[0], lambda x: client.application.get_first(name=x), 'application', True)
+        for entity in client.application.list(resource_id, arguments.action):
+            name_property = application_extra_list_commands[arguments.action][1]
+            print('%s - %s' % (entity['metadata']['guid'], entity['entity'][name_property]))
     elif arguments.action.find('list_') == 0:
         domain = arguments.action[len('list_'): len(arguments.action) - 1]
         filter_list = dict()
@@ -184,18 +194,11 @@ def main():
                 print(entity['metadata']['guid'])
     elif arguments.action.find('get_') == 0:
         domain = arguments.action[len('get_'):]
-        if is_guid(arguments.id[0]):
-            print(json.dumps(getattr(client, domain).get(arguments.id[0]), indent=1))
-        elif commands[domain]['allow_retrieve_by_name']:
-            filter_get = dict()
-            filter_get[commands[domain]['name']] = arguments.id[0]
-            entity = getattr(client, domain).get_first(**filter_get)
-            if entity is None:
-                raise InvalidStatusCode(httplib.NOT_FOUND, '%s with name %s' % (domain, arguments.id[0]))
-            else:
-                print(json.dumps(entity, indent=1))
-        else:
-            raise ValueError('id: %s: does not allow search by name' % domain)
+        resource_id = resolve_id(arguments.id[0],
+                                 lambda x: getattr(client, domain).get_first(**{commands[domain]['name']: x}),
+                                 domain,
+                                 commands[domain]['allow_retrieve_by_name'])
+        print(json.dumps(getattr(client, domain).get(resource_id), indent=1))
     elif arguments.action.find('create_') == 0:
         domain = arguments.action[len('create_'):]
         data = None
