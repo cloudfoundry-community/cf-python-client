@@ -1,15 +1,16 @@
 #!/usr/bin/python2.7
 import argparse
-import sys
-import os
-import logging
-import json
-import re
 import httplib
-from requests.exceptions import ConnectionError
-from cloudfoundry_client.entities import InvalidStatusCode
-from cloudfoundry_client.client import CloudFoundryClient
+import json
+import logging
+import os
+import re
+import sys
 
+from requests.exceptions import ConnectionError
+
+from cloudfoundry_client.client import CloudFoundryClient
+from cloudfoundry_client.entities import InvalidStatusCode
 
 __all__ = ['main', 'build_client_from_configuration']
 
@@ -18,7 +19,7 @@ _logger = logging.getLogger(__name__)
 
 def _read_value_from_user(prompt, error_message=None, validator=None, default=''):
     while True:
-        sys.stdout.write('%s : ' % prompt)
+        sys.stdout.write('%s [%s]: ' % (prompt, default))
         sys.stdout.flush()
         answer_value = sys.stdin.readline().rstrip(' \r\n')
         if len(answer_value) == 0:
@@ -32,7 +33,7 @@ def _read_value_from_user(prompt, error_message=None, validator=None, default=''
                 sys.stderr.write('\"%s\": %s\n' % (answer_value, error_message))
 
 
-def build_client_from_configuration():
+def build_client_from_configuration(previous_configuration=None):
     dir_conf = os.path.join(os.path.expanduser('~'))
     if not os.path.isdir(dir_conf):
         if os.path.exists(dir_conf):
@@ -42,10 +43,15 @@ def build_client_from_configuration():
     if not os.path.isfile(config_file):
         target_endpoint = _read_value_from_user('Please enter a target endpoint',
                                                 'Url must starts with http:// or https://',
-                                                lambda s: s.startswith('http://') or s.startswith('https://'))
-        skip_ssl_verification = _read_value_from_user('Skip ssl verification (true/false) [false]',
+                                                lambda s: s.startswith('http://') or s.startswith('https://'),
+                                                default='' if previous_configuration is None else
+                                                previous_configuration.get('target_endpoint', ''))
+        skip_ssl_verification = _read_value_from_user('Skip ssl verification (true/false)',
                                                       'Enter either true or false',
-                                                      lambda s: s == 'true' or s == 'false', 'false')
+                                                      lambda s: s == 'true' or s == 'false',
+                                                      default='false' if previous_configuration is None else
+                                                      json.dumps(
+                                                          previous_configuration.get('skip_ssl_verification', False)))
         login = _read_value_from_user('Please enter your login')
         password = _read_value_from_user('Please enter your password')
         client = CloudFoundryClient(target_endpoint, skip_verification=(skip_ssl_verification == 'true'))
@@ -53,26 +59,24 @@ def build_client_from_configuration():
         with open(config_file, 'w') as f:
             f.write(json.dumps(dict(target_endpoint=target_endpoint,
                                     skip_ssl_verification=(skip_ssl_verification == 'true'),
-                                    access_token=client.credentials_manager.access_token(),
-                                    refresh_token=client.credentials_manager.refresh_token()), indent=2))
+                                    refresh_token=client.credentials_manager.refresh_token), indent=2))
         return client
     else:
         try:
+            configuration = None
             with open(config_file, 'r') as f:
-
                 configuration = json.load(f)
                 client = CloudFoundryClient(configuration['target_endpoint'],
                                             skip_verification=configuration['skip_ssl_verification'])
-                client.credentials_manager.init_with_tokens(configuration['access_token'],
-                                                            configuration['refresh_token'])
+                client.credentials_manager.init_with_token(configuration['refresh_token'])
                 return client
         except Exception, ex:
             if type(ex) == ConnectionError:
                 raise
             else:
-                sys.stderr.write('Could not restore configuration. Cleaning and recreating\n')
+                _logger.exception("Could not restore configuration. Cleaning and recreating")
                 os.remove(config_file)
-                build_client_from_configuration()
+                return build_client_from_configuration(configuration)
 
 
 def is_guid(s):
@@ -87,6 +91,8 @@ def log_recent(client, application_guid):
 def main():
     logging.basicConfig(level=logging.INFO,
                         format='%(message)s')
+    logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
     client = build_client_from_configuration()
     parser = argparse.ArgumentParser(add_help=True)
     subparsers = parser.add_subparsers(help='commands', dest='action')
@@ -206,7 +212,7 @@ def main():
                 raise ValueError('entity: must be either a valid json file path or a json object')
         print(json.dumps(getattr(client, domain)._create(data)))
     elif arguments.action.find('delete_') == 0:
-        domain = arguments.action[len('create_'):]
+        domain = arguments.action[len('delete_'):]
         if is_guid(arguments.id[0]):
             getattr(client, domain)._remove(arguments.id[0])
         elif commands[domain]['allow_retrieve_by_name']:
