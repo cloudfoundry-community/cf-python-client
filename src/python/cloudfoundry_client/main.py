@@ -106,66 +106,94 @@ def main():
                         format='%(message)s')
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
-    client = build_client_from_configuration()
-    parser = argparse.ArgumentParser(add_help=True)
-    subparsers = parser.add_subparsers(help='commands', dest='action')
+
     commands = dict()
     commands['organization'] = dict(list=(), name='name', allow_retrieve_by_name=True, allow_creation=True,
-                                    allow_deletion=True)
+                                    allow_deletion=True, display_name='Organizations')
     commands['space'] = dict(list=('organization_guid',), name='name', allow_retrieve_by_name=True, allow_creation=True,
-                             allow_deletion=True)
+                             allow_deletion=True, display_name='Spaces')
     commands['application'] = dict(list=('organization_guid', 'space_guid',), name='name',
-                                   allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True)
+                                   allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True,
+                                   display_name='Applications')
     commands['service'] = dict(list=('service_broker_guid',), name='label', allow_retrieve_by_name=True,
                                allow_creation=True,
-                               allow_deletion=True)
+                               allow_deletion=True, display_name='Services')
     commands['service_plan'] = dict(list=('service_guid', 'service_instance_guid', 'service_broker_guid'), name='name',
-                                    allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False)
+                                    allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False,
+                                    display_name='Service plans')
     commands['service_instance'] = dict(list=('organization_guid', 'space_guid', 'service_plan_guid'), name='name',
-                                        allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True)
+                                        allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True,
+                                        display_name='Service instances')
     commands['service_binding'] = dict(list=('app_guid', 'service_instance_guid'), name=None,
-                                       allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True)
+                                       allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True,
+                                       display_name='Service bindings')
     commands['service_broker'] = dict(list=('name', 'space_guid'), name='name',
-                                      allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True)
+                                      allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True,
+                                      display_name='Service brokers')
     commands['buildpack'] = dict(list=(), name='name',
-                                 allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False)
+                                 allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False,
+                                 display_name='Buildpacks')
     commands['route'] = dict(list=(), name='host',
-                              allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False)
+                             allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False,
+                             display_name='Routes')
     application_commands = dict(recent_logs=('get_recent_logs', 'Recent Logs',),
-                                env=('get_env', 'Environment',),
-                                instances=('get_instances', 'Instances',),
-                                stats=('get_stats', 'Stats',),
-                                start=('start', 'Start application',),
-                                stop=('stop', 'Stop application',))
-    application_extra_list_commands = dict(routes=('Routes', 'host'))
-    for command, command_description in application_commands.items():
-        command_parser = subparsers.add_parser(command, help=command_description[1])
-        command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
-                                    help='The id. Can be UUID or name (first found then)')
-    for command, command_description in application_extra_list_commands.items():
-        command_parser = subparsers.add_parser(command, help=command_description[0])
-        command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
-                                    help='The id. Can be UUID or name (first found then)')
+                                env=('get_env', 'Get the environment of an application',),
+                                instances=('get_instances', 'Get the instances of an application',),
+                                stats=('get_stats', 'Get the stats of an application',),
+                                start=('start', 'Start an application',),
+                                stop=('stop', 'Stop an application',))
+    application_extra_list_commands = dict(routes=('List the routes(host) of an application', 'host'))
+    description = []
     for domain, command_description in commands.items():
-        list_parser = subparsers.add_parser('list_%ss' % domain, help='List %ss' % domain)
+        description.append(' %s' % command_description['display_name'])
+        description.append('   list_%ss : List %ss' % (domain, domain))
+        description.append('   get_%s : Get a %s by %s' % (domain, domain,
+                                                            'UUID or name (first found then)'
+                                                            if command_description['allow_retrieve_by_name']
+                                                            else 'UUID'))
+        if command_description['allow_creation']:
+            description.append('   create_%s : Create a %s' % (domain, domain))
+        if command_description['allow_deletion']:
+            description.append('   delete_%s : Delete a %s' % (domain, domain))
+        if domain == 'application':
+            for command, application_command_description in application_commands.items():
+                description.append('   %s : %s' % (command, application_command_description[1]))
+            for command, application_command_description in application_extra_list_commands.items():
+                description.append('   %s : %s' % (command, application_command_description[0]))
+        description.append('')
+
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
+    subparsers = parser.add_subparsers(title='Commands', dest='action', description='\n'.join(description))
+    for domain, command_description in commands.items():
+        list_parser = subparsers.add_parser('list_%ss' % domain)
         for filter_parameter in command_description['list']:
             list_parser.add_argument('-%s' % filter_parameter, action='store', dest=filter_parameter, type=str,
                                      default=None, help='Filter with %s' % filter_parameter)
-        get_parser = subparsers.add_parser('get_%s' % domain, help='Get a %s' % domain)
+        get_parser = subparsers.add_parser('get_%s' % domain)
         get_parser.add_argument('id', metavar='ids', type=str, nargs=1,
                                 help='The id. Can be UUID or name (first found then)'
                                 if command_description['allow_retrieve_by_name'] else 'The id (UUID)')
         if command_description['allow_creation']:
-            create_parser = subparsers.add_parser('create_%s' % domain, help='Create a %s' % domain)
+            create_parser = subparsers.add_parser('create_%s' % domain)
             create_parser.add_argument('entity', metavar='entities', type=str, nargs=1,
                                        help='Either a path of the json file containing the %s or a json object' % domain)
         if command_description['allow_deletion']:
-            delete_parser = subparsers.add_parser('delete_%s' % domain, help='Delete a %s' % domain)
+            delete_parser = subparsers.add_parser('delete_%s' % domain)
             delete_parser.add_argument('id', metavar='ids', type=str, nargs=1,
                                        help='The id. Can be UUID or name (first found then)'
                                        if command_description['allow_retrieve_by_name'] else 'The id (UUID)')
+        if domain == 'application':
+            for command, application_command_description in application_commands.items():
+                command_parser = subparsers.add_parser(command)
+                command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
+                                            help='The id. Can be UUID or name (first found then)')
+            for command, application_command_description in application_extra_list_commands.items():
+                command_parser = subparsers.add_parser(command)
+                command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
+                                            help='The id. Can be UUID or name (first found then)')
 
     arguments = parser.parse_args()
+    client = build_client_from_configuration()
     if arguments.action == 'recent_logs':
         resource_id = resolve_id(arguments.id[0], lambda x: client.application.get_first(name=x), 'application', True)
         log_recent(client, resource_id)
