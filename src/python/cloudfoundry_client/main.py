@@ -140,6 +140,7 @@ def main():
                                 env=('get_env', 'Get the environment of an application',),
                                 instances=('get_instances', 'Get the instances of an application',),
                                 stats=('get_stats', 'Get the stats of an application',),
+                                summary=('get_summary', 'Get the summary of an application',),
                                 start=('start', 'Start an application',),
                                 stop=('stop', 'Stop an application',))
     application_extra_list_commands = dict(routes=('List the routes(host) of an application', 'host'))
@@ -148,9 +149,9 @@ def main():
         description.append(' %s' % command_description['display_name'])
         description.append('   list_%ss : List %ss' % (domain, domain))
         description.append('   get_%s : Get a %s by %s' % (domain, domain,
-                                                            'UUID or name (first found then)'
-                                                            if command_description['allow_retrieve_by_name']
-                                                            else 'UUID'))
+                                                           'UUID or name (first found then)'
+                                                           if command_description['allow_retrieve_by_name']
+                                                           else 'UUID'))
         if command_description['allow_creation']:
             description.append('   create_%s : Create a %s' % (domain, domain))
         if command_description['allow_deletion']:

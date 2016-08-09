@@ -21,6 +21,9 @@ class ApplicationManager(EntityManager):
     def get_env(self, application_guid):
         return super(ApplicationManager, self).get(application_guid, 'env')
 
+    def get_summary(self, application_guid):
+        return super(ApplicationManager, self).get(application_guid, 'summary')
+
     def start(self, application_guid, check_time=0.5):
         result = super(ApplicationManager, self)._update(application_guid,
                                                          dict(state='STARTED'))
