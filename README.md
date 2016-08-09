@@ -1,4 +1,5 @@
-cf-python-client [![pypi](https://img.shields.io/pypi/v/cloudfoundry-client.svg)]() [![license](https://img.shields.io/github/license/antechrestos/rest-client-test.svg)]()
+# Python cloudfoundry client  [![pypi](https://img.shields.io/pypi/v/cloudfoundry-client.svg)](https://pypi.python.org/pypi/cloudfoundry-client) [![license](https://img.shields.io/github/license/antechrestos/cf-python-client.svg)](https://raw.githubusercontent.com/antechrestos/cf-python-client/master/LICENSE)
+
 ================
 
 The cf-python-client repo contains a Python client library for Cloud Foundry. 
