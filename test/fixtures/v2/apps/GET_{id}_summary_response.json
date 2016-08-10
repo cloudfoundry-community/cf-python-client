@@ -1,0 +1,60 @@
+
+{
+ "version": "0b9e28b8-b69d-46ba-ad7e-6c83899826b2",
+ "staging_failed_reason": null,
+ "docker_credentials_json": {
+  "redacted_message": "[PRIVATE DATA HIDDEN]"
+ },
+ "staging_failed_description": null,
+ "instances": 1,
+ "guid": "a5eee659-56a7-4123-91ac-ba190ddc5477",
+ "docker_image": null,
+ "diego": true,
+ "console": false,
+ "package_state": "STAGED",
+ "state": "STOPPED",
+ "production": false,
+ "stack_guid": "3cb62b55-3230-45d1-a297-ace25b3e3479",
+ "memory": 512,
+ "package_updated_at": "2016-08-10T14:01:54Z",
+ "staging_task_id": "c80457643d7d455c93f92151d6384c2d",
+ "buildpack": null,
+ "enable_ssh": true,
+ "detected_start_command": "sh boot.sh",
+ "disk_quota": 1024,
+ "routes": [
+  {
+   "path": "",
+   "host": "application_name",
+   "guid": "6c7d07f9-57a1-474e-8e91-82a597550956",
+   "port": null,
+   "domain": {
+    "guid": "f030f4bb-2b60-47e9-be3e-8105655c0286",
+    "name": "some-domain"
+   }
+  }
+ ],
+ "services": [],
+ "detected_buildpack": "staticfile 1.3.8",
+ "space_guid": "6c99652b-4795-416c-9466-64a3e4555627",
+ "name": "application_name",
+ "running_instances": 0,
+ "health_check_type": "port",
+ "command": null,
+ "debug": null,
+ "available_domains": [
+  {
+   "guid": "255b9370-3836-402c-9e1f-08b2a96dd180",
+   "name": "some-domain",
+   "owning_organization_guid": "d7d77408-a250-45e3-8de5-71fcf199bbab"
+  },
+  {
+   "guid": "f030f4bb-2b60-47e9-be3e-8105655c0286",
+   "name": "other-domain",
+   "owning_organization_guid": "d7d77408-a250-45e3-8de5-71fcf199bbab"
+  }
+ ],
+ "environment_json": {},
+ "ports": null,
+ "health_check_timeout": null
+}

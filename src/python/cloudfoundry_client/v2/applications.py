@@ -1,5 +1,4 @@
 import httplib
-import json
 import logging
 from time import sleep
 
@@ -72,4 +71,6 @@ class ApplicationManager(EntityManager):
                 # 220001: instances error
                 if code == 220001 or code == 170002:
                     return {}
+                else:
+                    _logger.error("")
             raise

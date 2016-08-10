@@ -72,6 +72,17 @@ class TestApplications(unittest.TestCase):
         self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
         self.assertEqual(cpt, 1)
 
+    def test_get_sumary(self):
+        self.credential_manager.get.return_value = mock_response(
+            '/v2/apps/app_id/summary',
+            httplib.OK,
+            None,
+            'v2', 'apps', 'GET_{id}_summary_response.json')
+        application = self.applications.get_summary('app_id')
+
+        self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
+        self.assertIsNotNone(application)
+
     def test_get(self):
         self.credential_manager.get.return_value = mock_response(
             '/v2/apps/app_id',
@@ -88,16 +99,30 @@ class TestApplications(unittest.TestCase):
             httplib.CREATED,
             None,
             'v2', 'apps', 'PUT_{id}_response.json')
-        self.credential_manager.get.return_value = mock_response(
+        mock_summary = mock_response(
+            '/v2/apps/app_id/summary',
+            httplib.OK,
+            None,
+            'v2', 'apps', 'GET_{id}_summary_response.json')
+        mock_instances_stopped = mock_response(
+            '/v2/apps/app_id/instances',
+            httplib.BAD_REQUEST,
+            None,
+            'v2', 'apps', 'GET_{id}_instances_stopped_response.json')
+        mock_instances_started = mock_response(
             '/v2/apps/app_id/instances',
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_instances_response.json')
+        self.credential_manager.get.side_effect = [mock_summary, mock_instances_stopped, mock_instances_started]
 
         application = self.applications.start('app_id')
         self.credential_manager.put.assert_called_with(self.credential_manager.put.return_value.url,
                                                        json=dict(state='STARTED'))
-        self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
+        self.credential_manager.get.assert_has_calls([mock.call(mock_summary.url),
+                                                      mock.call(mock_instances_stopped.url),
+                                                      mock.call(mock_instances_started.url)],
+                                                     any_order=False)
         self.assertIsNotNone(application)
 
     def test_stop(self):
@@ -108,8 +133,9 @@ class TestApplications(unittest.TestCase):
             'v2', 'apps', 'PUT_{id}_response.json')
         self.credential_manager.get.return_value = mock_response(
             '/v2/apps/app_id/instances',
-            httplib.BAD_REQUEST, None)
-
+            httplib.BAD_REQUEST,
+            None,
+            'v2', 'apps', 'GET_{id}_instances_stopped_response.json')
         application = self.applications.stop('app_id')
         self.credential_manager.put.assert_called_with(self.credential_manager.put.return_value.url,
                                                        json=dict(state='STOPPED'))

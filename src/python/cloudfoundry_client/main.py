@@ -207,7 +207,7 @@ def main():
         resource_id = resolve_id(arguments.id[0], lambda x: client.application.get_first(name=x), 'application', True)
         for entity in client.application.list(resource_id, arguments.action):
             name_property = application_extra_list_commands[arguments.action][1]
-            print('%s - %s' % (entity['metadata']['guid'], entity['entity'][name_property]))
+            print('%s - %s' % (entity.metadata.guid, entity.entity[name_property]))
     elif arguments.action.find('list_') == 0:
         domain = arguments.action[len('list_'): len(arguments.action) - 1]
         filter_list = dict()
@@ -218,9 +218,9 @@ def main():
         for entity in getattr(client, domain).list(**filter_list):
             name_property = commands[domain]['name']
             if name_property is not None:
-                print('%s - %s' % (entity['metadata']['guid'], entity['entity'][name_property]))
+                print('%s - %s' % (entity.metadata.guid, entity.entity[name_property]))
             else:
-                print(entity['metadata']['guid'])
+                print(entity.metadata.guid)
     elif arguments.action.find('get_') == 0:
         domain = arguments.action[len('get_'):]
         resource_id = resolve_id(arguments.id[0],
@@ -254,7 +254,7 @@ def main():
             if entity is None:
                 raise InvalidStatusCode(httplib.NOT_FOUND, '%s with name %s' % (domain, arguments.id[0]))
             else:
-                getattr(client, domain)._remove(entity['metadata']['guid'])
+                getattr(client, domain)._remove(entity.metadata.guid)
         else:
             raise ValueError('id: %s: does not allow search by name' % domain)
 

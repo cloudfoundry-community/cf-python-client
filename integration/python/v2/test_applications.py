@@ -57,9 +57,10 @@ class TestApplications(unittest.TestCase):
 
     def test_start(self):
         client = build_client_from_configuration()
-        _logger.debug('start - %s', client.application.start(client.app_guid, False))
+
+        _logger.debug('start - %s', client.application.start(client.app_guid, async=False))
 
     def test_stop(self):
         client = build_client_from_configuration()
-        _logger.debug('stop - %s', client.application.stop(client.app_guid, False))
+        _logger.debug('stop - %s', client.application.stop(client.app_guid, async=False))
 

@@ -10,7 +10,7 @@ _logger = logging.getLogger(__name__)
 class TestServicePlan(unittest.TestCase):
     def test_list_instance_for_plan(self):
         client = build_client_from_configuration()
-        for instance in client.service_plan.list_instance(client.plan_guid, space_guid=client.space_guid):
+        for instance in client.service_plan.list_instances(client.plan_guid, space_guid=client.space_guid):
             _logger.debug('test_list_instance_for_plan - %s -%s', instance['metadata']['guid'], instance['entity']['name'])
 
     def test_list_by_broker(self):
