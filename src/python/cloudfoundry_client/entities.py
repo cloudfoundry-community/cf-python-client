@@ -21,6 +21,7 @@ class InvalidStatusCode(Exception):
 
 class EntityManager(object):
     def __init__(self, target_endpoint, credentials_manager, entity_uri):
+        self.target_endpoint = target_endpoint
         self.base_url = '%s%s' % (target_endpoint, entity_uri)
         self.credentials_manager = credentials_manager
 
@@ -48,17 +49,19 @@ class EntityManager(object):
             requested_path = self.base_url
         else:
             requested_path = '%s/%s' % (self.base_url, '/'.join(extra_paths))
+        url_requested = EntityManager._get_url_filtered(requested_path, **kwargs)
         response = EntityManager._check_response(self.credentials_manager
-                                                 .get(EntityManager._get_url_filtered(requested_path, **kwargs)))
+                                                 .get(url_requested))
         while True:
-            _logger.debug('GET - %s - %s', self.base_url, response.text)
+            _logger.debug('GET - %s - %s', url_requested, response.text)
             response_json = response.json()
             for resource in response_json['resources']:
                 yield resource
             if response_json['next_url'] is None:
                 break
             else:
-                response = EntityManager._check_response(self.credentials_manager.get(response_json['next_url']))
+                url_requested = '%s%s' % (self.target_endpoint, response_json['next_url'])
+                response = EntityManager._check_response(self.credentials_manager.get(url_requested))
 
     def get_first(self, **kwargs):
         response = EntityManager._check_response(self.credentials_manager
@@ -82,9 +85,23 @@ class EntityManager(object):
 
     @staticmethod
     def _get_url_filtered(url, **kwargs):
+        list_query_paramters = ['page', 'results-per-page', 'order-direction']
+
+        def _encode_query(parameter_name, parameter_value):
+            if parameter_name in list_query_paramters:
+                return '%s=%s' % (parameter_name, str(parameter_value))
+            else:
+                return '%s IN %s' % (parameter_name, str(parameter_value))
+
         if len(kwargs) > 0:
+            query_parameters = []
+            for parameter_name, parameter_value in kwargs.items():
+                if parameter_name in list_query_paramters:
+                    query_parameters.append('%s=%s' % (parameter_name, str(parameter_value)))
+                else:
+                    query_parameters.append('q=%s' % quote("%s IN %s" % (parameter_name, str(parameter_value))))
             return '%s?%s' % (url,
-                              "&".join('q=%s' % quote("%s IN %s" % (k, v)) for k, v in kwargs.items()))
+                              "&".join(query_parameters))
         else:
             return url
 
