@@ -1,8 +1,9 @@
+import httplib
 import logging
 
 import requests
-import httplib
 from oauth2_client.credentials_manager import CredentialManager, ServiceInformation
+
 from cloudfoundry_client.entities import InvalidStatusCode
 from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
 from cloudfoundry_client.v2.applications import ApplicationManager
@@ -19,6 +20,19 @@ from cloudfoundry_client.v2.spaces import SpaceManager
 _logger = logging.getLogger(__name__)
 
 
+class CloudfoundryCredentialManager(CredentialManager):
+    @staticmethod
+    def _is_token_expired(response):
+        if response.status_code == httplib.UNAUTHORIZED:
+            try:
+                json_data = response.json()
+                return json_data.get('code', 0) == 1000 and json_data.get('error_code', '') == 'CF-InvalidAuthToken'
+            except:
+                return False
+        else:
+            return False
+
+
 class CloudFoundryClient(object):
     proxy = None
 
@@ -29,7 +43,7 @@ class CloudFoundryClient(object):
 
         service_informations = ServiceInformation(None, '%s/oauth/token' % info['authorization_endpoint'],
                                                   client_id, client_secret, [], skip_verification)
-        self.credentials_manager = CredentialManager(service_informations, proxy)
+        self.credentials_manager = CloudfoundryCredentialManager(service_informations, proxy)
         self.organization = OrganizationManager(target_endpoint, self.credentials_manager)
         self.space = SpaceManager(target_endpoint, self.credentials_manager)
         self.service = ServiceManager(target_endpoint, self.credentials_manager)
@@ -59,5 +73,3 @@ class CloudFoundryClient(object):
             raise InvalidStatusCode(info_response.status_code, info_response.text)
         info = info_response.json()
         return info
-
-
