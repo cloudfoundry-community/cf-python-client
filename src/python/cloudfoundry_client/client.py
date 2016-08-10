@@ -26,7 +26,9 @@ class CloudfoundryCredentialManager(CredentialManager):
         if response.status_code == httplib.UNAUTHORIZED:
             try:
                 json_data = response.json()
-                return json_data.get('code', 0) == 1000 and json_data.get('error_code', '') == 'CF-InvalidAuthToken'
+                result = json_data.get('code', 0) == 1000 and json_data.get('error_code', '') == 'CF-InvalidAuthToken'
+                _logger.info('_is_token_expired - %s' % str(result))
+                return result
             except:
                 return False
         else:
@@ -59,7 +61,7 @@ class CloudFoundryClient(object):
     def init_with_credentials(self, login, password):
         self.credentials_manager.init_with_user_credentials(login, password)
 
-    def init_with_refresh(self, refresh_token):
+    def init_with_refresh_token(self, refresh_token):
         self.credentials_manager.init_with_token(refresh_token)
 
     @staticmethod
