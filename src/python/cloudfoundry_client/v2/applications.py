@@ -53,9 +53,9 @@ class ApplicationManager(EntityManager):
             # this case will make this code work for both stop and start operation
             all_in_expected_state = number_in_expected_state == number_required
             if not all_in_expected_state:
-                _logger.debug('_wait_for_instances_in_state - %d/%d %s' % (number_in_expected_state,
-                                                                          number_required,
-                                                                          state_expected))
+                _logger.debug('_wait_for_instances_in_state - %d/%d %s', number_in_expected_state,
+                                                                         number_required,
+                                                                         state_expected)
                 if sum_waiting > timeout:
                     raise AssertionError('Failed to get state %s for %d instances' % (state_expected, number_required))
                 sleep(check_time)
