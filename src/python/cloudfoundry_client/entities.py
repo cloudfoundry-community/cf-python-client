@@ -86,6 +86,7 @@ class EntityManager(object):
                 response = EntityManager._check_response(self.credentials_manager.get(url_requested))
 
     def get_first(self, **kwargs):
+        kwargs.setdefault('results-per-page', 1)
         response = EntityManager._check_response(self.credentials_manager
                                                  .get(EntityManager._get_url_filtered(self.base_url, **kwargs)))
         _logger.debug('GET - %s - %s', self.base_url, response.text)
