@@ -93,21 +93,17 @@ class EntityManager(object):
     def _get_url_filtered(url, **kwargs):
         list_query_paramters = ['page', 'results-per-page', 'order-direction']
 
-        def _encode_query(parameter_name, parameter_value):
+        def _append_encoded_parameter(parameters, args):
+            parameter_name, parameter_value = args[0], args[1]
             if parameter_name in list_query_paramters:
-                return '%s=%s' % (parameter_name, str(parameter_value))
+                parameters.append('%s=%s' % (parameter_name, str(parameter_value)))
             else:
-                return '%s IN %s' % (parameter_name, str(parameter_value))
+                parameters.append('q=%s' % quote('%s IN %s' % (parameter_name, str(parameter_value))))
+            return parameters
 
         if len(kwargs) > 0:
-            query_parameters = []
-            for parameter_name, parameter_value in kwargs.items():
-                if parameter_name in list_query_paramters:
-                    query_parameters.append('%s=%s' % (parameter_name, str(parameter_value)))
-                else:
-                    query_parameters.append('q=%s' % quote("%s IN %s" % (parameter_name, str(parameter_value))))
             return '%s?%s' % (url,
-                              "&".join(query_parameters))
+                              "&".join(reduce(_append_encoded_parameter, kwargs.items(), [])))
         else:
             return url
 
@@ -124,10 +120,4 @@ class EntityManager(object):
 
     @staticmethod
     def _read_response(response):
-        def _to_attr_object(pairs):
-            result = JsonObject()
-            for k in pairs:
-                result[k[0]] = k[1]
-            return result
-
-        return response.json(object_pairs_hook=_to_attr_object)
+        return response.json(object_pairs_hook=lambda pairs: JsonObject(pairs))
