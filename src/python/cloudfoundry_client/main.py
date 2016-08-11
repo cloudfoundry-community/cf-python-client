@@ -80,7 +80,7 @@ def build_client_from_configuration(previous_configuration=None):
 
 
 def is_guid(s):
-    return re.match('[\d|a-z]{8}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{12}', s.lower()) is not None
+    return re.match(r'[\d|a-z]{8}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{12}', s.lower()) is not None
 
 
 def resolve_id(argument, get_by_name, domain_name, allow_search_by_name):
