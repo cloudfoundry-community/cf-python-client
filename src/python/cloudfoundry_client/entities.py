@@ -50,6 +50,9 @@ class EntityManager(object):
             self.credentials_manager.delete('%s/%s' % (self.base_url, resource_id)))
         _logger.debug('DELETE - %s/%s - %s', self.base_url, resource_id, response.text)
 
+    def __iter__(self):
+        return self.list()
+
     def list(self, *extra_paths, **kwargs):
         if len(extra_paths) == 0:
             requested_path = self.base_url
