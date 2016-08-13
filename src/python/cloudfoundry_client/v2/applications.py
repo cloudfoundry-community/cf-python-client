@@ -2,26 +2,60 @@ import httplib
 import logging
 from time import sleep
 
-from cloudfoundry_client.entities import EntityManager, InvalidStatusCode
+from cloudfoundry_client.entities import JsonObject, Entity, EntityManager, InvalidStatusCode
 
 _logger = logging.getLogger(__name__)
 
 
+class _Application(Entity):
+    def instances(self):
+        return self.client.application.get_instances(self.metadata.guid)
+
+    def start(self):
+        return self.client.application.start(self.metadata.guid)
+
+    def stop(self):
+        return self.client.application.stop(self.metadata.guid)
+
+    def stats(self):
+        return self.client.application.get_stats(self.metadata.guid)
+
+    def summary(self):
+        return self.client.application.get_summary(self.metadata.guid)
+
+    def space(self):
+        return self.client.space._get(self.entity.space_url)
+
+    def routes(self, **kwargs):
+        return self.client.route._list(self.entity.routes_url, **kwargs)
+
+    def service_bindings(self, **kwargs):
+        return self.client.service_binding._list(self.entity.service_bindings_url, **kwargs)
+
+
 class ApplicationManager(EntityManager):
-    def __init__(self, target_endpoint, credentials_manager):
-        super(ApplicationManager, self).__init__(target_endpoint, credentials_manager, '/v2/apps')
+    def __init__(self, target_endpoint, client):
+        super(ApplicationManager, self).__init__(target_endpoint, client, '/v2/apps',
+                                                 lambda pairs: _Application(client, pairs))
 
     def get_stats(self, application_guid):
-        return super(ApplicationManager, self).get(application_guid, 'stats')
+        return self._get('%s/%s/stats' % (self.entity_uri, application_guid), JsonObject)
 
     def get_instances(self, application_guid):
-        return super(ApplicationManager, self).get(application_guid, 'instances')
+        return self._get('%s/%s/instances' % (self.entity_uri, application_guid), JsonObject)
 
     def get_env(self, application_guid):
-        return super(ApplicationManager, self).get(application_guid, 'env')
+        return self._get('%s/%s/env' % (self.entity_uri, application_guid), JsonObject)
 
     def get_summary(self, application_guid):
-        return super(ApplicationManager, self).get(application_guid, 'summary')
+        return self._get('%s/%s/summary' % (self.entity_uri, application_guid), JsonObject)
+
+    def list_routes(self, application_guid, **kwargs):
+        return self.client.route._list('%s/%s/routes' % (self.entity_uri, application_guid), **kwargs)
+
+    def list_service_bindings(self, application_guid, **kwargs):
+        return self.client.service_binding._list('%s/%s/service_bindings' % (self.entity_uri, application_guid),
+                                                 **kwargs)
 
     def start(self, application_guid, check_time=0.5, timeout=300, async=False):
         result = super(ApplicationManager, self)._update(application_guid,
@@ -54,8 +88,8 @@ class ApplicationManager(EntityManager):
             all_in_expected_state = number_in_expected_state == number_required
             if not all_in_expected_state:
                 _logger.debug('_wait_for_instances_in_state - %d/%d %s', number_in_expected_state,
-                                                                         number_required,
-                                                                         state_expected)
+                              number_required,
+                              state_expected)
                 if sum_waiting > timeout:
                     raise AssertionError('Failed to get state %s for %d instances' % (state_expected, number_required))
                 sleep(check_time)

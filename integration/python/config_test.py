@@ -55,7 +55,7 @@ def build_client_from_configuration():
             pass
         client = CloudFoundryClient(cfg.get('service', 'target_endpoint'), proxy=proxy,
                                     skip_verification=skip_verification)
-        client.credentials_manager.init_with_user_credentials(cfg.get('authentification', 'login'),
+        client.init_with_user_credentials(cfg.get('authentification', 'login'),
                                                               cfg.get('authentification', 'password'))
         client.org_guid = cfg.get('test_data', 'org_guid')
         client.space_guid = cfg.get('test_data', 'space_guid')

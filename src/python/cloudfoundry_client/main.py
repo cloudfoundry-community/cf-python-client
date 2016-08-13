@@ -55,11 +55,11 @@ def build_client_from_configuration(previous_configuration=None):
         login = _read_value_from_user('Please enter your login')
         password = _read_value_from_user('Please enter your password')
         client = CloudFoundryClient(target_endpoint, skip_verification=(skip_ssl_verification == 'true'))
-        client.init_with_credentials(login, password)
+        client.init_with_user_credentials(login, password)
         with open(config_file, 'w') as f:
             f.write(json.dumps(dict(target_endpoint=target_endpoint,
                                     skip_ssl_verification=(skip_ssl_verification == 'true'),
-                                    refresh_token=client.credentials_manager.refresh_token), indent=2))
+                                    refresh_token=client.refresh_token), indent=2))
         return client
     else:
         try:
@@ -68,7 +68,7 @@ def build_client_from_configuration(previous_configuration=None):
                 configuration = json.load(f)
                 client = CloudFoundryClient(configuration['target_endpoint'],
                                             skip_verification=configuration['skip_ssl_verification'])
-                client.init_with_refresh_token(configuration['refresh_token'])
+                client.init_with_token(configuration['refresh_token'])
                 return client
         except Exception, ex:
             if type(ex) == ConnectionError:

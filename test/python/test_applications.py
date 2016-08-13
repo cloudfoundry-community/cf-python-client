@@ -3,98 +3,112 @@ import unittest
 
 import mock
 
-from cloudfoundry_client.v2.applications import ApplicationManager
-from fake_requests import mock_response, TARGET_ENDPOINT
+from abstract_test_case import AbstractTestCase
+from fake_requests import mock_response
 
 
-class TestApplications(unittest.TestCase):
+class TestApplications(unittest.TestCase, AbstractTestCase):
     def setUp(self):
-        self.credential_manager = mock.MagicMock()
-        self.applications = ApplicationManager(TARGET_ENDPOINT, self.credential_manager)
+        self.build_client()
 
     def test_list(self):
-        self.credential_manager.get.return_value = mock_response('/v2/apps',
-                                                                 httplib.OK,
-                                                                 None,
-                                                                 'v2', 'apps', 'GET_response.json')
-        cpt = reduce(lambda increment, _: increment + 1, self.applications.list(), 0)
-        self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
-        self.assertEqual(cpt, 3)
+        self.client.get.return_value = mock_response('/v2/apps',
+                                                     httplib.OK,
+                                                     None,
+                                                     'v2', 'apps', 'GET_response.json')
+        all_applications = [application for application in self.client.application.list()]
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+        self.assertEqual(len(all_applications), 3)
+        print 'test_list - Application - %s' % str(all_applications[0])
+        self.assertEqual(all_applications[0].entity.name, "name-423")
 
     def test_list_filtered(self):
-        self.credential_manager.get.return_value = mock_response(
+        self.client.get.return_value = mock_response(
             '/v2/apps?q=space_guid%20IN%20space_guid&results-per-page=1&q=name%20IN%20application_name',
             httplib.OK,
             None,
             'v2', 'apps', 'GET_space_guid_name_response.json')
-        application = self.applications.get_first(space_guid='space_guid', name='application_name')
-        self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
+        application = self.client.application.get_first(space_guid='space_guid', name='application_name')
+        self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
 
     def test_get_env(self):
-        self.credential_manager.get.return_value = mock_response(
+        self.client.get.return_value = mock_response(
             '/v2/apps/app_id/env',
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_env_response.json')
-        application = self.applications.get_env('app_id')
-        self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
+        application = self.client.application.get_env('app_id')
+        self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
 
     def test_get_instances(self):
-        self.credential_manager.get.return_value = mock_response(
+        self.client.get.return_value = mock_response(
             '/v2/apps/app_id/instances',
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_instances_response.json')
-        application = self.applications.get_instances('app_id')
-        self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
+        application = self.client.application.get_instances('app_id')
+        self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
 
     def test_get_stats(self):
-        self.credential_manager.get.return_value = mock_response(
+        self.client.get.return_value = mock_response(
             '/v2/apps/app_id/stats',
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_stats_response.json')
-        application = self.applications.get_stats('app_id')
-        self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
+        application = self.client.application.get_stats('app_id')
+        self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
 
-    def test_get_routes(self):
-        self.credential_manager.get.return_value = mock_response(
+    def test_list_routes(self):
+        self.client.get.return_value = mock_response(
             '/v2/apps/app_id/routes?q=route_guid%20IN%20route_id',
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_routes_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
-                     self.applications.list('app_id', 'routes', route_guid='route_id'), 0)
-        self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
+                     self.client.application.list_routes('app_id', route_guid='route_id'), 0)
+        for route in self.client.application.list_routes('app_id', route_guid='route_id'):
+            print  route
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+        self.assertEqual(cpt, 1)
+
+    def test_list_service_bindings(self):
+        self.client.get.return_value = mock_response(
+            '/v2/apps/app_id/service_bindings',
+            httplib.OK,
+            None,
+            'v2', 'apps', 'GET_{id}_service_bindings_response.json')
+        cpt = reduce(lambda increment, _: increment + 1,
+                     self.client.application.list_service_bindings('app_id'), 0)
+        self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
     def test_get_sumary(self):
-        self.credential_manager.get.return_value = mock_response(
+        self.client.get.return_value = mock_response(
             '/v2/apps/app_id/summary',
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_summary_response.json')
-        application = self.applications.get_summary('app_id')
+        application = self.client.application.get_summary('app_id')
 
-        self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
+        self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
 
     def test_get(self):
-        self.credential_manager.get.return_value = mock_response(
+        self.client.get.return_value = mock_response(
             '/v2/apps/app_id',
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_response.json')
-        application = self.applications.get('app_id')
-        self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
+        application = self.client.application.get('app_id')
+        self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
 
     def test_start(self):
-        self.credential_manager.put.return_value = mock_response(
+        self.client.put.return_value = mock_response(
             '/v2/apps/app_id',
             httplib.CREATED,
             None,
@@ -114,30 +128,57 @@ class TestApplications(unittest.TestCase):
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_instances_response.json')
-        self.credential_manager.get.side_effect = [mock_summary, mock_instances_stopped, mock_instances_started]
+        self.client.get.side_effect = [mock_summary, mock_instances_stopped, mock_instances_started]
 
-        application = self.applications.start('app_id')
-        self.credential_manager.put.assert_called_with(self.credential_manager.put.return_value.url,
-                                                       json=dict(state='STARTED'))
-        self.credential_manager.get.assert_has_calls([mock.call(mock_summary.url),
-                                                      mock.call(mock_instances_stopped.url),
-                                                      mock.call(mock_instances_started.url)],
-                                                     any_order=False)
+        application = self.client.application.start('app_id')
+        self.client.put.assert_called_with(self.client.put.return_value.url,
+                                           json=dict(state='STARTED'))
+        self.client.get.assert_has_calls([mock.call(mock_summary.url),
+                                          mock.call(mock_instances_stopped.url),
+                                          mock.call(mock_instances_started.url)],
+                                         any_order=False)
         self.assertIsNotNone(application)
 
     def test_stop(self):
-        self.credential_manager.put.return_value = mock_response(
+        self.client.put.return_value = mock_response(
             '/v2/apps/app_id',
             httplib.CREATED,
             None,
             'v2', 'apps', 'PUT_{id}_response.json')
-        self.credential_manager.get.return_value = mock_response(
+        self.client.get.return_value = mock_response(
             '/v2/apps/app_id/instances',
             httplib.BAD_REQUEST,
             None,
             'v2', 'apps', 'GET_{id}_instances_stopped_response.json')
-        application = self.applications.stop('app_id')
-        self.credential_manager.put.assert_called_with(self.credential_manager.put.return_value.url,
-                                                       json=dict(state='STOPPED'))
-        self.credential_manager.get.assert_called_with(self.credential_manager.get.return_value.url)
+        application = self.client.application.stop('app_id')
+        self.client.put.assert_called_with(self.client.put.return_value.url,
+                                           json=dict(state='STOPPED'))
+        self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
+
+    def test_entity(self):
+        self.client.get.side_effect = [
+            mock_response(
+                '/v2/apps/app_id',
+                httplib.OK,
+                None,
+                'v2', 'apps', 'GET_{id}_response.json'),
+            mock_response(
+                '/v2/spaces/space_id',
+                httplib.OK,
+                None,
+                'v2', 'spaces', 'GET_{id}_response.json')
+            ,
+            mock_response(
+                '/v2/routes',
+                httplib.OK,
+                None,
+                'v2', 'routes', 'GET_response.json')
+        ]
+        application = self.client.application.get('app_id')
+
+        self.assertIsNotNone(application.space())
+        cpt = reduce(lambda increment, _: increment + 1, application.routes(), 0)
+        self.assertEqual(cpt, 1)
+        self.client.get.assert_has_calls([mock.call(side_effect.url) for side_effect in self.client.get.side_effect],
+                                         any_order=False)

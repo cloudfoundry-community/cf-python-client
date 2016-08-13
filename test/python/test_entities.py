@@ -15,8 +15,8 @@ class TestEntities(unittest.TestCase):
         self.assertEqual(url, '/v2/apps?q=space_guid%20IN%20some-id&results-per-page=20&page=1&order-direction=asc')
 
     def test_list(self):
-        credential_manager = mock.MagicMock()
-        entity_manager = EntityManager(TARGET_ENDPOINT, credential_manager, '/fake/first')
+        client = mock.MagicMock()
+        entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/first')
 
         first_response = mock_response(
             '/fake/first?q=space_guid%20IN%20some-id&results-per-page=20&page=1&order-direction=asc',
@@ -28,26 +28,40 @@ class TestEntities(unittest.TestCase):
                                         None,
                                         'fake', 'GET_multi_page_1_response.json')
 
-        credential_manager.get.side_effect = [first_response, second_response]
+        client.get.side_effect = [first_response, second_response]
         cpt = reduce(lambda increment, _: increment + 1, entity_manager.list(**{"results-per-page": 20,
                                                                                 'order-direction': 'asc',
                                                                                 'page': 1,
                                                                                 "space_guid": 'some-id'}), 0)
-        credential_manager.get.assert_has_calls([mock.call(first_response.url),
-                                                 mock.call(second_response.url)],
-                                                any_order=False)
+        client.get.assert_has_calls([mock.call(first_response.url),
+                                     mock.call(second_response.url)],
+                                    any_order=False)
         self.assertEqual(cpt, 3)
 
     def test_iter(self):
-        credential_manager = mock.MagicMock()
-        entity_manager = EntityManager(TARGET_ENDPOINT, credential_manager, '/fake/something')
+        client = mock.MagicMock()
+        entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/something')
 
-        credential_manager.get.return_value = mock_response(
+        client.get.return_value = mock_response(
             '/fake/something',
             httplib.OK,
             None,
             'fake', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, entity_manager, 0)
-        credential_manager.get.assert_called_with(credential_manager.get.return_value.url)
+        client.get.assert_called_with(client.get.return_value.url)
 
         self.assertEqual(cpt, 2)
+
+    def test_get_elem(self):
+        client = mock.MagicMock()
+        entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/something')
+
+        client.get.return_value = mock_response(
+            '/fake/something/with-id',
+            httplib.OK,
+            None,
+            'fake', 'GET_{id}_response.json')
+        entity = entity_manager['with-id']
+        client.get.assert_called_with(client.get.return_value.url)
+
+        self.assertEqual(entity.entity.name, 'name-423')

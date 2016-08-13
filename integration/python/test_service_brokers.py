@@ -1,7 +1,7 @@
-from config_test import build_client_from_configuration
-import unittest
 import logging
-import json
+import unittest
+
+from config_test import build_client_from_configuration
 
 _logger = logging.getLogger(__name__)
 

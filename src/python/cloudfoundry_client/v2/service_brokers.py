@@ -1,11 +1,14 @@
-from cloudfoundry_client.entities import EntityManager
+from cloudfoundry_client.entities import Entity, EntityManager
 
-__author__ = 'BUCE8373'
+
+class _ServiceBroker(Entity):
+    pass
 
 
 class ServiceBrokerManager(EntityManager):
-    def __init__(self, target_endpoint, credentials_manager):
-        super(ServiceBrokerManager, self).__init__(target_endpoint, credentials_manager, '/v2/service_brokers')
+    def __init__(self, target_endpoint, client):
+        super(ServiceBrokerManager, self).__init__(target_endpoint, client, '/v2/service_brokers',
+                                                   lambda pairs: _ServiceBroker(client, pairs))
 
     def create(self, broker_url, broker_name, auth_username, auth_password, space_guid=None):
         request = dict(broker_url=broker_url,

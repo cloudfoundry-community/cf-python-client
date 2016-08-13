@@ -11,6 +11,12 @@ class JsonObject(dict):
         self.__dict__ = self
 
 
+class Entity(JsonObject):
+    def __init__(self, client, *args, **kwargs):
+        super(Entity, self).__init__(*args, **kwargs)
+        self.client = client
+
+
 class InvalidStatusCode(Exception):
     def __init__(self, status_code, body):
         self.status_code = status_code
@@ -26,72 +32,82 @@ class InvalidStatusCode(Exception):
 
 
 class EntityManager(object):
-    def __init__(self, target_endpoint, credentials_manager, entity_uri):
+    def __init__(self, target_endpoint, client, entity_uri, entity_builder=JsonObject):
         self.target_endpoint = target_endpoint
-        self.base_url = '%s%s' % (target_endpoint, entity_uri)
-        self.credentials_manager = credentials_manager
+        self.entity_uri = entity_uri
+        self.client = client
+        self.entity_builder = entity_builder
 
-    def _get_one(self, url):
-        return EntityManager._read_response(EntityManager._check_response(self.credentials_manager.get(url)))
+    def _get(self, requested_path, entity_builder=None):
+        url = '%s%s' % (self.target_endpoint, requested_path)
+        response = EntityManager._check_response(self.client.get(url))
+        _logger.debug('GET - %s - %s', requested_path, response.text)
+        return self._read_response(response, entity_builder)
+
+    def _list(self, requested_path, entity_builder=None, **kwargs):
+        url_requested = EntityManager._get_url_filtered('%s%s' % (self.target_endpoint, requested_path), **kwargs)
+        response = EntityManager._check_response(self.client
+                                                 .get(url_requested))
+        entity_builder = self._get_entity_builder(entity_builder)
+        while True:
+            _logger.debug('GET - %s - %s', url_requested, response.text)
+            response_json = self._read_response(response, JsonObject)
+            for resource in response_json.resources:
+                yield entity_builder(resource.items())
+            if response_json['next_url'] is None:
+                break
+            else:
+                url_requested = '%s%s' % (self.target_endpoint, response_json['next_url'])
+                response = EntityManager._check_response(self.client.get(url_requested))
 
     def _create(self, data):
-        response = EntityManager._check_response(self.credentials_manager.post(self.base_url, json=data))
-        _logger.debug('POST - %s - %s', self.base_url, response.text)
-        return EntityManager._read_response(response)
+        url = '%s%s' % (self.target_endpoint, self.entity_uri)
+        response = EntityManager._check_response(self.client.post(url, json=data))
+        _logger.debug('POST - %s - %s', url, response.text)
+        return self._read_response(response)
 
     def _update(self, resource_id, data):
-        response = EntityManager._check_response(self.credentials_manager.put('%s/%s' % (self.base_url, resource_id),
-                                                                              json=data))
-        _logger.debug('PUT - %s/%s - %s', self.base_url, resource_id, response.text)
-        return EntityManager._read_response(response)
+        url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
+        response = EntityManager._check_response(self.client.put(url, json=data))
+        _logger.debug('PUT - %s - %s', url, response.text)
+        return self._read_response(response)
 
     def _remove(self, resource_id):
-        response = EntityManager._check_response(
-            self.credentials_manager.delete('%s/%s' % (self.base_url, resource_id)))
-        _logger.debug('DELETE - %s/%s - %s', self.base_url, resource_id, response.text)
+        url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
+        response = EntityManager._check_response(self.client.delete(url))
+        _logger.debug('DELETE - %s - %s', url, response.text)
 
     def __iter__(self):
         return self.list()
 
-    def list(self, *extra_paths, **kwargs):
-        if len(extra_paths) == 0:
-            requested_path = self.base_url
-        else:
-            requested_path = '%s/%s' % (self.base_url, '/'.join(extra_paths))
-        url_requested = EntityManager._get_url_filtered(requested_path, **kwargs)
-        response = EntityManager._check_response(self.credentials_manager
-                                                 .get(url_requested))
-        while True:
-            _logger.debug('GET - %s - %s', url_requested, response.text)
-            response_json = EntityManager._read_response(response)
-            for resource in response_json.resources:
-                yield resource
-            if response_json.next_url is None:
-                break
-            else:
-                url_requested = '%s%s' % (self.target_endpoint, response_json.next_url)
-                response = EntityManager._check_response(self.credentials_manager.get(url_requested))
+    def __getitem__(self, entity_guid):
+        return self.get(entity_guid)
+
+    def list(self, **kwargs):
+        return self._list(self.entity_uri, **kwargs)
 
     def get_first(self, **kwargs):
         kwargs.setdefault('results-per-page', 1)
-        response = EntityManager._check_response(self.credentials_manager
-                                                 .get(EntityManager._get_url_filtered(self.base_url, **kwargs)))
-        _logger.debug('GET - %s - %s', self.base_url, response.text)
-        response_json = EntityManager._read_response(response)
-        if len(response_json.resources) > 0:
-            return response_json.resources[0]
-        else:
-            return None
+        for entity in self._list(self.entity_uri, **kwargs):
+            return entity
+        return None
 
     def get(self, entity_id, *extra_paths):
-
         if len(extra_paths) == 0:
-            requested_path = '%s/%s' % (self.base_url, entity_id)
+            requested_path = '%s/%s' % (self.entity_uri, entity_id)
         else:
-            requested_path = '%s/%s/%s' % (self.base_url, entity_id, '/'.join(extra_paths))
-        response = EntityManager._check_response(self.credentials_manager.get(requested_path))
-        _logger.debug('GET - %s - %s', requested_path, response.text)
-        return EntityManager._read_response(response)
+            requested_path = '%s/%s/%s' % (self.entity_uri, entity_id, '/'.join(extra_paths))
+        return self._get(requested_path)
+
+    def _read_response(self, response, other_entity_builder=None):
+        entity_builder = self._get_entity_builder(other_entity_builder)
+        return response.json(object_pairs_hook=lambda pairs: entity_builder(pairs))
+
+    def _get_entity_builder(self, entity_builder):
+        if entity_builder is None:
+            return self.entity_builder
+        else:
+            return entity_builder
 
     @staticmethod
     def _get_url_filtered(url, **kwargs):
@@ -121,7 +137,3 @@ class EntityManager(object):
             except Exception, _:
                 body = response.text
             raise InvalidStatusCode(response.status_code, body)
-
-    @staticmethod
-    def _read_response(response):
-        return response.json(object_pairs_hook=lambda pairs: JsonObject(pairs))

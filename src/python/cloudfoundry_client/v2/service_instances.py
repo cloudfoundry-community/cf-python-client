@@ -1,11 +1,24 @@
-from cloudfoundry_client.entities import EntityManager
+from cloudfoundry_client.entities import JsonObject, Entity, EntityManager
 
-__author__ = 'BUCE8373'
+
+class _ServiceInstance(Entity):
+    def space(self):
+        return self.client.space._get(self.entity.space_url)
+
+    def service_bindings(self, **kwargs):
+        return self.client.service_binding._list(self.entity.service_bindings_url, **kwargs)
+
+    def routes(self, **kwargs):
+        return self.client.route._list(self.entity.routes_url, **kwargs)
+
+    def service_plan(self):
+        return self.client.service_plan._get(self.entity.service_plan_url)
 
 
 class ServiceInstanceManager(EntityManager):
-    def __init__(self, target_endpoint, credentials_manager):
-        super(ServiceInstanceManager, self).__init__(target_endpoint, credentials_manager, '/v2/service_instances')
+    def __init__(self, target_endpoint, client):
+        super(ServiceInstanceManager, self).__init__(target_endpoint, client, '/v2/service_instances',
+                                                     lambda pairs: _ServiceInstance(client, pairs))
 
     def create(self, space_guid, instance_name, plan_guid, parameters=None, tags=None):
         request = dict(name=instance_name,
@@ -30,7 +43,8 @@ class ServiceInstanceManager(EntityManager):
         return super(ServiceInstanceManager, self)._update(instance_guid, request)
 
     def list_permissions(self, instance_guid):
-        return super(ServiceInstanceManager, self)._get_one('%s/%s/permissions' % (self.base_url, instance_guid))
+        return super(ServiceInstanceManager, self)._get('%s/%s/permissions' % (self.entity_uri, instance_guid),
+                                                        JsonObject)
 
     def remove(self, instance_guid):
         super(ServiceInstanceManager, self)._remove(instance_guid)

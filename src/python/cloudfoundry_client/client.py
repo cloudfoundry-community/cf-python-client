@@ -20,24 +20,7 @@ from cloudfoundry_client.v2.spaces import SpaceManager
 _logger = logging.getLogger(__name__)
 
 
-class CloudfoundryCredentialManager(CredentialManager):
-    @staticmethod
-    def _is_token_expired(response):
-        if response.status_code == httplib.UNAUTHORIZED:
-            try:
-                json_data = response.json()
-                result = json_data.get('code', 0) == 1000 and json_data.get('error_code', '') == 'CF-InvalidAuthToken'
-                _logger.info('_is_token_expired - %s' % str(result))
-                return result
-            except:
-                return False
-        else:
-            return False
-
-
-class CloudFoundryClient(object):
-    proxy = None
-
+class CloudFoundryClient(CredentialManager):
     def __init__(self, target_endpoint, client_id='cf', client_secret='', proxy=None, skip_verification=False):
         info = self.get_info(target_endpoint, proxy, skip_verification)
         if not info['api_version'].startswith('2.'):
@@ -45,24 +28,18 @@ class CloudFoundryClient(object):
 
         service_informations = ServiceInformation(None, '%s/oauth/token' % info['authorization_endpoint'],
                                                   client_id, client_secret, [], skip_verification)
-        self.credentials_manager = CloudfoundryCredentialManager(service_informations, proxy)
-        self.organization = OrganizationManager(target_endpoint, self.credentials_manager)
-        self.space = SpaceManager(target_endpoint, self.credentials_manager)
-        self.service = ServiceManager(target_endpoint, self.credentials_manager)
-        self.service_plan = ServicePlanManager(target_endpoint, self.credentials_manager)
-        self.service_instance = ServiceInstanceManager(target_endpoint, self.credentials_manager)
-        self.service_binding = ServiceBindingManager(target_endpoint, self.credentials_manager)
-        self.service_broker = ServiceBrokerManager(target_endpoint, self.credentials_manager)
-        self.application = ApplicationManager(target_endpoint, self.credentials_manager)
-        self.buidlpack = BuildpackManager(target_endpoint, self.credentials_manager)
-        self.route = RouteManager(target_endpoint, self.credentials_manager)
-        self.loggregator = LoggregatorManager(info['logging_endpoint'], self.credentials_manager)
-
-    def init_with_credentials(self, login, password):
-        self.credentials_manager.init_with_user_credentials(login, password)
-
-    def init_with_refresh_token(self, refresh_token):
-        self.credentials_manager.init_with_token(refresh_token)
+        super(CloudFoundryClient, self).__init__(service_informations, proxy)
+        self.organization = OrganizationManager(target_endpoint, self)
+        self.space = SpaceManager(target_endpoint, self)
+        self.service = ServiceManager(target_endpoint, self)
+        self.service_plan = ServicePlanManager(target_endpoint, self)
+        self.service_instance = ServiceInstanceManager(target_endpoint, self)
+        self.service_binding = ServiceBindingManager(target_endpoint, self)
+        self.service_broker = ServiceBrokerManager(target_endpoint, self)
+        self.application = ApplicationManager(target_endpoint, self)
+        self.buildpack = BuildpackManager(target_endpoint, self)
+        self.route = RouteManager(target_endpoint, self)
+        self.loggregator = LoggregatorManager(info['logging_endpoint'], self)
 
     @staticmethod
     def get_info(target_endpoint, proxy=None, skip_verification=False):
@@ -75,3 +52,16 @@ class CloudFoundryClient(object):
             raise InvalidStatusCode(info_response.status_code, info_response.text)
         info = info_response.json()
         return info
+
+    @staticmethod
+    def _is_token_expired(response):
+        if response.status_code == httplib.UNAUTHORIZED:
+            try:
+                json_data = response.json()
+                result = json_data.get('code', 0) == 1000 and json_data.get('error_code', '') == 'CF-InvalidAuthToken'
+                _logger.info('_is_token_expired - %s' % str(result))
+                return result
+            except:
+                return False
+        else:
+            return False
