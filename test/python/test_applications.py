@@ -23,7 +23,7 @@ class TestApplications(unittest.TestCase):
 
     def test_list_filtered(self):
         self.credential_manager.get.return_value = mock_response(
-            '/v2/apps?q=space_guid%20IN%20space_guid&q=name%20IN%20application_name',
+            '/v2/apps?q=space_guid%20IN%20space_guid&results-per-page=1&q=name%20IN%20application_name',
             httplib.OK,
             None,
             'v2', 'apps', 'GET_space_guid_name_response.json')

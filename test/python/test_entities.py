@@ -22,11 +22,11 @@ class TestEntities(unittest.TestCase):
             '/fake/first?q=space_guid%20IN%20some-id&results-per-page=20&page=1&order-direction=asc',
             httplib.OK,
             None,
-            'fake', 'GET_first_response.json')
+            'fake', 'GET_multi_page_0_response.json')
         second_response = mock_response('/fake/next?order-direction=asc&page=2&results-per-page=50',
                                         httplib.OK,
                                         None,
-                                        'fake', 'GET_next_response.json')
+                                        'fake', 'GET_multi_page_1_response.json')
 
         credential_manager.get.side_effect = [first_response, second_response]
         cpt = reduce(lambda increment, _: increment + 1, entity_manager.list(**{"results-per-page": 20,
@@ -37,3 +37,17 @@ class TestEntities(unittest.TestCase):
                                                  mock.call(second_response.url)],
                                                 any_order=False)
         self.assertEqual(cpt, 3)
+
+    def test_iter(self):
+        credential_manager = mock.MagicMock()
+        entity_manager = EntityManager(TARGET_ENDPOINT, credential_manager, '/fake/something')
+
+        credential_manager.get.return_value = mock_response(
+            '/fake/something',
+            httplib.OK,
+            None,
+            'fake', 'GET_response.json')
+        cpt = reduce(lambda increment, _: increment + 1, entity_manager, 0)
+        credential_manager.get.assert_called_with(credential_manager.get.return_value.url)
+
+        self.assertEqual(cpt, 2)
