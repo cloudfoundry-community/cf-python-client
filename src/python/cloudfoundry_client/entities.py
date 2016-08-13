@@ -6,9 +6,22 @@ _logger = logging.getLogger(__name__)
 
 
 class JsonObject(dict):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, target_endpoint, credentials_manager, *args, **kwargs):
         super(JsonObject, self).__init__(*args, **kwargs)
         self.__dict__ = self
+        self.__target_endpoint = target_endpoint
+        self.__credentials_manager = credentials_manager
+
+    def __getattr__(self, name):
+        try:
+            url = self['entity']['%s_url' % name]
+        except KeyError:
+            raise AttributeError(name)
+        return EntityManager(
+            self.__target_endpoint,
+            self.__credentials_manager,
+            url,
+        )
 
 
 class InvalidStatusCode(Exception):
@@ -32,18 +45,18 @@ class EntityManager(object):
         self.credentials_manager = credentials_manager
 
     def _get_one(self, url):
-        return EntityManager._read_response(EntityManager._check_response(self.credentials_manager.get(url)))
+        return self._read_response(EntityManager._check_response(self.credentials_manager.get(url)))
 
     def _create(self, data):
         response = EntityManager._check_response(self.credentials_manager.post(self.base_url, json=data))
         _logger.debug('POST - %s - %s', self.base_url, response.text)
-        return EntityManager._read_response(response)
+        return self._read_response(response)
 
     def _update(self, resource_id, data):
         response = EntityManager._check_response(self.credentials_manager.put('%s/%s' % (self.base_url, resource_id),
                                                                               json=data))
         _logger.debug('PUT - %s/%s - %s', self.base_url, resource_id, response.text)
-        return EntityManager._read_response(response)
+        return self._read_response(response)
 
     def _remove(self, resource_id):
         response = EntityManager._check_response(
@@ -63,7 +76,7 @@ class EntityManager(object):
                                                  .get(url_requested))
         while True:
             _logger.debug('GET - %s - %s', url_requested, response.text)
-            response_json = EntityManager._read_response(response)
+            response_json = self._read_response(response)
             for resource in response_json.resources:
                 yield resource
             if response_json.next_url is None:
@@ -77,7 +90,7 @@ class EntityManager(object):
         response = EntityManager._check_response(self.credentials_manager
                                                  .get(EntityManager._get_url_filtered(self.base_url, **kwargs)))
         _logger.debug('GET - %s - %s', self.base_url, response.text)
-        response_json = EntityManager._read_response(response)
+        response_json = self._read_response(response)
         if len(response_json.resources) > 0:
             return response_json.resources[0]
         else:
@@ -91,7 +104,7 @@ class EntityManager(object):
             requested_path = '%s/%s/%s' % (self.base_url, entity_id, '/'.join(extra_paths))
         response = EntityManager._check_response(self.credentials_manager.get(requested_path))
         _logger.debug('GET - %s - %s', requested_path, response.text)
-        return EntityManager._read_response(response)
+        return self._read_response(response)
 
     @staticmethod
     def _get_url_filtered(url, **kwargs):
@@ -122,6 +135,12 @@ class EntityManager(object):
                 body = response.text
             raise InvalidStatusCode(response.status_code, body)
 
-    @staticmethod
-    def _read_response(response):
-        return response.json(object_pairs_hook=lambda pairs: JsonObject(pairs))
+    def _read_response(self, response):
+        def _to_attr_object(pairs):
+            return JsonObject(
+                self.target_endpoint,
+                self.credentials_manager,
+                pairs,
+            )
+
+        return response.json(object_pairs_hook=_to_attr_object)
