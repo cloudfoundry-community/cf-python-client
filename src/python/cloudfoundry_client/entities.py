@@ -1,6 +1,7 @@
 import json
 import logging
 from urllib import quote
+import types
 
 _logger = logging.getLogger(__name__)
 
@@ -15,6 +16,23 @@ class Entity(JsonObject):
     def __init__(self, client, *args, **kwargs):
         super(Entity, self).__init__(*args, **kwargs)
         self.client = client
+        for attribute, value in self['entity'].items():
+            if attribute.endswith('_url'):
+                domain_name = attribute[:len(attribute) - len('_url')]
+                manager_name = domain_name if domain_name.endswith('s') else '%ss' % domain_name
+                if hasattr(client, manager_name):
+                    print 'generating access for %s' % domain_name
+                    manager = getattr(client, manager_name)
+                    if domain_name.endswith('s'):
+                        def new_method(**kwargs):
+                            print 'invoking _list for %s - %s' % (manager_name, value)
+                            return manager._list(value, **kwargs)
+                    else:
+                        def new_method():
+                            print 'invoking _list for %s - %s' % (manager_name, value)
+                            return manager._get(value)
+                    setattr(self, domain_name, new_method)
+
 
 
 class InvalidStatusCode(Exception):
@@ -101,7 +119,8 @@ class EntityManager(object):
 
     def _read_response(self, response, other_entity_builder=None):
         entity_builder = self._get_entity_builder(other_entity_builder)
-        return response.json(object_pairs_hook=lambda pairs: entity_builder(pairs))
+        result = response.json(object_pairs_hook=JsonObject)
+        return entity_builder(result.items())
 
     def _get_entity_builder(self, entity_builder):
         if entity_builder is None:

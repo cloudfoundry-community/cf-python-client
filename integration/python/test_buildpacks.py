@@ -11,5 +11,5 @@ _logger = logging.getLogger(__name__)
 class TestBuildpacks(unittest.TestCase):
     def test_list(self):
         client = build_client_from_configuration()
-        for buildpack in client.buidlpack.list():
+        for buildpack in client.buidlpacks.list():
             _logger.debug(' %s' % json.dumps(buildpack))

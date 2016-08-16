@@ -9,34 +9,25 @@ _logger = logging.getLogger(__name__)
 
 class _Application(Entity):
     def instances(self):
-        return self.client.application.get_instances(self.metadata.guid)
+        return self.client.apps.get_instances(self.metadata.guid)
 
     def start(self):
-        return self.client.application.start(self.metadata.guid)
+        return self.client.apps.start(self.metadata.guid)
 
     def stop(self):
-        return self.client.application.stop(self.metadata.guid)
+        return self.client.apps.stop(self.metadata.guid)
 
     def stats(self):
-        return self.client.application.get_stats(self.metadata.guid)
+        return self.client.apps.get_stats(self.metadata.guid)
 
     def summary(self):
-        return self.client.application.get_summary(self.metadata.guid)
-
-    def space(self):
-        return self.client.space._get(self.entity.space_url)
-
-    def routes(self, **kwargs):
-        return self.client.route._list(self.entity.routes_url, **kwargs)
-
-    def service_bindings(self, **kwargs):
-        return self.client.service_binding._list(self.entity.service_bindings_url, **kwargs)
+        return self.client.apps.get_summary(self.metadata.guid)
 
 
-class ApplicationManager(EntityManager):
+class AppManager(EntityManager):
     def __init__(self, target_endpoint, client):
-        super(ApplicationManager, self).__init__(target_endpoint, client, '/v2/apps',
-                                                 lambda pairs: _Application(client, pairs))
+        super(AppManager, self).__init__(target_endpoint, client, '/v2/apps',
+                                         lambda pairs: _Application(client, pairs))
 
     def get_stats(self, application_guid):
         return self._get('%s/%s/stats' % (self.entity_uri, application_guid), JsonObject)
@@ -51,15 +42,15 @@ class ApplicationManager(EntityManager):
         return self._get('%s/%s/summary' % (self.entity_uri, application_guid), JsonObject)
 
     def list_routes(self, application_guid, **kwargs):
-        return self.client.route._list('%s/%s/routes' % (self.entity_uri, application_guid), **kwargs)
+        return self.client.routes._list('%s/%s/routes' % (self.entity_uri, application_guid), **kwargs)
 
     def list_service_bindings(self, application_guid, **kwargs):
-        return self.client.service_binding._list('%s/%s/service_bindings' % (self.entity_uri, application_guid),
+        return self.client.service_bindings._list('%s/%s/service_bindings' % (self.entity_uri, application_guid),
                                                  **kwargs)
 
     def start(self, application_guid, check_time=0.5, timeout=300, async=False):
-        result = super(ApplicationManager, self)._update(application_guid,
-                                                         dict(state='STARTED'))
+        result = super(AppManager, self)._update(application_guid,
+                                                 dict(state='STARTED'))
         if async:
             return result
         else:
@@ -68,7 +59,7 @@ class ApplicationManager(EntityManager):
             return result
 
     def stop(self, application_guid, check_time=0.5, timeout=500, async=False):
-        result = super(ApplicationManager, self)._update(application_guid, dict(state='STOPPED'))
+        result = super(AppManager, self)._update(application_guid, dict(state='STOPPED'))
         if async:
             return result
         else:

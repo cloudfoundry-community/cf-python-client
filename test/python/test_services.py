@@ -15,7 +15,7 @@ class TestServices(unittest.TestCase, AbstractTestCase):
                                                      httplib.OK,
                                                      None,
                                                      'v2', 'services', 'GET_response.json')
-        cpt = reduce(lambda increment, _: increment + 1, self.client.service.list(label='some_label'), 0)
+        cpt = reduce(lambda increment, _: increment + 1, self.client.services.list(label='some_label'), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
@@ -25,7 +25,7 @@ class TestServices(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'services', 'GET_{id}_response.json')
-        result = self.client.service.get('service_id')
+        result = self.client.services.get('service_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
 
@@ -43,7 +43,7 @@ class TestServices(unittest.TestCase, AbstractTestCase):
                 'v2', 'service_plans', 'GET_response.json')
 
         ]
-        service = self.client.service.get('service_id')
+        service = self.client.services.get('service_id')
         cpt = reduce(lambda increment, _: increment + 1, service.service_plans(), 0)
         self.assertEqual(cpt, 1)
         self.client.get.assert_has_calls([mock.call(side_effect.url) for side_effect in self.client.get.side_effect],

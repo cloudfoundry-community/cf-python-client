@@ -16,7 +16,7 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
                                                      httplib.OK,
                                                      None,
                                                      'v2', 'organizations', 'GET_response.json')
-        cpt = reduce(lambda increment, _: increment + 1, self.client.organization.list(name='organization_name'), 0)
+        cpt = reduce(lambda increment, _: increment + 1, self.client.organizations.list(name='organization_name'), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
@@ -26,7 +26,7 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'organizations', 'GET_{id}_response.json')
-        result = self.client.organization.get('org_id')
+        result = self.client.organizations.get('org_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
 
@@ -43,7 +43,7 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
                 None,
                 'v2', 'spaces', 'GET_response.json')
         ]
-        organization = self.client.organization.get('org_id')
+        organization = self.client.organizations.get('org_id')
         cpt = reduce(lambda increment, _: increment + 1, organization.spaces(), 0)
         self.assertEqual(cpt, 1)
         self.client.get.assert_has_calls([mock.call(side_effect.url) for side_effect in self.client.get.side_effect],

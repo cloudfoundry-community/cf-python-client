@@ -1,24 +1,10 @@
 from cloudfoundry_client.entities import JsonObject, Entity, EntityManager
 
 
-class _ServiceInstance(Entity):
-    def space(self):
-        return self.client.space._get(self.entity.space_url)
-
-    def service_bindings(self, **kwargs):
-        return self.client.service_binding._list(self.entity.service_bindings_url, **kwargs)
-
-    def routes(self, **kwargs):
-        return self.client.route._list(self.entity.routes_url, **kwargs)
-
-    def service_plan(self):
-        return self.client.service_plan._get(self.entity.service_plan_url)
-
-
 class ServiceInstanceManager(EntityManager):
     def __init__(self, target_endpoint, client):
         super(ServiceInstanceManager, self).__init__(target_endpoint, client, '/v2/service_instances',
-                                                     lambda pairs: _ServiceInstance(client, pairs))
+                                                     lambda pairs: Entity(client, pairs))
 
     def create(self, space_guid, instance_name, plan_guid, parameters=None, tags=None):
         request = dict(name=instance_name,

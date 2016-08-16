@@ -18,7 +18,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
             None,
             'v2', 'service_instances', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
-                     self.client.service_instance.list(space_guid='space_guid', service_plan_guid='plan_id'), 0)
+                     self.client.service_instances.list(space_guid='space_guid', service_plan_guid='plan_id'), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
@@ -28,7 +28,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'service_instances', 'GET_{id}_response.json')
-        result = self.client.service_instance.get('instance_id')
+        result = self.client.service_instances.get('instance_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
 
@@ -38,7 +38,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
             httplib.CREATED,
             None,
             'v2', 'service_instances', 'POST_response.json')
-        service_instance = self.client.service_instance.create('space_guid', 'name', 'plan_id',
+        service_instance = self.client.service_instances.create('space_guid', 'name', 'plan_id',
                                                          parameters=dict(the_service_broker="wants this object"),
                                                          tags=['mongodb'])
         self.client.post.assert_called_with(self.client.post.return_value.url,
@@ -57,7 +57,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'service_instances', 'PUT_{id}_response.json')
-        service_instance = self.client.service_instance.update('instance_id', instance_name='new-name', tags=['other-tag'])
+        service_instance = self.client.service_instances.update('instance_id', instance_name='new-name', tags=['other-tag'])
         self.client.put.assert_called_with(self.client.put.return_value.url,
                                                        json=dict(name='new-name',
                                                                  tags=['other-tag']))
@@ -68,7 +68,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
             '/v2/service_instances/instance_id',
             httplib.NO_CONTENT,
             None)
-        self.client.service_instance.remove('instance_id')
+        self.client.service_instances.remove('instance_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
     def test_entity(self):
@@ -101,7 +101,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
                 'v2', 'routes', 'GET_response.json'
             )
         ]
-        service_instance = self.client.service_instance.get('instance_id')
+        service_instance = self.client.service_instances.get('instance_id')
 
         self.assertIsNotNone(service_instance.space())
         cpt = reduce(lambda increment, _: increment + 1, service_instance.service_bindings(), 0)

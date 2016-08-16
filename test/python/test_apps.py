@@ -7,7 +7,7 @@ from abstract_test_case import AbstractTestCase
 from fake_requests import mock_response
 
 
-class TestApplications(unittest.TestCase, AbstractTestCase):
+class TestApps(unittest.TestCase, AbstractTestCase):
     def setUp(self):
         self.build_client()
 
@@ -16,7 +16,7 @@ class TestApplications(unittest.TestCase, AbstractTestCase):
                                                      httplib.OK,
                                                      None,
                                                      'v2', 'apps', 'GET_response.json')
-        all_applications = [application for application in self.client.application.list()]
+        all_applications = [application for application in self.client.apps.list()]
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(len(all_applications), 3)
         print 'test_list - Application - %s' % str(all_applications[0])
@@ -28,7 +28,7 @@ class TestApplications(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'apps', 'GET_space_guid_name_response.json')
-        application = self.client.application.get_first(space_guid='space_guid', name='application_name')
+        application = self.client.apps.get_first(space_guid='space_guid', name='application_name')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
 
@@ -38,7 +38,7 @@ class TestApplications(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_env_response.json')
-        application = self.client.application.get_env('app_id')
+        application = self.client.apps.get_env('app_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
 
@@ -48,7 +48,7 @@ class TestApplications(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_instances_response.json')
-        application = self.client.application.get_instances('app_id')
+        application = self.client.apps.get_instances('app_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
 
@@ -58,7 +58,7 @@ class TestApplications(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_stats_response.json')
-        application = self.client.application.get_stats('app_id')
+        application = self.client.apps.get_stats('app_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
 
@@ -69,8 +69,8 @@ class TestApplications(unittest.TestCase, AbstractTestCase):
             None,
             'v2', 'apps', 'GET_{id}_routes_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
-                     self.client.application.list_routes('app_id', route_guid='route_id'), 0)
-        for route in self.client.application.list_routes('app_id', route_guid='route_id'):
+                     self.client.apps.list_routes('app_id', route_guid='route_id'), 0)
+        for route in self.client.apps.list_routes('app_id', route_guid='route_id'):
             print  route
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
@@ -82,7 +82,7 @@ class TestApplications(unittest.TestCase, AbstractTestCase):
             None,
             'v2', 'apps', 'GET_{id}_service_bindings_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
-                     self.client.application.list_service_bindings('app_id'), 0)
+                     self.client.apps.list_service_bindings('app_id'), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
@@ -92,7 +92,7 @@ class TestApplications(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_summary_response.json')
-        application = self.client.application.get_summary('app_id')
+        application = self.client.apps.get_summary('app_id')
 
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
@@ -103,7 +103,7 @@ class TestApplications(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'apps', 'GET_{id}_response.json')
-        application = self.client.application.get('app_id')
+        application = self.client.apps.get('app_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
 
@@ -130,7 +130,7 @@ class TestApplications(unittest.TestCase, AbstractTestCase):
             'v2', 'apps', 'GET_{id}_instances_response.json')
         self.client.get.side_effect = [mock_summary, mock_instances_stopped, mock_instances_started]
 
-        application = self.client.application.start('app_id')
+        application = self.client.apps.start('app_id')
         self.client.put.assert_called_with(self.client.put.return_value.url,
                                            json=dict(state='STARTED'))
         self.client.get.assert_has_calls([mock.call(mock_summary.url),
@@ -150,7 +150,7 @@ class TestApplications(unittest.TestCase, AbstractTestCase):
             httplib.BAD_REQUEST,
             None,
             'v2', 'apps', 'GET_{id}_instances_stopped_response.json')
-        application = self.client.application.stop('app_id')
+        application = self.client.apps.stop('app_id')
         self.client.put.assert_called_with(self.client.put.return_value.url,
                                            json=dict(state='STOPPED'))
         self.client.get.assert_called_with(self.client.get.return_value.url)
@@ -175,7 +175,7 @@ class TestApplications(unittest.TestCase, AbstractTestCase):
                 None,
                 'v2', 'routes', 'GET_response.json')
         ]
-        application = self.client.application.get('app_id')
+        application = self.client.apps.get('app_id')
 
         self.assertIsNotNone(application.space())
         cpt = reduce(lambda increment, _: increment + 1, application.routes(), 0)

@@ -101,6 +101,10 @@ def log_recent(client, application_guid):
         _logger.info(message.message)
 
 
+def _get_client_domain(client, domain):
+    return getattr(client, '%ss' % domain)
+
+
 def main():
     logging.basicConfig(level=logging.INFO,
                         format='%(message)s')
@@ -112,9 +116,9 @@ def main():
                                     allow_deletion=True, display_name='Organizations')
     commands['space'] = dict(list=('organization_guid',), name='name', allow_retrieve_by_name=True, allow_creation=True,
                              allow_deletion=True, display_name='Spaces')
-    commands['application'] = dict(list=('organization_guid', 'space_guid',), name='name',
-                                   allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True,
-                                   display_name='Applications')
+    commands['app'] = dict(list=('organization_guid', 'space_guid',), name='name',
+                           allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True,
+                           display_name='Applications')
     commands['service'] = dict(list=('service_broker_guid',), name='label', allow_retrieve_by_name=True,
                                allow_creation=True,
                                allow_deletion=True, display_name='Services')
@@ -215,7 +219,7 @@ def main():
             filter_value = getattr(arguments, filter_parameter)
             if filter_value is not None:
                 filter_list[filter_parameter] = filter_value
-        for entity in getattr(client, domain).list(**filter_list):
+        for entity in _get_client_domain(client, domain).list(**filter_list):
             name_property = commands[domain]['name']
             if name_property is not None:
                 print('%s - %s' % (entity.metadata.guid, entity.entity[name_property]))
@@ -224,10 +228,11 @@ def main():
     elif arguments.action.find('get_') == 0:
         domain = arguments.action[len('get_'):]
         resource_id = resolve_id(arguments.id[0],
-                                 lambda x: getattr(client, domain).get_first(**{commands[domain]['name']: x}),
+                                 lambda x: _get_client_domain(client, domain).get_first(
+                                     **{commands[domain]['name']: x}),
                                  domain,
                                  commands[domain]['allow_retrieve_by_name'])
-        print(json.dumps(getattr(client, domain).get(resource_id), indent=1))
+        print(json.dumps(_get_client_domain(client, domain).get(resource_id), indent=1))
     elif arguments.action.find('create_') == 0:
         domain = arguments.action[len('create_'):]
         data = None
@@ -242,19 +247,19 @@ def main():
                 data = json.loads(arguments.entity[0])
             except ValueError, _:
                 raise ValueError('entity: must be either a valid json file path or a json object')
-        print(json.dumps(getattr(client, domain)._create(data)))
+        print(json.dumps(_get_client_domain(client, domain)._create(data)))
     elif arguments.action.find('delete_') == 0:
         domain = arguments.action[len('delete_'):]
         if is_guid(arguments.id[0]):
-            getattr(client, domain)._remove(arguments.id[0])
+            _get_client_domain(client, domain)._remove(arguments.id[0])
         elif commands[domain]['allow_retrieve_by_name']:
             filter_get = dict()
             filter_get[commands[domain]['name']] = arguments.id[0]
-            entity = getattr(client, domain).get_first(**filter_get)
+            entity = _get_client_domain(client, domain).get_first(**filter_get)
             if entity is None:
                 raise InvalidStatusCode(httplib.NOT_FOUND, '%s with name %s' % (domain, arguments.id[0]))
             else:
-                getattr(client, domain)._remove(entity.metadata.guid)
+                _get_client_domain(client, domain)._remove(entity.metadata.guid)
         else:
             raise ValueError('id: %s: does not allow search by name' % domain)
 

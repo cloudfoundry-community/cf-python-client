@@ -16,7 +16,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'service_plans', 'GET_response.json')
-        cpt = reduce(lambda increment, _: increment + 1, self.client.service_plan.list(service_guid='service_id'), 0)
+        cpt = reduce(lambda increment, _: increment + 1, self.client.service_plans.list(service_guid='service_id'), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
@@ -26,7 +26,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'service_plans', 'GET_{id}_response.json')
-        result = self.client.service_plan.get('plan_id')
+        result = self.client.service_plans.get('plan_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
 
@@ -37,7 +37,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
             None,
             'v2', 'apps', 'GET_{id}_routes_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
-                     self.client.service_plan.list_instances('plan_id', space_guid='space_id'), 0)
+                     self.client.service_plans.list_instances('plan_id', space_guid='space_id'), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
@@ -60,7 +60,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
                 None,
                 'v2', 'service_instances', 'GET_response.json')
         ]
-        service_plan = self.client.service_plan.get('plan_id')
+        service_plan = self.client.service_plans.get('plan_id')
 
         self.assertIsNotNone(service_plan.service())
         cpt = reduce(lambda increment, _: increment + 1, service_plan.service_instances(), 0)

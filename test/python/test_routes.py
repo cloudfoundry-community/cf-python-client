@@ -17,7 +17,7 @@ class TestRoutes(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'routes', 'GET_response.json')
-        cpt = reduce(lambda increment, _: increment + 1, self.client.route.list(organization_guid='organization_guid'),
+        cpt = reduce(lambda increment, _: increment + 1, self.client.routes.list(organization_guid='organization_guid'),
                      0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
@@ -28,7 +28,7 @@ class TestRoutes(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'routes', 'GET_{id}_response.json')
-        result = self.client.route.get('route_id')
+        result = self.client.routes.get('route_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
 
@@ -54,10 +54,10 @@ class TestRoutes(unittest.TestCase, AbstractTestCase):
                           None,
                           'v2', 'apps', 'GET_response.json')
         ]
-        route = self.client.route.get('route_id')
+        route = self.client.routes.get('route_id')
         self.assertIsNotNone(route.service_instance())
         self.assertIsNotNone(route.space())
-        cpt = reduce(lambda increment, _: increment + 1, route.applications(), 0)
+        cpt = reduce(lambda increment, _: increment + 1, route.apps(), 0)
         self.assertEqual(cpt, 3)
         self.client.get.assert_has_calls([mock.call(side_effect.url) for side_effect in self.client.get.side_effect],
                                          any_order=False)

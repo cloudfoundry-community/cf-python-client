@@ -18,7 +18,7 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
             None,
             'v2', 'service_bindings', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
-                     self.client.service_binding.list(service_instance_guid='instance_guid'), 0)
+                     self.client.service_bindings.list(service_instance_guid='instance_guid'), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
@@ -28,7 +28,7 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
             httplib.OK,
             None,
             'v2', 'service_bindings', 'GET_{id}_response.json')
-        result = self.client.service_binding.get('service_binding_id')
+        result = self.client.service_bindings.get('service_binding_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
 
@@ -38,7 +38,7 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
             httplib.CREATED,
             None,
             'v2', 'service_bindings', 'POST_response.json')
-        service_bindiing = self.client.service_binding.create('app_guid', 'instance_guid',
+        service_bindiing = self.client.service_bindings.create('app_guid', 'instance_guid',
                                                               dict(the_service_broker='wants this object'))
         self.client.post.assert_called_with(self.client.post.return_value.url,
                                             json=dict(app_guid='app_guid',
@@ -52,7 +52,7 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
             '/v2/service_bindings/binding_id',
             httplib.NO_CONTENT,
             None)
-        self.client.service_binding.remove('binding_id')
+        self.client.service_bindings.remove('binding_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
     def test_entity(self):
@@ -73,8 +73,8 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
                 None,
                 'v2', 'apps', 'GET_{id}_response.json')
         ]
-        service_binding = self.client.service_binding.get('service_binding_id')
+        service_binding = self.client.service_bindings.get('service_binding_id')
         self.assertIsNotNone(service_binding.service_instance())
-        self.assertIsNotNone(service_binding.application())
+        self.assertIsNotNone(service_binding.app())
         self.client.get.assert_has_calls([mock.call(side_effect.url) for side_effect in self.client.get.side_effect],
                                          any_order=False)

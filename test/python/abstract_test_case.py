@@ -1,7 +1,8 @@
 import mock
 
+from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
-from cloudfoundry_client.v2.applications import ApplicationManager
+from cloudfoundry_client.v2.apps import AppManager
 from cloudfoundry_client.v2.buildpacks import BuildpackManager
 from cloudfoundry_client.v2.organizations import OrganizationManager
 from cloudfoundry_client.v2.routes import RouteManager
@@ -16,15 +17,15 @@ from fake_requests import TARGET_ENDPOINT
 
 class AbstractTestCase(object):
     def build_client(self):
-        self.client = mock.MagicMock()
-        self.client.organization = OrganizationManager(TARGET_ENDPOINT, self.client)
-        self.client.space = SpaceManager(TARGET_ENDPOINT, self.client)
-        self.client.service = ServiceManager(TARGET_ENDPOINT, self.client)
-        self.client.service_plan = ServicePlanManager(TARGET_ENDPOINT, self.client)
-        self.client.service_instance = ServiceInstanceManager(TARGET_ENDPOINT, self.client)
-        self.client.service_binding = ServiceBindingManager(TARGET_ENDPOINT, self.client)
-        self.client.service_broker = ServiceBrokerManager(TARGET_ENDPOINT, self.client)
-        self.client.application = ApplicationManager(TARGET_ENDPOINT, self.client)
-        self.client.buildpack = BuildpackManager(TARGET_ENDPOINT, self.client)
-        self.client.route = RouteManager(TARGET_ENDPOINT, self.client)
+        self.client = mock.MagicMock(spec=CloudFoundryClient)
+        self.client.organizations = OrganizationManager(TARGET_ENDPOINT, self.client)
+        self.client.spaces = SpaceManager(TARGET_ENDPOINT, self.client)
+        self.client.services = ServiceManager(TARGET_ENDPOINT, self.client)
+        self.client.service_plans = ServicePlanManager(TARGET_ENDPOINT, self.client)
+        self.client.service_instances = ServiceInstanceManager(TARGET_ENDPOINT, self.client)
+        self.client.service_bindings = ServiceBindingManager(TARGET_ENDPOINT, self.client)
+        self.client.service_brokers = ServiceBrokerManager(TARGET_ENDPOINT, self.client)
+        self.client.apps = AppManager(TARGET_ENDPOINT, self.client)
+        self.client.buildpacks = BuildpackManager(TARGET_ENDPOINT, self.client)
+        self.client.routes = RouteManager(TARGET_ENDPOINT, self.client)
         self.client.loggregator = LoggregatorManager(TARGET_ENDPOINT, self.client)

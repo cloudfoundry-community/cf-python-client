@@ -6,7 +6,7 @@ from oauth2_client.credentials_manager import CredentialManager, ServiceInformat
 
 from cloudfoundry_client.entities import InvalidStatusCode
 from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
-from cloudfoundry_client.v2.applications import ApplicationManager
+from cloudfoundry_client.v2.apps import AppManager
 from cloudfoundry_client.v2.buildpacks import BuildpackManager
 from cloudfoundry_client.v2.organizations import OrganizationManager
 from cloudfoundry_client.v2.routes import RouteManager
@@ -29,17 +29,17 @@ class CloudFoundryClient(CredentialManager):
         service_informations = ServiceInformation(None, '%s/oauth/token' % info['authorization_endpoint'],
                                                   client_id, client_secret, [], skip_verification)
         super(CloudFoundryClient, self).__init__(service_informations, proxy)
-        self.organization = OrganizationManager(target_endpoint, self)
-        self.space = SpaceManager(target_endpoint, self)
-        self.service = ServiceManager(target_endpoint, self)
-        self.service_plan = ServicePlanManager(target_endpoint, self)
-        self.service_instance = ServiceInstanceManager(target_endpoint, self)
-        self.service_binding = ServiceBindingManager(target_endpoint, self)
-        self.service_broker = ServiceBrokerManager(target_endpoint, self)
-        self.application = ApplicationManager(target_endpoint, self)
-        self.buildpack = BuildpackManager(target_endpoint, self)
-        self.route = RouteManager(target_endpoint, self)
-        self.loggregator = LoggregatorManager(info['logging_endpoint'], self)
+        self.organizations = OrganizationManager(target_endpoint, self)
+        self.spaces = SpaceManager(target_endpoint, self)
+        self.services = ServiceManager(target_endpoint, self)
+        self.service_plans = ServicePlanManager(target_endpoint, self)
+        self.service_instances = ServiceInstanceManager(target_endpoint, self)
+        self.service_bindings = ServiceBindingManager(target_endpoint, self)
+        self.service_brokers = ServiceBrokerManager(target_endpoint, self)
+        self.apps = AppManager(target_endpoint, self)
+        self.buildpacks = BuildpackManager(target_endpoint, self)
+        self.routes = RouteManager(target_endpoint, self)
+        self.loggregators = LoggregatorManager(info['logging_endpoint'], self)
 
     @staticmethod
     def get_info(target_endpoint, proxy=None, skip_verification=False):
