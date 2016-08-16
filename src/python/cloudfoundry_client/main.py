@@ -1,11 +1,11 @@
 #!/usr/bin/python2.7
 import argparse
 import httplib
-import json
 import logging
 import os
 import re
 import sys
+import json
 
 from requests.exceptions import ConnectionError
 
@@ -147,7 +147,7 @@ def main():
                                 summary=('get_summary', 'Get the summary of an application',),
                                 start=('start', 'Start an application',),
                                 stop=('stop', 'Stop an application',))
-    application_extra_list_commands = dict(routes=('List the routes(host) of an application', 'host'))
+    application_extra_list_commands = dict(routes=('list_routes', 'List the routes(host) of an application', 'host'))
     description = []
     for domain, command_description in commands.items():
         description.append(' %s' % command_description['display_name'])
@@ -164,7 +164,7 @@ def main():
             for command, application_command_description in application_commands.items():
                 description.append('   %s : %s' % (command, application_command_description[1]))
             for command, application_command_description in application_extra_list_commands.items():
-                description.append('   %s : %s' % (command, application_command_description[0]))
+                description.append('   %s : %s' % (command, application_command_description[1]))
         description.append('')
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -187,7 +187,7 @@ def main():
             delete_parser.add_argument('id', metavar='ids', type=str, nargs=1,
                                        help='The id. Can be UUID or name (first found then)'
                                        if command_description['allow_retrieve_by_name'] else 'The id (UUID)')
-        if domain == 'application':
+        if domain == 'app':
             for command, application_command_description in application_commands.items():
                 command_parser = subparsers.add_parser(command)
                 command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
@@ -200,17 +200,15 @@ def main():
     arguments = parser.parse_args()
     client = build_client_from_configuration()
     if arguments.action == 'recent_logs':
-        resource_id = resolve_id(arguments.id[0], lambda x: client.application.get_first(name=x), 'application', True)
+        resource_id = resolve_id(arguments.id[0], lambda x: client.apps.get_first(name=x), 'application', True)
         log_recent(client, resource_id)
     elif application_commands.get(arguments.action) is not None:
-        resource_id = resolve_id(arguments.id[0], lambda x: client.application.get_first(name=x), 'application', True)
-        print(json.dumps(getattr(client.application, application_commands[arguments.action][0])(resource_id),
-                         indent=1))
+        resource_id = resolve_id(arguments.id[0], lambda x: client.apps.get_first(name=x), 'application', True)
+        print(getattr(client.apps, application_commands[arguments.action][0])(resource_id).json(indent=1))
     elif application_extra_list_commands.get(arguments.action) is not None:
-
-        resource_id = resolve_id(arguments.id[0], lambda x: client.application.get_first(name=x), 'application', True)
-        for entity in client.application.list(resource_id, arguments.action):
-            name_property = application_extra_list_commands[arguments.action][1]
+        resource_id = resolve_id(arguments.id[0], lambda x: client.apps.get_first(name=x), 'application', True)
+        name_property = application_extra_list_commands[arguments.action][2]
+        for entity in getattr(client.apps, application_extra_list_commands[arguments.action][0])(resource_id):
             print('%s - %s' % (entity.metadata.guid, entity.entity[name_property]))
     elif arguments.action.find('list_') == 0:
         domain = arguments.action[len('list_'): len(arguments.action) - 1]
@@ -232,7 +230,7 @@ def main():
                                      **{commands[domain]['name']: x}),
                                  domain,
                                  commands[domain]['allow_retrieve_by_name'])
-        print(json.dumps(_get_client_domain(client, domain).get(resource_id), indent=1))
+        print(_get_client_domain(client, domain).get(resource_id).json(indent=1))
     elif arguments.action.find('create_') == 0:
         domain = arguments.action[len('create_'):]
         data = None
@@ -247,7 +245,7 @@ def main():
                 data = json.loads(arguments.entity[0])
             except ValueError, _:
                 raise ValueError('entity: must be either a valid json file path or a json object')
-        print(json.dumps(_get_client_domain(client, domain)._create(data)))
+        print(_get_client_domain(client, domain)._create(data.json()))
     elif arguments.action.find('delete_') == 0:
         domain = arguments.action[len('delete_'):]
         if is_guid(arguments.id[0]):
