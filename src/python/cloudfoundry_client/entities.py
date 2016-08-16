@@ -1,7 +1,6 @@
 import json
 import logging
 from urllib import quote
-import types
 
 _logger = logging.getLogger(__name__)
 
@@ -10,6 +9,9 @@ class JsonObject(dict):
     def __init__(self, *args, **kwargs):
         super(JsonObject, self).__init__(*args, **kwargs)
         self.__dict__ = self
+
+    def json(self, **kwargs):
+        return json.dumps(dict(self.items()), **kwargs)
 
 
 class Entity(JsonObject):
@@ -21,18 +23,19 @@ class Entity(JsonObject):
                 domain_name = attribute[:len(attribute) - len('_url')]
                 manager_name = domain_name if domain_name.endswith('s') else '%ss' % domain_name
                 if hasattr(client, manager_name):
-                    print 'generating access for %s' % domain_name
                     manager = getattr(client, manager_name)
                     if domain_name.endswith('s'):
                         def new_method(**kwargs):
-                            print 'invoking _list for %s - %s' % (manager_name, value)
                             return manager._list(value, **kwargs)
                     else:
                         def new_method():
-                            print 'invoking _list for %s - %s' % (manager_name, value)
                             return manager._get(value)
+                    new_method.__name__ = str(domain_name)
                     setattr(self, domain_name, new_method)
 
+    def json(self, **kwargs):
+        return json.dumps(dict([(k, v) for k, v in self.items() if k != 'client' and not hasattr(v, '__call__')]),
+                          **kwargs)
 
 
 class InvalidStatusCode(Exception):

@@ -8,24 +8,24 @@ import json
 _logger = logging.getLogger(__name__)
 
 
-class TestApplications(unittest.TestCase):
+class TestApps(unittest.TestCase):
     def test_list(self):
         cpt = 0
         client = build_client_from_configuration()
-        for application in client.application.list(space_guid=client.space_guid):
+        for application in client.apps.list(space_guid=client.space_guid):
             _logger.debug('- %s' % application['entity']['name'])
             if cpt == 0:
                 _logger.debug('- %s' % application['metadata']['guid'])
-                self.assertIsNotNone(client.application.get_first(space_guid=client.space_guid,
+                self.assertIsNotNone(client.apps.get_first(space_guid=client.space_guid,
                                                                   name=application['entity']['name']))
-                self.assertIsNotNone(client.application.get(application['metadata']['guid']))
+                self.assertIsNotNone(client.apps.get(application['metadata']['guid']))
                 try:
-                    client.application.get('%s-0' % application['metadata']['guid'])
+                    client.apps.get('%s-0' % application['metadata']['guid'])
                     self.fail('Should not have been found')
                 except InvalidStatusCode, e:
                     self.assertEquals(e.status_code, httplib.NOT_FOUND)
                 try:
-                    instances = client.application.get_instances(application['metadata']['guid'])
+                    instances = client.apps.get_instances(application['metadata']['guid'])
                     self.assertIsNotNone(instances)
                     self.assertEquals(len(instances), application['entity']['instances'])
                     _logger.debug('instances = %s', json.dumps(instances))
@@ -35,7 +35,7 @@ class TestApplications(unittest.TestCase):
                     self.assertIsInstance(e.body, dict)
                     self.assertEqual(e.body.get('error_code'), 'CF-InstancesError')
                 try:
-                    stats = client.application.get_stats(application['metadata']['guid'])
+                    stats = client.apps.get_stats(application['metadata']['guid'])
                     self.assertIsNotNone(stats)
                     self.assertEquals(len(stats), application['entity']['instances'])
                     self.assertEquals(len(stats), application['entity']['instances'])
@@ -45,7 +45,7 @@ class TestApplications(unittest.TestCase):
                     self.assertEquals(e.status_code, httplib.BAD_REQUEST)
                     self.assertIsInstance(e.body, dict)
                     self.assertEqual(e.body.get('error_code'), 'CF-AppStoppedStatsError')
-                env = client.application.get_env(application['metadata']['guid'])
+                env = client.apps.get_env(application['metadata']['guid'])
                 self.assertIsNotNone(env)
                 self.assertIsNotNone(env.get('application_env_json', None))
                 self.assertIsNotNone(env['application_env_json'].get('VCAP_APPLICATION', None))
@@ -58,9 +58,9 @@ class TestApplications(unittest.TestCase):
     def test_start(self):
         client = build_client_from_configuration()
 
-        _logger.debug('start - %s', client.application.start(client.app_guid, async=False))
+        _logger.debug('start - %s', client.apps.start(client.app_guid, async=False))
 
     def test_stop(self):
         client = build_client_from_configuration()
-        _logger.debug('stop - %s', client.application.stop(client.app_guid, async=False))
+        _logger.debug('stop - %s', client.apps.stop(client.app_guid, async=False))
 

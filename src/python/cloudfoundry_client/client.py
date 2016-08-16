@@ -39,7 +39,7 @@ class CloudFoundryClient(CredentialManager):
         self.apps = AppManager(target_endpoint, self)
         self.buildpacks = BuildpackManager(target_endpoint, self)
         self.routes = RouteManager(target_endpoint, self)
-        self.loggregators = LoggregatorManager(info['logging_endpoint'], self)
+        self.loggregator = LoggregatorManager(info['logging_endpoint'], self)
 
     @staticmethod
     def get_info(target_endpoint, proxy=None, skip_verification=False):

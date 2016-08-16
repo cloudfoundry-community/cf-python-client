@@ -1,7 +1,6 @@
 from config_test import build_client_from_configuration
 import unittest
 import logging
-import json
 
 _logger = logging.getLogger(__name__)
 
@@ -10,10 +9,10 @@ class TestServices(unittest.TestCase):
     def test_list_services(self):
         cpt = 0
         client = build_client_from_configuration()
-        for service in client.service.list():
+        for service in client.services.list():
             _logger.debug('- %s' % service['entity']['label'])
             if cpt == 0:
-                service = client.service.get_first(label=service['entity']['label'])
+                service = client.services.get_first(label=service['entity']['label'])
                 self.assertIsNotNone(service)
             cpt += 1
 
