@@ -64,4 +64,4 @@ class TestEntities(unittest.TestCase):
         entity = entity_manager['with-id']
         client.get.assert_called_with(client.get.return_value.url)
 
-        self.assertEqual(entity.entity.name, 'name-423')
+        self.assertEqual(entity['entity']['name'], 'name-423')

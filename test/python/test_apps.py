@@ -20,7 +20,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(len(all_applications), 3)
         print 'test_list - Application - %s' % str(all_applications[0])
-        self.assertEqual(all_applications[0].entity.name, "name-423")
+        self.assertEqual(all_applications[0]['entity']['name'], "name-423")
 
     def test_list_filtered(self):
         self.client.get.return_value = mock_response(
