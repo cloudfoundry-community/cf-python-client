@@ -1,5 +1,7 @@
+import functools
 import json
 import logging
+
 from urllib import quote
 
 _logger = logging.getLogger(__name__)
@@ -16,20 +18,41 @@ class Entity(JsonObject):
     def __init__(self, client, *args, **kwargs):
         super(Entity, self).__init__(*args, **kwargs)
         self.client = client
+
+        # link an entity to managers
+        if 'entity' not in self:
+            return
+
         for attribute, value in self['entity'].items():
-            if attribute.endswith('_url'):
-                domain_name = attribute[:len(attribute) - len('_url')]
+            domain_name, suffix = attribute.rpartition('_')[::2]
+            if suffix == 'url':
                 manager_name = domain_name if domain_name.endswith('s') else '%ss' % domain_name
-                if hasattr(client, manager_name):
+                try:
                     manager = getattr(client, manager_name)
-                    if domain_name.endswith('s'):
-                        def new_method(**kwargs):
-                            return manager._list(value, **kwargs)
+                except AttributeError:
+                    # generic manager
+                    if isinstance(client, EntityManager):
+                        manager = EntityManager(
+                            client.target_endpoint,
+                            client,
+                            '',
+                            client.entity_builder,
+                        )
                     else:
-                        def new_method():
-                            return manager._get(value)
-                    new_method.__name__ = str(domain_name)
-                    setattr(self, domain_name, new_method)
+                        # maybe this is a client.CloudFoundryClient instance
+                        manager = EntityManager(
+                            client.apps.target_endpoint,
+                            client,
+                            '',
+                            client.apps.entity_builder,
+                        )
+
+                if domain_name.endswith('s'):
+                    new_method = functools.partial(manager._list, value)
+                else:
+                    new_method = functools.partial(manager._get, value)
+
+                setattr(self, domain_name, new_method)
 
 
 class InvalidStatusCode(Exception):
