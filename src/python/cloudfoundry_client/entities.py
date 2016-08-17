@@ -10,8 +10,7 @@ class JsonObject(dict):
         super(JsonObject, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
-    def json(self, **kwargs):
-        return json.dumps(dict(self.items()), **kwargs)
+    json = json.dumps
 
 
 class Entity(JsonObject):
