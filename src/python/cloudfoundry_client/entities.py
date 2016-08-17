@@ -155,6 +155,6 @@ class EntityManager(object):
         else:
             try:
                 body = response.json()
-            except Exception, _:
+            except Exception:
                 body = response.text
             raise InvalidStatusCode(response.status_code, body)

@@ -243,7 +243,7 @@ def main():
         else:
             try:
                 data = json.loads(arguments.entity[0])
-            except ValueError, _:
+            except ValueError:
                 raise ValueError('entity: must be either a valid json file path or a json object')
         print(_get_client_domain(client, domain)._create(data.json()))
     elif arguments.action.find('delete_') == 0:
