@@ -8,7 +8,6 @@ _logger = logging.getLogger(__name__)
 class JsonObject(dict):
     def __init__(self, *args, **kwargs):
         super(JsonObject, self).__init__(*args, **kwargs)
-        self.__dict__ = self
 
     json = json.dumps
 
@@ -31,10 +30,6 @@ class Entity(JsonObject):
                             return manager._get(value)
                     new_method.__name__ = str(domain_name)
                     setattr(self, domain_name, new_method)
-
-    def json(self, **kwargs):
-        return json.dumps(dict([(k, v) for k, v in self.items() if k != 'client' and not hasattr(v, '__call__')]),
-                          **kwargs)
 
 
 class InvalidStatusCode(Exception):
@@ -72,7 +67,7 @@ class EntityManager(object):
         while True:
             _logger.debug('GET - %s - %s', url_requested, response.text)
             response_json = self._read_response(response, JsonObject)
-            for resource in response_json.resources:
+            for resource in response_json['resources']:
                 yield entity_builder(resource.items())
             if response_json['next_url'] is None:
                 break
