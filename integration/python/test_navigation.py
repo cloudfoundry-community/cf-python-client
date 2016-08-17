@@ -15,7 +15,8 @@ class TestNavigation(unittest.TestCase):
                     if space['metadata']['guid'] == client.space_guid:
                         organization_reloaded = space.organization()
                         self.assertEqual(organization['metadata']['guid'], organization_reloaded['metadata']['guid'])
-                        for application in space.applications():
+                        print(dir(space))
+                        for application in space.apps():
                             if application['metadata']['guid'] == client.app_guid:
                                 space_reloaded = application.space()
                                 self.assertEqual(space['metadata']['guid'], space_reloaded['metadata']['guid'])
@@ -35,13 +36,13 @@ class TestNavigation(unittest.TestCase):
                                 service_instance_reloaded = service_binding.service_instance()
                                 self.assertEqual(service_instance['metadata']['guid'],
                                                  service_instance_reloaded['metadata']['guid'])
-                                service_binding.application()
+                                service_binding.app()
                                 break
                             for route in service_instance.routes():
                                 service_instance_reloaded = route.service_instance()
                                 self.assertEqual(service_instance['metadata']['guid'],
                                                  service_instance_reloaded['metadata']['guid'])
-                                for _ in route.applications():
+                                for _ in route.apps():
                                     break
                                 space_reloaded = route.space()
                                 self.assertEqual(space['metadata']['guid'], space_reloaded['metadata']['guid'])

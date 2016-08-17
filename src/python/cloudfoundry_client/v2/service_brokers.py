@@ -4,7 +4,7 @@ from cloudfoundry_client.entities import Entity, EntityManager
 class ServiceBrokerManager(EntityManager):
     def __init__(self, target_endpoint, client):
         super(ServiceBrokerManager, self).__init__(target_endpoint, client, '/v2/service_brokers',
-                                                   lambda pairs: Entity(client, pairs))
+                                                   lambda pairs: Entity(target_endpoint, client, pairs))
 
     def create(self, broker_url, broker_name, auth_username, auth_password, space_guid=None):
         request = dict(broker_url=broker_url,

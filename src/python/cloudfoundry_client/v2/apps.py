@@ -9,25 +9,25 @@ _logger = logging.getLogger(__name__)
 
 class _Application(Entity):
     def instances(self):
-        return self.client.apps.get_instances(self.metadata.guid)
+        return self.client.apps.get_instances(self['metadata']['guid'])
 
     def start(self):
-        return self.client.apps.start(self.metadata.guid)
+        return self.client.apps.start(self['metadata']['guid'])
 
     def stop(self):
-        return self.client.apps.stop(self.metadata.guid)
+        return self.client.apps.stop(self['metadata']['guid'])
 
     def stats(self):
-        return self.client.apps.get_stats(self.metadata.guid)
+        return self.client.apps.get_stats(self['metadata']['guid'])
 
     def summary(self):
-        return self.client.apps.get_summary(self.metadata.guid)
+        return self.client.apps.get_summary(self['metadata']['guid'])
 
 
 class AppManager(EntityManager):
     def __init__(self, target_endpoint, client):
         super(AppManager, self).__init__(target_endpoint, client, '/v2/apps',
-                                         lambda pairs: _Application(client, pairs))
+                                         lambda pairs: _Application(target_endpoint, client, pairs))
 
     def get_stats(self, application_guid):
         return self._get('%s/%s/stats' % (self.entity_uri, application_guid), JsonObject)

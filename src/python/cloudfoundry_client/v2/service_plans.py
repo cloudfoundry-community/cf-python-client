@@ -4,7 +4,7 @@ from cloudfoundry_client.entities import Entity, EntityManager
 class ServicePlanManager(EntityManager):
     def __init__(self, target_endpoint, client):
         super(ServicePlanManager, self).__init__(target_endpoint, client, '/v2/service_plans',
-                                                 lambda pairs: Entity(client, pairs))
+                                                 lambda pairs: Entity(target_endpoint, client, pairs))
 
     def create_from_resource_file(self, path):
         raise NotImplementedError('No creation allowed')

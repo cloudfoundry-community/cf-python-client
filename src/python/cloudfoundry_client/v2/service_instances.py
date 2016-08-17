@@ -4,7 +4,7 @@ from cloudfoundry_client.entities import JsonObject, Entity, EntityManager
 class ServiceInstanceManager(EntityManager):
     def __init__(self, target_endpoint, client):
         super(ServiceInstanceManager, self).__init__(target_endpoint, client, '/v2/service_instances',
-                                                     lambda pairs: Entity(client, pairs))
+                                                     lambda pairs: Entity(target_endpoint, client, pairs))
 
     def create(self, space_guid, instance_name, plan_guid, parameters=None, tags=None):
         request = dict(name=instance_name,

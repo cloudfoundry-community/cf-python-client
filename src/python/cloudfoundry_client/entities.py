@@ -15,8 +15,9 @@ class JsonObject(dict):
 
 
 class Entity(JsonObject):
-    def __init__(self, client, *args, **kwargs):
+    def __init__(self, target_endpoint, client, *args, **kwargs):
         super(Entity, self).__init__(*args, **kwargs)
+        self.target_endpoint = target_endpoint
         self.client = client
 
         # link an entity to managers
@@ -28,30 +29,22 @@ class Entity(JsonObject):
             if suffix == 'url':
                 manager_name = domain_name if domain_name.endswith('s') else '%ss' % domain_name
                 try:
-                    manager = getattr(client, manager_name)
+                    other_manager = getattr(client, manager_name)
                 except AttributeError:
                     # generic manager
-                    if isinstance(client, EntityManager):
-                        manager = EntityManager(
-                            client.target_endpoint,
-                            client,
-                            '',
-                            client.entity_builder,
-                        )
-                    else:
-                        # maybe this is a client.CloudFoundryClient instance
-                        manager = EntityManager(
-                            client.apps.target_endpoint,
-                            client,
-                            '',
-                            client.apps.entity_builder,
-                        )
 
+                    other_manager = EntityManager(
+                        target_endpoint,
+                        client,
+                        '',
+                        # keep current manager for access
+                        lambda pairs: Entity(target_endpoint, client, pairs)
+                    )
                 if domain_name.endswith('s'):
-                    new_method = functools.partial(manager._list, value)
+                    new_method = functools.partial(other_manager._list, value)
                 else:
-                    new_method = functools.partial(manager._get, value)
-
+                    new_method = functools.partial(other_manager._get, value)
+                new_method.__name__ = domain_name
                 setattr(self, domain_name, new_method)
 
 
