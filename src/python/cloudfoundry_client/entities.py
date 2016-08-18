@@ -19,33 +19,29 @@ class Entity(JsonObject):
         super(Entity, self).__init__(*args, **kwargs)
         self.target_endpoint = target_endpoint
         self.client = client
+        try:
+            for attribute, value in self['entity'].items():
+                domain_name, suffix = attribute.rpartition('_')[::2]
+                if suffix == 'url':
+                    manager_name = domain_name if domain_name.endswith('s') else '%ss' % domain_name
+                    try:
+                        other_manager = getattr(client, manager_name)
+                    except AttributeError:
+                        # generic manager
 
-        # link an entity to managers
-        if 'entity' not in self:
-            return
-
-        for attribute, value in self['entity'].items():
-            domain_name, suffix = attribute.rpartition('_')[::2]
-            if suffix == 'url':
-                manager_name = domain_name if domain_name.endswith('s') else '%ss' % domain_name
-                try:
-                    other_manager = getattr(client, manager_name)
-                except AttributeError:
-                    # generic manager
-
-                    other_manager = EntityManager(
-                        target_endpoint,
-                        client,
-                        '',
-                        # keep current manager for access
-                        lambda pairs: Entity(target_endpoint, client, pairs)
-                    )
-                if domain_name.endswith('s'):
-                    new_method = functools.partial(other_manager._list, value)
-                else:
-                    new_method = functools.partial(other_manager._get, value)
-                new_method.__name__ = domain_name
-                setattr(self, domain_name, new_method)
+                        other_manager = EntityManager(
+                            target_endpoint,
+                            client,
+                            '')
+                    if domain_name.endswith('s'):
+                        new_method = functools.partial(other_manager._list, value)
+                    else:
+                        new_method = functools.partial(other_manager._get, value)
+                    new_method.__name__ = domain_name
+                    setattr(self, domain_name, new_method)
+        except KeyError:
+            print self.keys()
+            raise
 
 
 class InvalidStatusCode(Exception):
@@ -63,11 +59,12 @@ class InvalidStatusCode(Exception):
 
 
 class EntityManager(object):
-    def __init__(self, target_endpoint, client, entity_uri, entity_builder=JsonObject):
+    def __init__(self, target_endpoint, client, entity_uri, entity_builder=None):
         self.target_endpoint = target_endpoint
         self.entity_uri = entity_uri
         self.client = client
-        self.entity_builder = entity_builder
+        self.entity_builder = entity_builder if entity_builder is not None else lambda pairs: Entity(target_endpoint,
+                                                                                                     client, pairs)
 
     def _get(self, requested_path, entity_builder=None):
         url = '%s%s' % (self.target_endpoint, requested_path)

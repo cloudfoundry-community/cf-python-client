@@ -4,18 +4,14 @@ import logging
 import requests
 from oauth2_client.credentials_manager import CredentialManager, ServiceInformation
 
-from cloudfoundry_client.entities import InvalidStatusCode
+from cloudfoundry_client.entities import InvalidStatusCode, EntityManager
 from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
 from cloudfoundry_client.v2.apps import AppManager
 from cloudfoundry_client.v2.buildpacks import BuildpackManager
-from cloudfoundry_client.v2.organizations import OrganizationManager
-from cloudfoundry_client.v2.routes import RouteManager
 from cloudfoundry_client.v2.service_bindings import ServiceBindingManager
 from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager
 from cloudfoundry_client.v2.service_instances import ServiceInstanceManager
 from cloudfoundry_client.v2.service_plans import ServicePlanManager
-from cloudfoundry_client.v2.services import ServiceManager
-from cloudfoundry_client.v2.spaces import SpaceManager
 
 _logger = logging.getLogger(__name__)
 
@@ -29,16 +25,17 @@ class CloudFoundryClient(CredentialManager):
         service_informations = ServiceInformation(None, '%s/oauth/token' % info['authorization_endpoint'],
                                                   client_id, client_secret, [], skip_verification)
         super(CloudFoundryClient, self).__init__(service_informations, proxy)
-        self.organizations = OrganizationManager(target_endpoint, self)
-        self.spaces = SpaceManager(target_endpoint, self)
-        self.services = ServiceManager(target_endpoint, self)
         self.service_plans = ServicePlanManager(target_endpoint, self)
         self.service_instances = ServiceInstanceManager(target_endpoint, self)
         self.service_bindings = ServiceBindingManager(target_endpoint, self)
         self.service_brokers = ServiceBrokerManager(target_endpoint, self)
         self.apps = AppManager(target_endpoint, self)
         self.buildpacks = BuildpackManager(target_endpoint, self)
-        self.routes = RouteManager(target_endpoint, self)
+        # Default implementations
+        self.organizations = EntityManager(target_endpoint, self, '/v2/organizations')
+        self.spaces = EntityManager(target_endpoint, self, '/v2/spaces')
+        self.services = EntityManager(target_endpoint, self, '/v2/services')
+        self.routes = EntityManager(target_endpoint, self, '/v2/routes')
         self.loggregator = LoggregatorManager(info['logging_endpoint'], self)
 
     @staticmethod

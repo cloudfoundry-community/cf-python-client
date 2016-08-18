@@ -1,31 +1,26 @@
-import mock
+import types
 
-from cloudfoundry_client.client import CloudFoundryClient
-from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
-from cloudfoundry_client.v2.apps import AppManager
-from cloudfoundry_client.v2.buildpacks import BuildpackManager
-from cloudfoundry_client.v2.organizations import OrganizationManager
-from cloudfoundry_client.v2.routes import RouteManager
-from cloudfoundry_client.v2.service_bindings import ServiceBindingManager
-from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager
-from cloudfoundry_client.v2.service_instances import ServiceInstanceManager
-from cloudfoundry_client.v2.service_plans import ServicePlanManager
-from cloudfoundry_client.v2.services import ServiceManager
-from cloudfoundry_client.v2.spaces import SpaceManager
-from fake_requests import TARGET_ENDPOINT
+import mock
+import json
+
+from cloudfoundry_client.client import CloudFoundryClient, CredentialManager
+from fake_requests import TARGET_ENDPOINT, mock_response
 
 
 class AbstractTestCase(object):
+
     def build_client(self):
-        self.client = mock.MagicMock(spec=CloudFoundryClient)
-        self.client.organizations = OrganizationManager(TARGET_ENDPOINT, self.client)
-        self.client.spaces = SpaceManager(TARGET_ENDPOINT, self.client)
-        self.client.services = ServiceManager(TARGET_ENDPOINT, self.client)
-        self.client.service_plans = ServicePlanManager(TARGET_ENDPOINT, self.client)
-        self.client.service_instances = ServiceInstanceManager(TARGET_ENDPOINT, self.client)
-        self.client.service_bindings = ServiceBindingManager(TARGET_ENDPOINT, self.client)
-        self.client.service_brokers = ServiceBrokerManager(TARGET_ENDPOINT, self.client)
-        self.client.apps = AppManager(TARGET_ENDPOINT, self.client)
-        self.client.buildpacks = BuildpackManager(TARGET_ENDPOINT, self.client)
-        self.client.routes = RouteManager(TARGET_ENDPOINT, self.client)
-        self.client.loggregator = LoggregatorManager(TARGET_ENDPOINT, self.client)
+        with mock.patch('cloudfoundry_client.client.requests') as fake_requests:
+            class MockCredentail(object):
+                def __init__(self, *args, **kwargs):
+                    for attribute in dir(CredentialManager):
+                        if isinstance(getattr(CredentialManager, attribute), types.MethodType):
+                            setattr(self, attribute, mock.MagicMock())
+            fake_info_response = mock_response('/v2/info', 200, None)
+            fake_info_response.text = json.dumps(dict(api_version='2.X',
+                                                      authorization_endpoint=TARGET_ENDPOINT,
+                                                      logging_endpoint=TARGET_ENDPOINT))
+            fake_requests.get.return_value = fake_info_response
+
+            CloudFoundryClient.__bases__ = (MockCredentail,)
+            self.client = CloudFoundryClient(TARGET_ENDPOINT)
