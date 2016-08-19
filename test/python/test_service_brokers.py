@@ -1,11 +1,19 @@
 import httplib
+import sys
 import unittest
 
+import mock
+
+import cloudfoundry_client.main as main
 from abstract_test_case import AbstractTestCase
 from fake_requests import mock_response
 
 
 class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.mock_client_class()
+
     def setUp(self):
         self.build_client()
 
@@ -67,3 +75,26 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
             None)
         self.client.service_brokers.remove('broker_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
+
+    @mock.patch.object(sys, 'argv', ['main', 'list_service_brokers'])
+    def test_main_list_service_brokers(self):
+        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
+                        new=lambda: self.client):
+            self.client.get.return_value = mock_response('/v2/service_brokers',
+                                                         httplib.OK,
+                                                         None,
+                                                         'v2', 'service_brokers', 'GET_response.json')
+            main.main()
+            self.client.get.assert_called_with(self.client.get.return_value.url)
+
+    @mock.patch.object(sys, 'argv', ['main', 'get_service_broker', 'ade9730c-4ee5-4290-ad37-0b15cecd2ca6'])
+    def test_main_get_service_broker(self):
+        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
+                        new=lambda: self.client):
+            self.client.get.return_value = mock_response('/v2/service_brokers/ade9730c-4ee5-4290-ad37-0b15cecd2ca6',
+                                                         httplib.OK,
+                                                         None,
+                                                         'v2', 'service_brokers', 'GET_{id}_response.json')
+            main.main()
+            self.client.get.assert_called_with(self.client.get.return_value.url)
+

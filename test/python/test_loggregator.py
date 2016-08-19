@@ -6,6 +6,10 @@ from fake_requests import mock_response
 
 
 class TestLoggregator(unittest.TestCase, AbstractTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.mock_client_class()
+
     def setUp(self):
         self.build_client()
 

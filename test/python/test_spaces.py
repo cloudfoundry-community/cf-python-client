@@ -1,13 +1,19 @@
 import httplib
+import sys
 import unittest
 
 import mock
 
+import cloudfoundry_client.main as main
 from abstract_test_case import AbstractTestCase
 from fake_requests import mock_response
-import mock
+
 
 class TestSpaces(unittest.TestCase, AbstractTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.mock_client_class()
+
     def setUp(self):
         self.build_client()
 
@@ -62,3 +68,24 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.client.get.assert_has_calls([mock.call(side_effect.url) for side_effect in self.client.get.side_effect],
                                          any_order=False)
 
+    @mock.patch.object(sys, 'argv', ['main', 'list_spaces'])
+    def test_main_list_spaces(self):
+        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
+                        new=lambda: self.client):
+            self.client.get.return_value = mock_response('/v2/spaces',
+                                                         httplib.OK,
+                                                         None,
+                                                         'v2', 'spaces', 'GET_response.json')
+            main.main()
+            self.client.get.assert_called_with(self.client.get.return_value.url)
+
+    @mock.patch.object(sys, 'argv', ['main', 'get_space', '2d745a4b-67e3-4398-986e-2adbcf8f7ec9'])
+    def test_main_get_spaces(self):
+        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
+                        new=lambda: self.client):
+            self.client.get.return_value = mock_response('/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9',
+                                                         httplib.OK,
+                                                         None,
+                                                         'v2', 'spaces', 'GET_{id}_response.json')
+            main.main()
+            self.client.get.assert_called_with(self.client.get.return_value.url)

@@ -1,11 +1,19 @@
 import httplib
 import unittest
 
+import mock
+import sys
+
+import cloudfoundry_client.main as main
 from abstract_test_case import AbstractTestCase
 from fake_requests import mock_response
 
 
 class TestBuildpacks(unittest.TestCase, AbstractTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.mock_client_class()
+
     def setUp(self):
         self.build_client()
 
@@ -18,6 +26,16 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 3)
 
+    def test_get(self):
+        self.client.get.return_value = mock_response(
+            '/v2/buildpacks/buildpack_id',
+            httplib.OK,
+            None,
+            'v2', 'buildpacks', 'GET_{id}_response.json')
+        result = self.client.buildpacks.get('buildpack_id')
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+        self.assertIsNotNone(result)
+
     def test_update(self):
         self.client.put.return_value = mock_response(
             '/v2/buildpacks/build_pack_id',
@@ -28,3 +46,25 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
         self.client.put.assert_called_with(self.client.put.return_value.url,
                                            json=dict(enabled=False))
         self.assertIsNotNone(result)
+
+    @mock.patch.object(sys, 'argv', ['main', 'list_buildpacks'])
+    def test_main_list_buildpacks(self):
+        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
+                        new=lambda: self.client):
+            self.client.get.return_value = mock_response('/v2/buildpacks',
+                                                         httplib.OK,
+                                                         None,
+                                                         'v2', 'buildpacks', 'GET_response.json')
+            main.main()
+            self.client.get.assert_called_with(self.client.get.return_value.url)
+
+    @mock.patch.object(sys, 'argv', ['main', 'get_buildpack', '6e72c33b-dff0-4020-8603-bcd8a4eb05e4'])
+    def test_main_get_buildpack(self):
+        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
+                        new=lambda: self.client):
+            self.client.get.return_value = mock_response('/v2/buildpacks/6e72c33b-dff0-4020-8603-bcd8a4eb05e4',
+                                                         httplib.OK,
+                                                         None,
+                                                         'v2', 'buildpacks', 'GET_{id}_response.json')
+            main.main()
+            self.client.get.assert_called_with(self.client.get.return_value.url)

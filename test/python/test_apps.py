@@ -1,13 +1,19 @@
 import httplib
+import sys
 import unittest
 
 import mock
 
+import cloudfoundry_client.main as main
 from abstract_test_case import AbstractTestCase
 from fake_requests import mock_response
 
 
 class TestApps(unittest.TestCase, AbstractTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.mock_client_class()
+
     def setUp(self):
         self.build_client()
 
@@ -182,3 +188,25 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertEqual(cpt, 1)
         self.client.get.assert_has_calls([mock.call(side_effect.url) for side_effect in self.client.get.side_effect],
                                          any_order=False)
+
+    @mock.patch.object(sys, 'argv', ['main', 'list_apps'])
+    def test_main_list_apps(self):
+        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
+                        new=lambda: self.client):
+            self.client.get.return_value = mock_response('/v2/apps',
+                                                         httplib.OK,
+                                                         None,
+                                                         'v2', 'apps', 'GET_response.json')
+            main.main()
+            self.client.get.assert_called_with(self.client.get.return_value.url)
+
+    @mock.patch.object(sys, 'argv', ['main', 'get_app', '906775ea-622e-4bc7-af5d-9aab3b652f81'])
+    def test_main_get_app(self):
+        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
+                        new=lambda: self.client):
+            self.client.get.return_value = mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81',
+                                                         httplib.OK,
+                                                         None,
+                                                         'v2', 'apps', 'GET_{id}_response.json')
+            main.main()
+            self.client.get.assert_called_with(self.client.get.return_value.url)
