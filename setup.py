@@ -1,8 +1,8 @@
-from setuptools import setup, find_packages, Command
-import subprocess
 import os
-import sys
 import shutil
+import subprocess
+
+from setuptools import setup, find_packages, Command
 
 src_dir = 'src/python'
 package_directory = 'cloudfoundry_client'
@@ -22,16 +22,6 @@ if __version__ is None:
 
 def purge_sub_dir(path):
     shutil.rmtree(os.path.join(os.path.dirname(__file__), path))
-
-# add generate command if install
-generate_present = False
-for cpt_arg in xrange(1, len(sys.argv)):
-    if sys.argv[cpt_arg] == "generate":
-        generate_present = True
-        break
-
-if not generate_present and len(sys.argv) > 1:
-    sys.argv.insert(1, 'generate')
 
 
 class GenerateCommand(Command):
