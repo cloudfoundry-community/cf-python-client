@@ -8,16 +8,16 @@ src_dir = 'src/python'
 package_directory = 'cloudfoundry_client'
 package_name = 'cloudfoundry-client'
 loggregator_dir = 'loggregator'
+sys.path.insert(0, os.path.realpath(src_dir))
 
-__version__ = None
 version_file = '%s/%s/__init__.py' % (src_dir, package_directory)
 with open(version_file, 'r') as f:
     for line in f.readlines():
         if line.find('__version__') >= 0:
             exec line
-
-if __version__ is None:
-    raise AssertionError('Failed to load version from %s' % version_file)
+            break
+    else:
+        raise AssertionError('Failed to load version from %s' % version_file)
 
 
 def purge_sub_dir(path):
@@ -66,5 +66,7 @@ setup(name=package_name,
       },
       cmdclass=dict(generate=GenerateCommand),
       package_dir={package_directory: '%s/%s' % (src_dir, package_directory)},
-      install_requires=[requirement.rstrip(' \r\n') for requirement in open('requirements.txt').readlines()],
+      install_requires=[requirement.rstrip(' \r\n') for requirement in open('requirements.txt')],
+      tests_require=[line.rstrip() for line in open('test/requirements.txt')],
+      test_suite='test',
       )
