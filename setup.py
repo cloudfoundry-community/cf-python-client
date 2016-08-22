@@ -51,7 +51,7 @@ setup(name=package_name,
       author='Benjamin Einaudi',
       author_email='antechrestos@gmail.com',
       description='A client library for CloudFoundry',
-      long_description=open('README.md').read(),
+      long_description=open('README.rst').read(),
       url='http://github.com/antechrestos/cf-python-client',
       classifiers=[
           "Programming Language :: Python",
