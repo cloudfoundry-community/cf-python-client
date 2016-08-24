@@ -43,16 +43,26 @@ You may build the client and use it in your code
 
 Client
 ~~~~~~
+To instanciate the client, nothing easier
+
 .. code-block:: python
 
     from cloudfoundry_client.client import CloudFoundryClient
     target_endpoint = 'https://somewhere.org'
+    proxy = dict(http=os.environ.get('HTTP_PROXY', ''), https=os.environ.get('HTTPS_PROXY', ''))
+    client = CloudFoundryClient(target_endpoint, proxy=proxy, skip_verification=True)
+    client.init_with_user_credentials('login', 'password')
+
+And then you can use it as follows:
+
+.. code-block:: python
+
     for organization in client.organizations:
         print organization['metadata']['guid']
 
 Entities
 ~~~~~~~~
-Entities returned by client calls (*organzation*, *space*, *app*..) are navigable ie you can call the method associated with the *xxx_url* entity attribute
+Entities returned by client calls (*organization*, *space*, *app*..) are navigable ie you can call the method associated with the *xxx_url* entity attribute
 (note that if the attribute's name ends with a list, it will be interpreted as a list of object. Other wise you will get a single entity).
 
 .. code-block:: python
@@ -66,6 +76,16 @@ Application object provides more methods such as
  - stats
  - start
  - stop
+ - summary
+
+As instance, you can get all the summaries as follows:
+
+Or else:
+
+.. code-block:: python
+
+    for app in client.apps:
+        print app.summary()
 
 Available managers
 ~~~~~~~~~~~~~~~~~~
