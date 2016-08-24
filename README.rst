@@ -122,6 +122,13 @@ All managers provide the following methods:
 - ``_update``: the update operation. Since it is a generic operation (only takes a the resource id and a *dict* object), this operation is protected
 - ``_remove``: the delete operation. This operation is maintained protected.
 
+Command Line Interface
+----------------------
+
+The client comes with a command line interface. Run ``cloudfoundry-client`` command. At first execution, it will ask you
+ information about the target platform and your credential (do not worry they are not saved). After that you may have a help
+by running ``cloudfoundry-client -h``
+
 Issues and contributions
 ------------------------
 Please submit issue/pull request.
