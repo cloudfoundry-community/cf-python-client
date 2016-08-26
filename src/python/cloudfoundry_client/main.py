@@ -9,6 +9,7 @@ import json
 
 from requests.exceptions import ConnectionError
 
+from cloudfoundry_client import __version__
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.entities import InvalidStatusCode
 
@@ -168,6 +169,7 @@ def main():
         description.append('')
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('-V', '--version', action='version', version=__version__)
     subparsers = parser.add_subparsers(title='Commands', dest='action', description='\n'.join(description))
     for domain, command_description in commands.items():
         list_parser = subparsers.add_parser('list_%ss' % domain)
