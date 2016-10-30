@@ -105,6 +105,12 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
                 httplib.OK,
                 None,
                 'v2', 'routes', 'GET_response.json'
+            ),
+            mock_response(
+                '/v2/service_instances/df52420f-d5b9-4b86-a7d3-6d7005d1ce96/service_keys',
+                httplib.OK,
+                None,
+                'v2', 'service_keys', 'GET_response.json'
             )
         ]
         service_instance = self.client.service_instances.get('instance_id')
@@ -114,6 +120,8 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
         self.assertEqual(cpt, 1)
         self.assertIsNotNone(service_instance.service_plan())
         cpt = reduce(lambda increment, _: increment + 1, service_instance.routes(), 0)
+        self.assertEqual(cpt, 1)
+        cpt = reduce(lambda increment, _: increment + 1, service_instance.service_keys(), 0)
         self.assertEqual(cpt, 1)
         self.client.get.assert_has_calls([mock.call(side_effect.url) for side_effect in self.client.get.side_effect],
                                          any_order=False)

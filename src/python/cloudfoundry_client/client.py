@@ -11,6 +11,7 @@ from cloudfoundry_client.v2.buildpacks import BuildpackManager
 from cloudfoundry_client.v2.service_bindings import ServiceBindingManager
 from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager
 from cloudfoundry_client.v2.service_instances import ServiceInstanceManager
+from cloudfoundry_client.v2.service_keys import ServiceKeyManager
 from cloudfoundry_client.v2.service_plans import ServicePlanManager
 
 _logger = logging.getLogger(__name__)
@@ -27,6 +28,7 @@ class CloudFoundryClient(CredentialManager):
         super(CloudFoundryClient, self).__init__(service_informations, proxy)
         self.service_plans = ServicePlanManager(target_endpoint, self)
         self.service_instances = ServiceInstanceManager(target_endpoint, self)
+        self.service_keys = ServiceKeyManager(target_endpoint, self)
         self.service_bindings = ServiceBindingManager(target_endpoint, self)
         self.service_brokers = ServiceBrokerManager(target_endpoint, self)
         self.apps = AppManager(target_endpoint, self)

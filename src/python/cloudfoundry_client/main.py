@@ -129,6 +129,9 @@ def main():
     commands['service_instance'] = dict(list=('organization_guid', 'space_guid', 'service_plan_guid'), name='name',
                                         allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True,
                                         display_name='Service instances')
+    commands['service_key'] = dict(list=('service_instance_guid',), name='name',
+                                        allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True,
+                                        display_name='Service keys')
     commands['service_binding'] = dict(list=('app_guid', 'service_instance_guid'), name=None,
                                        allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True,
                                        display_name='Service bindings')
@@ -247,7 +250,7 @@ def main():
                 data = json.loads(arguments.entity[0])
             except ValueError:
                 raise ValueError('entity: must be either a valid json file path or a json object')
-        print(_get_client_domain(client, domain)._create(data.json()))
+        print(_get_client_domain(client, domain)._create(data).json())
     elif arguments.action.find('delete_') == 0:
         domain = arguments.action[len('delete_'):]
         if is_guid(arguments.id[0]):
