@@ -115,7 +115,7 @@ For example, event entity manager is not yet implemented but you can do
 All managers provide the following methods:
 
 - ``list(**kwargs)``: return an *iterator* on entities, according to the given filtered parameters
-- ``get_one(**kwargs)``: return the first matching entity according to the given parameters. Returns ```None`` if none returned
+- ``get_first(**kwargs)``: return the first matching entity according to the given parameters. Returns ```None`` if none returned
 - ``get``: perform a **GET** on the entity. If the entity cannot be find it will raise an exception due to http *NOT FOUND* response status
 - ``__iter__``: iteration on the manager itself. Alias for a no-filter list
 - ``__getitem__``: alias for the ``get`` operation
