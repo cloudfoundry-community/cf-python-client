@@ -1,7 +1,7 @@
 Cloudfoundry python client
 ==========================
 .. image:: https://img.shields.io/pypi/v/cloudfoundry-client.svg
-:target: https://pypi.python.org/pypi/cloudfoundry-client
+	:target: https://pypi.python.org/pypi/cloudfoundry-client
 .. image:: https://img.shields.io/github/license/antechrestos/cf-python-client.svg
 	:target: https://raw.githubusercontent.com/antechrestos/cf-python-client/master/LICENSE
 
