@@ -33,7 +33,7 @@ def mock_response(uri, status_code, headers, *path_parts):
         file_name = path_parts[len(path_parts) - 1]
         extension_idx = file_name.rfind('.')
         binary_file = extension_idx >= 0 and file_name[extension_idx:] == '.bin'
-        with(open(os.path.join(os.path.dirname(__file__), '..', 'fixtures', *path_parts),
+        with(open(os.path.join(os.path.dirname(__file__), 'fixtures', *path_parts),
                   'rb' if binary_file else 'r')) as f:
             return MockResponse(url='%s%s' % (TARGET_ENDPOINT, uri),
                                 status_code=status_code,

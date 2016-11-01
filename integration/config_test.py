@@ -16,7 +16,7 @@ def _init_logging():
 
 
 def get_resource_dir():
-    result = os.path.join(os.path.dirname(__file__), '..', 'resources')
+    result = os.path.join(os.path.dirname(__file__), 'resources')
     if not (os.path.exists(result) and os.path.isdir(result)):
         raise IOError('Directory %s must exist.' % result)
     return result
@@ -30,7 +30,7 @@ def get_resource(file_name):
 
 
 def get_build_dir():
-    result = os.path.join(os.path.dirname(__file__), '..', '..', 'dist')
+    result = os.path.join(os.path.dirname(__file__), '..', 'dist')
     return result
 
 

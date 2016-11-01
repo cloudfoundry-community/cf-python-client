@@ -5,7 +5,7 @@ import sys
 
 from setuptools import setup, find_packages, Command
 
-src_dir = 'src/python'
+src_dir = 'main'
 package_directory = 'cloudfoundry_client'
 package_name = 'cloudfoundry-client'
 loggregator_dir = 'loggregator'
