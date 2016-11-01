@@ -5,7 +5,6 @@ import requests
 from oauth2_client.credentials_manager import CredentialManager, ServiceInformation
 
 from cloudfoundry_client.entities import InvalidStatusCode, EntityManager
-from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
 from cloudfoundry_client.v2.apps import AppManager
 from cloudfoundry_client.v2.buildpacks import BuildpackManager
 from cloudfoundry_client.v2.service_bindings import ServiceBindingManager
@@ -38,7 +37,19 @@ class CloudFoundryClient(CredentialManager):
         self.spaces = EntityManager(target_endpoint, self, '/v2/spaces')
         self.services = EntityManager(target_endpoint, self, '/v2/services')
         self.routes = EntityManager(target_endpoint, self, '/v2/routes')
-        self.loggregator = LoggregatorManager(info['logging_endpoint'], self)
+        try:
+            from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
+            self._loggregator = LoggregatorManager(info['logging_endpoint'], self)
+        except BaseException, ex:
+            _logger.warning("Error while loading loggregator: %s", ex)
+            self._loggregator = ex
+
+    @property
+    def loggregator(self):
+        if isinstance(self._loggregator, BaseException):
+            raise self._loggregator
+        else:
+            return self._loggregator
 
     @staticmethod
     def get_info(target_endpoint, proxy=None, skip_verification=False):
