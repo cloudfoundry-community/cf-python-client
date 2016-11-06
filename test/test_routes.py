@@ -1,12 +1,11 @@
-import httplib
 import sys
 import unittest
 
-import mock
-
 import cloudfoundry_client.main as main
 from abstract_test_case import AbstractTestCase
+from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
+from imported import mock
 
 
 class TestRoutes(unittest.TestCase, AbstractTestCase):
@@ -20,7 +19,7 @@ class TestRoutes(unittest.TestCase, AbstractTestCase):
     def test_list(self):
         self.client.get.return_value = mock_response(
             '/v2/routes?q=organization_guid%20IN%20organization_guid',
-            httplib.OK,
+            OK,
             None,
             'v2', 'routes', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, self.client.routes.list(organization_guid='organization_guid'),
@@ -31,7 +30,7 @@ class TestRoutes(unittest.TestCase, AbstractTestCase):
     def test_get(self):
         self.client.get.return_value = mock_response(
             '/v2/routes/route_id',
-            httplib.OK,
+            OK,
             None,
             'v2', 'routes', 'GET_{id}_response.json')
         result = self.client.routes.get('route_id')
@@ -42,21 +41,21 @@ class TestRoutes(unittest.TestCase, AbstractTestCase):
         self.client.get.side_effect = [
             mock_response(
                 '/v2/routes/route_id',
-                httplib.OK,
+                OK,
                 None,
                 'v2', 'routes', 'GET_{id}_response.json'),
             mock_response(
                 '/v2/service_instances/e3db4ea8-ab0c-4c47-adf8-a70a8e990ee4',
-                httplib.OK,
+                OK,
                 None,
                 'v2', 'service_instances', 'GET_{id}_response.json'),
             mock_response(
                 '/v2/spaces/b3f94ab9-1520-478b-a6d6-eb467c179ada',
-                httplib.OK,
+                OK,
                 None,
                 'v2', 'spaces', 'GET_{id}_response.json'),
             mock_response('/v2/routes/75c16cfe-9b8a-4faf-bb65-02c713c7956f/apps',
-                          httplib.OK,
+                          OK,
                           None,
                           'v2', 'apps', 'GET_response.json')
         ]
@@ -68,13 +67,12 @@ class TestRoutes(unittest.TestCase, AbstractTestCase):
         self.client.get.assert_has_calls([mock.call(side_effect.url) for side_effect in self.client.get.side_effect],
                                          any_order=False)
 
-
     @mock.patch.object(sys, 'argv', ['main', 'list_routes'])
     def test_main_list_routes(self):
         with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/routes',
-                                                         httplib.OK,
+                                                         OK,
                                                          None,
                                                          'v2', 'routes', 'GET_response.json')
             main.main()
@@ -85,7 +83,7 @@ class TestRoutes(unittest.TestCase, AbstractTestCase):
         with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/routes/75c16cfe-9b8a-4faf-bb65-02c713c7956f',
-                                                         httplib.OK,
+                                                         OK,
                                                          None,
                                                          'v2', 'routes', 'GET_{id}_response.json')
             main.main()

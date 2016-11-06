@@ -1,9 +1,10 @@
 from config_test import build_client_from_configuration
-from cloudfoundry_client import InvalidStatusCode
 import unittest
 import logging
-import httplib
 import json
+
+from cloudfoundry_client.entities import InvalidStatusCode
+from cloudfoundry_client.imported import NOT_FOUND, BAD_REQUEST
 
 _logger = logging.getLogger(__name__)
 
@@ -22,16 +23,16 @@ class TestApps(unittest.TestCase):
                 try:
                     client.apps.get('%s-0' % application['metadata']['guid'])
                     self.fail('Should not have been found')
-                except InvalidStatusCode, e:
-                    self.assertEquals(e.status_code, httplib.NOT_FOUND)
+                except InvalidStatusCode as e:
+                    self.assertEquals(e.status_code, NOT_FOUND)
                 try:
                     instances = client.apps.get_instances(application['metadata']['guid'])
                     self.assertIsNotNone(instances)
                     self.assertEquals(len(instances), application['entity']['instances'])
                     _logger.debug('instances = %s', json.dumps(instances))
-                except InvalidStatusCode, e:
+                except InvalidStatusCode as e:
                     #instance is stopped
-                    self.assertEquals(e.status_code, httplib.BAD_REQUEST)
+                    self.assertEquals(e.status_code, BAD_REQUEST)
                     self.assertIsInstance(e.body, dict)
                     self.assertEqual(e.body.get('error_code'), 'CF-InstancesError')
                 try:
@@ -40,9 +41,9 @@ class TestApps(unittest.TestCase):
                     self.assertEquals(len(stats), application['entity']['instances'])
                     self.assertEquals(len(stats), application['entity']['instances'])
                     _logger.debug('stats = %s', json.dumps(stats))
-                except InvalidStatusCode, e:
+                except InvalidStatusCode as e:
                     # instance is stopped
-                    self.assertEquals(e.status_code, httplib.BAD_REQUEST)
+                    self.assertEquals(e.status_code, BAD_REQUEST)
                     self.assertIsInstance(e.body, dict)
                     self.assertEqual(e.body.get('error_code'), 'CF-AppStoppedStatsError')
                 env = client.apps.get_env(application['metadata']['guid'])

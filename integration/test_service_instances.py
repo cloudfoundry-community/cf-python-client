@@ -12,7 +12,7 @@ class TestServiceInstances(unittest.TestCase):
         result = client.service_instances.create(client.space_guid, 'test_name', client.plan_guid,
                                                  client.creation_parameters)
         if len(client.update_parameters) > 0:
-            result_updated = client.service_instances.update(result['metadata']['guid'], client.update_parameters)
+            client.service_instances.update(result['metadata']['guid'], client.update_parameters)
         else:
             _logger.warning('update test skipped')
         client.service_instances.remove(result['metadata']['guid'])

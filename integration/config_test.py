@@ -1,7 +1,7 @@
-import ConfigParser
 import logging
 import os
 
+from imported import ConfigParser, NoSectionError, NoOptionError
 from cloudfoundry_client.client import CloudFoundryClient
 
 _client = None
@@ -38,20 +38,20 @@ def build_client_from_configuration():
     global _client
     if _client is None:
         _init_logging()
-        cfg = ConfigParser.ConfigParser()
+        cfg = ConfigParser()
         cfg.read(get_resource('test.properties'))
         proxy = None
         try:
             http = cfg.get('proxy', 'http')
             https = cfg.get('proxy', 'https')
             proxy = dict(http=http, https=https)
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError), _:
+        except (NoSectionError, NoOptionError):
             pass
         skip_verification = False
         try:
             skip_verification_str = cfg.get('service', 'skip_ssl_verification')
             skip_verification = skip_verification_str.lower() == 'true'
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError), _:
+        except (NoSectionError, NoOptionError):
             pass
         client = CloudFoundryClient(cfg.get('service', 'target_endpoint'), proxy=proxy,
                                     skip_verification=skip_verification)

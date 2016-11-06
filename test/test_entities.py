@@ -1,30 +1,30 @@
-import httplib
 import unittest
 
-import mock
-
 from cloudfoundry_client.entities import EntityManager
+from cloudfoundry_client.imported import OK, reduce
 from fake_requests import TARGET_ENDPOINT, mock_response
+from imported import mock
 
 
 class TestEntities(unittest.TestCase):
     def test_query(self):
         url = EntityManager._get_url_filtered('/v2/apps', **{"results-per-page": 20,
-                                                             'order-direction': 'asc', 'page': 1,
+                                                             'order-direction': 'asc',
+                                                             'page': 1,
                                                              "space_guid": 'some-id'})
-        self.assertEqual(url, '/v2/apps?q=space_guid%20IN%20some-id&results-per-page=20&page=1&order-direction=asc')
+        self.assertEqual('/v2/apps?order-direction=asc&page=1&results-per-page=20&q=space_guid%20IN%20some-id', url)
 
     def test_list(self):
         client = mock.MagicMock()
         entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/first')
 
         first_response = mock_response(
-            '/fake/first?q=space_guid%20IN%20some-id&results-per-page=20&page=1&order-direction=asc',
-            httplib.OK,
+            '/fake/first?order-direction=asc&page=1&results-per-page=20&q=space_guid%20IN%20some-id',
+            OK,
             None,
             'fake', 'GET_multi_page_0_response.json')
         second_response = mock_response('/fake/next?order-direction=asc&page=2&results-per-page=50',
-                                        httplib.OK,
+                                        OK,
                                         None,
                                         'fake', 'GET_multi_page_1_response.json')
 
@@ -44,7 +44,7 @@ class TestEntities(unittest.TestCase):
 
         client.get.return_value = mock_response(
             '/fake/something',
-            httplib.OK,
+            OK,
             None,
             'fake', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, entity_manager, 0)
@@ -58,7 +58,7 @@ class TestEntities(unittest.TestCase):
 
         client.get.return_value = mock_response(
             '/fake/something/with-id',
-            httplib.OK,
+            OK,
             None,
             'fake', 'GET_{id}_response.json')
         entity = entity_manager['with-id']

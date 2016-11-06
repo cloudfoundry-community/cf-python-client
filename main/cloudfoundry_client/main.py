@@ -1,6 +1,5 @@
 #!/usr/bin/python2.7
 import argparse
-import httplib
 import logging
 import os
 import re
@@ -9,6 +8,7 @@ import json
 
 from requests.exceptions import ConnectionError
 
+from cloudfoundry_client.imported import NOT_FOUND
 from cloudfoundry_client import __version__
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.entities import InvalidStatusCode
@@ -71,7 +71,7 @@ def build_client_from_configuration(previous_configuration=None):
                                             skip_verification=configuration['skip_ssl_verification'])
                 client.init_with_token(configuration['refresh_token'])
                 return client
-        except Exception, ex:
+        except Exception as ex:
             if type(ex) == ConnectionError:
                 raise
             else:
@@ -92,7 +92,7 @@ def resolve_id(argument, get_by_name, domain_name, allow_search_by_name):
         if result is not None:
             return result['metadata']['guid']
         else:
-            raise InvalidStatusCode(httplib.NOT_FOUND, '%s with name %s' % (domain_name, argument))
+            raise InvalidStatusCode(NOT_FOUND, '%s with name %s' % (domain_name, argument))
     else:
         raise ValueError('id: %s: does not allow search by name' % domain_name)
 
@@ -153,7 +153,7 @@ def main():
                                 stop=('stop', 'Stop an application',))
     application_extra_list_commands = dict(routes=('list_routes', 'List the routes(host) of an application', 'host'))
     description = []
-    for domain, command_description in commands.items():
+    for domain, command_description in list(commands.items()):
         description.append(' %s' % command_description['display_name'])
         description.append('   list_%ss : List %ss' % (domain, domain))
         description.append('   get_%s : Get a %s by %s' % (domain, domain,
@@ -165,16 +165,16 @@ def main():
         if command_description['allow_deletion']:
             description.append('   delete_%s : Delete a %s' % (domain, domain))
         if domain == 'application':
-            for command, application_command_description in application_commands.items():
+            for command, application_command_description in list(application_commands.items()):
                 description.append('   %s : %s' % (command, application_command_description[1]))
-            for command, application_command_description in application_extra_list_commands.items():
+            for command, application_command_description in list(application_extra_list_commands.items()):
                 description.append('   %s : %s' % (command, application_command_description[1]))
         description.append('')
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-V', '--version', action='version', version=__version__)
     subparsers = parser.add_subparsers(title='Commands', dest='action', description='\n'.join(description))
-    for domain, command_description in commands.items():
+    for domain, command_description in list(commands.items()):
         list_parser = subparsers.add_parser('list_%ss' % domain)
         for filter_parameter in command_description['list']:
             list_parser.add_argument('-%s' % filter_parameter, action='store', dest=filter_parameter, type=str,
@@ -193,11 +193,11 @@ def main():
                                        help='The id. Can be UUID or name (first found then)'
                                        if command_description['allow_retrieve_by_name'] else 'The id (UUID)')
         if domain == 'app':
-            for command, application_command_description in application_commands.items():
+            for command, application_command_description in list(application_commands.items()):
                 command_parser = subparsers.add_parser(command)
                 command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
                                             help='The id. Can be UUID or name (first found then)')
-            for command, application_command_description in application_extra_list_commands.items():
+            for command, application_command_description in list(application_extra_list_commands.items()):
                 command_parser = subparsers.add_parser(command)
                 command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
                                             help='The id. Can be UUID or name (first found then)')
@@ -243,7 +243,7 @@ def main():
             with open(arguments.entity[0], 'r') as f:
                 try:
                     data = json.load(f)
-                except ValueError, _:
+                except ValueError:
                     raise ValueError('entity: file %s does not contain valid json data' % arguments.entity[0])
         else:
             try:
@@ -260,7 +260,7 @@ def main():
             filter_get[commands[domain]['name']] = arguments.id[0]
             entity = _get_client_domain(client, domain).get_first(**filter_get)
             if entity is None:
-                raise InvalidStatusCode(httplib.NOT_FOUND, '%s with name %s' % (domain, arguments.id[0]))
+                raise InvalidStatusCode(NOT_FOUND, '%s with name %s' % (domain, arguments.id[0]))
             else:
                 _get_client_domain(client, domain)._remove(entity['metadata']['guid'])
         else:

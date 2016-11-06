@@ -15,7 +15,7 @@ version_file = '%s/%s/__init__.py' % (src_dir, package_directory)
 with open(version_file, 'r') as f:
     for line in f.readlines():
         if line.find('__version__') >= 0:
-            exec line
+            exec(line)
             break
     else:
         raise AssertionError('Failed to load version from %s' % version_file)
@@ -58,6 +58,10 @@ setup(name=package_name,
           "Natural Language :: English",
           "Operating System :: OS Independent",
           "Programming Language :: Python :: 2.7",
+          "Programming Language :: Python :: 3",
+          "Programming Language :: Python :: 3.3",
+          "Programming Language :: Python :: 3.4",
+          "Programming Language :: Python :: 3.5",
           "Topic :: Communications",
       ],
       entry_points={

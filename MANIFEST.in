@@ -1,2 +1,2 @@
-include *.md
+include *.rst
 include requirements.txt

@@ -1,4 +1,4 @@
-import httplib
+from cloudfoundry_client.imported import OK, UNAUTHORIZED
 import logging
 
 import requests
@@ -37,19 +37,15 @@ class CloudFoundryClient(CredentialManager):
         self.spaces = EntityManager(target_endpoint, self, '/v2/spaces')
         self.services = EntityManager(target_endpoint, self, '/v2/services')
         self.routes = EntityManager(target_endpoint, self, '/v2/routes')
-        try:
-            from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
-            self._loggregator = LoggregatorManager(info['logging_endpoint'], self)
-        except BaseException, ex:
-            _logger.warning("Error while loading loggregator: %s", ex)
-            self._loggregator = ex
+        self._loggregator_endpoint = info['logging_endpoint']
+        self._loggregator = None
 
     @property
     def loggregator(self):
-        if isinstance(self._loggregator, BaseException):
-            raise self._loggregator
-        else:
-            return self._loggregator
+        if self._loggregator is None:
+            from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
+            self._loggregator = LoggregatorManager(self._loggregator_endpoint, self)
+        return self._loggregator
 
     @staticmethod
     def get_info(target_endpoint, proxy=None, skip_verification=False):
@@ -57,15 +53,14 @@ class CloudFoundryClient(CredentialManager):
         info_response = requests.get('%s/v2/info' % target_endpoint,
                                      proxies=proxy if proxy is not None else dict(http='', https=''),
                                      verify=not skip_verification)
-        if info_response.status_code != httplib.OK:
-            print info_response.status_code
+        if info_response.status_code != OK:
             raise InvalidStatusCode(info_response.status_code, info_response.text)
         info = info_response.json()
         return info
 
     @staticmethod
     def _is_token_expired(response):
-        if response.status_code == httplib.UNAUTHORIZED:
+        if response.status_code == UNAUTHORIZED:
             try:
                 json_data = response.json()
                 result = json_data.get('code', 0) == 1000 and json_data.get('error_code', '') == 'CF-InvalidAuthToken'

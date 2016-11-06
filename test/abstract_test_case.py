@@ -1,7 +1,7 @@
 import json
 import types
 
-import mock
+from imported import mock
 
 from cloudfoundry_client.client import CloudFoundryClient
 from fake_requests import TARGET_ENDPOINT, mock_response
@@ -14,9 +14,12 @@ def mock_class(clazz):
         class MockClass(object):
             def __init__(self, *args, **kwargs):
                 for mother_class in true_mother_class:
-                    for attribute in dir(mother_class):
-                        if isinstance(getattr(mother_class, attribute), types.MethodType):
-                            setattr(self, attribute, mock.MagicMock())
+                    print ('adding attributes of %s' % mother_class)
+                    for attribute_name in dir(mother_class):
+                        attribute = getattr(mother_class, attribute_name)
+                        if isinstance(attribute, types.MethodType) or isinstance(attribute, types.FunctionType):
+                            setattr(self, attribute_name, mock.MagicMock())
+                            print('method %s added' % attribute_name)
 
         clazz.__bases__ = (MockClass,)
         setattr(clazz, 'CLASS_MOCKED', True)

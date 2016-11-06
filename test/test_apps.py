@@ -1,9 +1,9 @@
-import httplib
 import sys
 import unittest
 
-import mock
 
+from cloudfoundry_client.imported import BAD_REQUEST, OK, reduce
+from imported import CREATED, mock
 import cloudfoundry_client.main as main
 from abstract_test_case import AbstractTestCase
 from fake_requests import mock_response
@@ -19,19 +19,19 @@ class TestApps(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response('/v2/apps',
-                                                     httplib.OK,
+                                                     OK,
                                                      None,
                                                      'v2', 'apps', 'GET_response.json')
         all_applications = [application for application in self.client.apps.list()]
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(len(all_applications), 3)
-        print 'test_list - Application - %s' % str(all_applications[0])
+        print('test_list - Application - %s' % str(all_applications[0]))
         self.assertEqual(all_applications[0]['entity']['name'], "name-423")
 
     def test_list_filtered(self):
         self.client.get.return_value = mock_response(
-            '/v2/apps?q=space_guid%20IN%20space_guid&results-per-page=1&q=name%20IN%20application_name',
-            httplib.OK,
+            '/v2/apps?q=name%20IN%20application_name&results-per-page=1&q=space_guid%20IN%20space_guid',
+            OK,
             None,
             'v2', 'apps', 'GET_space_guid_name_response.json')
         application = self.client.apps.get_first(space_guid='space_guid', name='application_name')
@@ -41,7 +41,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_get_env(self):
         self.client.get.return_value = mock_response(
             '/v2/apps/app_id/env',
-            httplib.OK,
+            OK,
             None,
             'v2', 'apps', 'GET_{id}_env_response.json')
         application = self.client.apps.get_env('app_id')
@@ -51,7 +51,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_get_instances(self):
         self.client.get.return_value = mock_response(
             '/v2/apps/app_id/instances',
-            httplib.OK,
+            OK,
             None,
             'v2', 'apps', 'GET_{id}_instances_response.json')
         application = self.client.apps.get_instances('app_id')
@@ -61,7 +61,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_get_stats(self):
         self.client.get.return_value = mock_response(
             '/v2/apps/app_id/stats',
-            httplib.OK,
+            OK,
             None,
             'v2', 'apps', 'GET_{id}_stats_response.json')
         application = self.client.apps.get_stats('app_id')
@@ -71,20 +71,20 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_list_routes(self):
         self.client.get.return_value = mock_response(
             '/v2/apps/app_id/routes?q=route_guid%20IN%20route_id',
-            httplib.OK,
+            OK,
             None,
             'v2', 'apps', 'GET_{id}_routes_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
                      self.client.apps.list_routes('app_id', route_guid='route_id'), 0)
         for route in self.client.apps.list_routes('app_id', route_guid='route_id'):
-            print  route
+            print (route)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
     def test_list_service_bindings(self):
         self.client.get.return_value = mock_response(
             '/v2/apps/app_id/service_bindings',
-            httplib.OK,
+            OK,
             None,
             'v2', 'apps', 'GET_{id}_service_bindings_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
@@ -95,7 +95,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_get_sumary(self):
         self.client.get.return_value = mock_response(
             '/v2/apps/app_id/summary',
-            httplib.OK,
+            OK,
             None,
             'v2', 'apps', 'GET_{id}_summary_response.json')
         application = self.client.apps.get_summary('app_id')
@@ -106,7 +106,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_get(self):
         self.client.get.return_value = mock_response(
             '/v2/apps/app_id',
-            httplib.OK,
+            OK,
             None,
             'v2', 'apps', 'GET_{id}_response.json')
         application = self.client.apps.get('app_id')
@@ -116,22 +116,22 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_start(self):
         self.client.put.return_value = mock_response(
             '/v2/apps/app_id',
-            httplib.CREATED,
+            CREATED,
             None,
             'v2', 'apps', 'PUT_{id}_response.json')
         mock_summary = mock_response(
             '/v2/apps/app_id/summary',
-            httplib.OK,
+            OK,
             None,
             'v2', 'apps', 'GET_{id}_summary_response.json')
         mock_instances_stopped = mock_response(
             '/v2/apps/app_id/instances',
-            httplib.BAD_REQUEST,
+            BAD_REQUEST,
             None,
             'v2', 'apps', 'GET_{id}_instances_stopped_response.json')
         mock_instances_started = mock_response(
             '/v2/apps/app_id/instances',
-            httplib.OK,
+            OK,
             None,
             'v2', 'apps', 'GET_{id}_instances_response.json')
         self.client.get.side_effect = [mock_summary, mock_instances_stopped, mock_instances_started]
@@ -148,12 +148,12 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_stop(self):
         self.client.put.return_value = mock_response(
             '/v2/apps/app_id',
-            httplib.CREATED,
+            CREATED,
             None,
             'v2', 'apps', 'PUT_{id}_response.json')
         self.client.get.return_value = mock_response(
             '/v2/apps/app_id/instances',
-            httplib.BAD_REQUEST,
+            BAD_REQUEST,
             None,
             'v2', 'apps', 'GET_{id}_instances_stopped_response.json')
         application = self.client.apps.stop('app_id')
@@ -166,18 +166,18 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.client.get.side_effect = [
             mock_response(
                 '/v2/apps/app_id',
-                httplib.OK,
+                OK,
                 None,
                 'v2', 'apps', 'GET_{id}_response.json'),
             mock_response(
                 '/v2/spaces/space_id',
-                httplib.OK,
+                OK,
                 None,
                 'v2', 'spaces', 'GET_{id}_response.json')
             ,
             mock_response(
                 '/v2/routes',
-                httplib.OK,
+                OK,
                 None,
                 'v2', 'routes', 'GET_response.json')
         ]
@@ -194,7 +194,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/apps',
-                                                         httplib.OK,
+                                                         OK,
                                                          None,
                                                          'v2', 'apps', 'GET_response.json')
             main.main()
@@ -205,7 +205,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81',
-                                                         httplib.OK,
+                                                         OK,
                                                          None,
                                                          'v2', 'apps', 'GET_{id}_response.json')
             main.main()

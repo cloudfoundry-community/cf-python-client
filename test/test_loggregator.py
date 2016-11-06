@@ -1,7 +1,7 @@
-import httplib
 import unittest
 
 from abstract_test_case import AbstractTestCase
+from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
 
 
@@ -16,7 +16,7 @@ class TestLoggregator(unittest.TestCase, AbstractTestCase):
     def test_recents(self):
         boundary = '7e061f8d6ec00677d6f6b17fcafec9eef2e3a2360e557f72e3e1116efcec'
         self.client.get.return_value = mock_response('/recent?app=app_id',
-                                                     httplib.OK,
+                                                     OK,
                                                      {'content-type':
                                                           'multipart/x-protobuf; boundary=%s' % boundary},
                                                      'recents', 'GET_response.bin')

@@ -1,6 +1,7 @@
-import httplib
 import os
 from json import loads
+
+from imported import SEE_OTHER
 
 
 class MockResponse(object):
@@ -9,7 +10,7 @@ class MockResponse(object):
         self.url = url
         self.text = text
         self.headers = dict()
-        self.is_redirect = status_code == httplib.SEE_OTHER
+        self.is_redirect = status_code == SEE_OTHER
         if headers is not None:
             self.headers.update(headers)
 

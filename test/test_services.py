@@ -1,11 +1,11 @@
-import httplib
-import unittest
-import mock
 import sys
+import unittest
 
 import cloudfoundry_client.main as main
 from abstract_test_case import AbstractTestCase
+from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
+from imported import mock
 
 
 class TestServices(unittest.TestCase, AbstractTestCase):
@@ -18,7 +18,7 @@ class TestServices(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response('/v2/services?q=label%20IN%20some_label',
-                                                     httplib.OK,
+                                                     OK,
                                                      None,
                                                      'v2', 'services', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, self.client.services.list(label='some_label'), 0)
@@ -28,7 +28,7 @@ class TestServices(unittest.TestCase, AbstractTestCase):
     def test_get(self):
         self.client.get.return_value = mock_response(
             '/v2/services/service_id',
-            httplib.OK,
+            OK,
             None,
             'v2', 'services', 'GET_{id}_response.json')
         result = self.client.services.get('service_id')
@@ -39,12 +39,12 @@ class TestServices(unittest.TestCase, AbstractTestCase):
         self.client.get.side_effect = [
             mock_response(
                 '/v2/services/service_id',
-                httplib.OK,
+                OK,
                 None,
                 'v2', 'services', 'GET_{id}_response.json'),
             mock_response(
                 '/v2/services/2c883dbb-a726-4ecf-a0b7-d65588897e7f/service_plans',
-                httplib.OK,
+                OK,
                 None,
                 'v2', 'service_plans', 'GET_response.json')
 
@@ -60,7 +60,7 @@ class TestServices(unittest.TestCase, AbstractTestCase):
         with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/services',
-                                                         httplib.OK,
+                                                         OK,
                                                          None,
                                                          'v2', 'services', 'GET_response.json')
             main.main()
@@ -71,9 +71,8 @@ class TestServices(unittest.TestCase, AbstractTestCase):
         with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/services/2c883dbb-a726-4ecf-a0b7-d65588897e7f',
-                                                         httplib.OK,
+                                                         OK,
                                                          None,
                                                          'v2', 'services', 'GET_{id}_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
-

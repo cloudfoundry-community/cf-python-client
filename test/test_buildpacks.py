@@ -1,12 +1,11 @@
-import httplib
-import unittest
-
-import mock
 import sys
+import unittest
 
 import cloudfoundry_client.main as main
 from abstract_test_case import AbstractTestCase
+from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
+from imported import CREATED, mock
 
 
 class TestBuildpacks(unittest.TestCase, AbstractTestCase):
@@ -19,7 +18,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response('/v2/buildpacks',
-                                                     httplib.OK,
+                                                     OK,
                                                      None,
                                                      'v2', 'buildpacks', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, self.client.buildpacks.list(), 0)
@@ -29,7 +28,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
     def test_get(self):
         self.client.get.return_value = mock_response(
             '/v2/buildpacks/buildpack_id',
-            httplib.OK,
+            OK,
             None,
             'v2', 'buildpacks', 'GET_{id}_response.json')
         result = self.client.buildpacks.get('buildpack_id')
@@ -39,7 +38,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
     def test_update(self):
         self.client.put.return_value = mock_response(
             '/v2/buildpacks/build_pack_id',
-            httplib.CREATED,
+            CREATED,
             None,
             'v2', 'apps', 'PUT_{id}_response.json')
         result = self.client.buildpacks.update('build_pack_id', dict(enabled=False))
@@ -52,7 +51,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
         with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/buildpacks',
-                                                         httplib.OK,
+                                                         OK,
                                                          None,
                                                          'v2', 'buildpacks', 'GET_response.json')
             main.main()
@@ -63,7 +62,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
         with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/buildpacks/6e72c33b-dff0-4020-8603-bcd8a4eb05e4',
-                                                         httplib.OK,
+                                                         OK,
                                                          None,
                                                          'v2', 'buildpacks', 'GET_{id}_response.json')
             main.main()

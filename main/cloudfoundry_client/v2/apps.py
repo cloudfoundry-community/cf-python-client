@@ -1,7 +1,8 @@
-import httplib
+
 import logging
 from time import sleep
 
+from cloudfoundry_client.imported import BAD_REQUEST
 from cloudfoundry_client.entities import JsonObject, Entity, EntityManager, InvalidStatusCode
 
 _logger = logging.getLogger(__name__)
@@ -72,7 +73,7 @@ class AppManager(EntityManager):
         while not all_in_expected_state:
             instances = self._safe_get_instances(application_guid)
             number_in_expected_state = 0
-            for instance_number, instance in instances.items():
+            for instance_number, instance in list(instances.items()):
                 if instance['state'] == state_expected:
                     number_in_expected_state += 1
             # this case will make this code work for both stop and start operation
@@ -89,8 +90,8 @@ class AppManager(EntityManager):
     def _safe_get_instances(self, application_guid):
         try:
             return self.get_instances(application_guid)
-        except InvalidStatusCode, ex:
-            if ex.status_code == httplib.BAD_REQUEST and type(ex.body) == dict:
+        except InvalidStatusCode as ex:
+            if ex.status_code == BAD_REQUEST and type(ex.body) == dict:
                 code = ex.body.get('code', -1)
                 # 170002: staging not finished
                 # 220001: instances error

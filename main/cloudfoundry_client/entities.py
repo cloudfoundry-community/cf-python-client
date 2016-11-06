@@ -2,7 +2,7 @@ import functools
 import json
 import logging
 
-from urllib import quote
+from cloudfoundry_client.imported import quote, reduce
 
 _logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class Entity(JsonObject):
         self.target_endpoint = target_endpoint
         self.client = client
         try:
-            for attribute, value in self['entity'].items():
+            for attribute, value in list(self['entity'].items()):
                 domain_name, suffix = attribute.rpartition('_')[::2]
                 if suffix == 'url':
                     manager_name = domain_name if domain_name.endswith('s') else '%ss' % domain_name
@@ -40,7 +40,6 @@ class Entity(JsonObject):
                     new_method.__name__ = domain_name
                     setattr(self, domain_name, new_method)
         except KeyError:
-            print self.keys()
             raise
 
 
@@ -81,7 +80,7 @@ class EntityManager(object):
             _logger.debug('GET - %s - %s', url_requested, response.text)
             response_json = self._read_response(response, JsonObject)
             for resource in response_json['resources']:
-                yield entity_builder(resource.items())
+                yield entity_builder(list(resource.items()))
             if response_json['next_url'] is None:
                 break
             else:
@@ -130,7 +129,7 @@ class EntityManager(object):
     def _read_response(self, response, other_entity_builder=None):
         entity_builder = self._get_entity_builder(other_entity_builder)
         result = response.json(object_pairs_hook=JsonObject)
-        return entity_builder(result.items())
+        return entity_builder(list(result.items()))
 
     def _get_entity_builder(self, entity_builder):
         if entity_builder is None:
@@ -152,13 +151,13 @@ class EntityManager(object):
 
         if len(kwargs) > 0:
             return '%s?%s' % (url,
-                              "&".join(reduce(_append_encoded_parameter, kwargs.items(), [])))
+                              "&".join(reduce(_append_encoded_parameter, sorted(list(kwargs.items())), [])))
         else:
             return url
 
     @staticmethod
     def _check_response(response):
-        if response.status_code / 100 == 2:
+        if int(response.status_code / 100) == 2:
             return response
         else:
             try:

@@ -1,12 +1,11 @@
-import httplib
+import sys
 import unittest
 
-import mock
-import sys
 import cloudfoundry_client.main as main
-
 from abstract_test_case import AbstractTestCase
+from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
+from imported import mock
 
 
 class TestOrganizations(unittest.TestCase, AbstractTestCase):
@@ -19,7 +18,7 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response('/v2/organizations?q=name%20IN%20organization_name',
-                                                     httplib.OK,
+                                                     OK,
                                                      None,
                                                      'v2', 'organizations', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, self.client.organizations.list(name='organization_name'), 0)
@@ -29,7 +28,7 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
     def test_get(self):
         self.client.get.return_value = mock_response(
             '/v2/organizations/org_id',
-            httplib.OK,
+            OK,
             None,
             'v2', 'organizations', 'GET_{id}_response.json')
         result = self.client.organizations.get('org_id')
@@ -40,12 +39,12 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
         self.client.get.side_effect = [
             mock_response(
                 '/v2/organizations/org_id',
-                httplib.OK,
+                OK,
                 None,
                 'v2', 'organizations', 'GET_{id}_response.json'),
             mock_response(
                 '/v2/organizations/fe79371b-39b8-4f0d-8331-cff423a06aca/spaces',
-                httplib.OK,
+                OK,
                 None,
                 'v2', 'spaces', 'GET_response.json')
         ]
@@ -60,7 +59,7 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
         with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/organizations',
-                                                         httplib.OK,
+                                                         OK,
                                                          None,
                                                          'v2', 'organizations', 'GET_response.json')
             main.main()
@@ -71,7 +70,7 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
         with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/organizations/fe79371b-39b8-4f0d-8331-cff423a06aca',
-                                                         httplib.OK,
+                                                         OK,
                                                          None,
                                                          'v2', 'organizations', 'GET_{id}_response.json')
             main.main()
