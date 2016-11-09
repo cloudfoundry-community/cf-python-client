@@ -3,7 +3,7 @@ import unittest
 from cloudfoundry_client.entities import EntityManager
 from cloudfoundry_client.imported import OK, reduce
 from fake_requests import TARGET_ENDPOINT, mock_response
-from imported import mock
+from imported import MagicMock, call
 
 
 class TestEntities(unittest.TestCase):
@@ -15,7 +15,7 @@ class TestEntities(unittest.TestCase):
         self.assertEqual('/v2/apps?order-direction=asc&page=1&results-per-page=20&q=space_guid%20IN%20some-id', url)
 
     def test_list(self):
-        client = mock.MagicMock()
+        client = MagicMock()
         entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/first')
 
         first_response = mock_response(
@@ -33,13 +33,13 @@ class TestEntities(unittest.TestCase):
                                                                                 'order-direction': 'asc',
                                                                                 'page': 1,
                                                                                 "space_guid": 'some-id'}), 0)
-        client.get.assert_has_calls([mock.call(first_response.url),
-                                     mock.call(second_response.url)],
+        client.get.assert_has_calls([call(first_response.url),
+                                     call(second_response.url)],
                                     any_order=False)
         self.assertEqual(cpt, 3)
 
     def test_iter(self):
-        client = mock.MagicMock()
+        client = MagicMock()
         entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/something')
 
         client.get.return_value = mock_response(
@@ -53,7 +53,7 @@ class TestEntities(unittest.TestCase):
         self.assertEqual(cpt, 2)
 
     def test_get_elem(self):
-        client = mock.MagicMock()
+        client = MagicMock()
         entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/something')
 
         client.get.return_value = mock_response(

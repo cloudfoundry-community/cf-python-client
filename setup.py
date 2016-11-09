@@ -24,6 +24,11 @@ with open(version_file, 'r') as f:
 def purge_sub_dir(path):
     shutil.rmtree(os.path.join(os.path.dirname(__file__), path))
 
+if 'test' in sys.argv[1:]:
+    print('%s added' % os.path.join(os.getcwd(), 'test'))
+    sys.path.append(os.path.join(os.getcwd(), 'test'))
+
+
 
 class GenerateCommand(Command):
     description = "generate protobuf class generation"
@@ -39,9 +44,9 @@ class GenerateCommand(Command):
         source_path = os.path.join(os.path.dirname(__file__), src_dir, package_directory, loggregator_dir)
         for file_protobuf in os.listdir(source_path):
             if file_protobuf.endswith('.proto'):
-                print('Generating %s' % file_protobuf)
-                subprocess.call(['protoc', '-I', source_path, '--python_out=%s' % source_path,
-                                 os.path.join(source_path, file_protobuf)])
+                file_path = os.path.join(source_path, file_protobuf)
+                print('Generating %s from %s' % (file_protobuf, file_path))
+                subprocess.call(['protoc', '-I', source_path, '--python_out=%s' % source_path, file_path])
 
 
 setup(name=package_name,

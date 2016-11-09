@@ -5,7 +5,7 @@ import cloudfoundry_client.main as main
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
-from imported import mock, CREATED, NO_CONTENT
+from imported import patch, call, CREATED, NO_CONTENT
 
 
 class TestServiceInstances(unittest.TestCase, AbstractTestCase):
@@ -123,13 +123,13 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
         self.assertEqual(cpt, 1)
         cpt = reduce(lambda increment, _: increment + 1, service_instance.service_keys(), 0)
         self.assertEqual(cpt, 1)
-        self.client.get.assert_has_calls([mock.call(side_effect.url) for side_effect in self.client.get.side_effect],
+        self.client.get.assert_has_calls([call(side_effect.url) for side_effect in self.client.get.side_effect],
                                          any_order=False)
 
-    @mock.patch.object(sys, 'argv', ['main', 'list_service_instances'])
+    @patch.object(sys, 'argv', ['main', 'list_service_instances'])
     def test_main_list_service_instances(self):
-        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
-                        new=lambda: self.client):
+        with patch('cloudfoundry_client.main.build_client_from_configuration',
+                   new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_instances',
                                                          OK,
                                                          None,
@@ -137,10 +137,10 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
 
-    @mock.patch.object(sys, 'argv', ['main', 'get_service_instance', 'df52420f-d5b9-4b86-a7d3-6d7005d1ce96'])
+    @patch.object(sys, 'argv', ['main', 'get_service_instance', 'df52420f-d5b9-4b86-a7d3-6d7005d1ce96'])
     def test_main_get_service_instance(self):
-        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
-                        new=lambda: self.client):
+        with patch('cloudfoundry_client.main.build_client_from_configuration',
+                   new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_instances/df52420f-d5b9-4b86-a7d3-6d7005d1ce96',
                                                          OK,
                                                          None,

@@ -6,3 +6,4 @@ dist/
 main/cloudfoundry_client/loggregator/logmessage_pb2.py
 integration/sandbox.py
 integration/resources/test.properties
+.eggs/

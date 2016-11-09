@@ -1,12 +1,11 @@
 import sys
 
-
 if sys.version_info.major == 2:
-    import mock
+    from mock import patch, call, MagicMock
     from httplib import SEE_OTHER, CREATED, NO_CONTENT
 
 elif sys.version_info.major == 3:
-    from unittest import mock
+    from unittest.mock import patch, call, MagicMock
     from http.client import SEE_OTHER, CREATED, NO_CONTENT
 
 else:

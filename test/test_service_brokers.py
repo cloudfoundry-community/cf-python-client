@@ -5,7 +5,7 @@ import cloudfoundry_client.main as main
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
-from imported import mock, CREATED, NO_CONTENT
+from imported import patch, CREATED, NO_CONTENT
 
 
 class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
@@ -75,9 +75,9 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
         self.client.service_brokers.remove('broker_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
-    @mock.patch.object(sys, 'argv', ['main', 'list_service_brokers'])
+    @patch.object(sys, 'argv', ['main', 'list_service_brokers'])
     def test_main_list_service_brokers(self):
-        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_brokers',
                                                          OK,
@@ -86,9 +86,9 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
 
-    @mock.patch.object(sys, 'argv', ['main', 'get_service_broker', 'ade9730c-4ee5-4290-ad37-0b15cecd2ca6'])
+    @patch.object(sys, 'argv', ['main', 'get_service_broker', 'ade9730c-4ee5-4290-ad37-0b15cecd2ca6'])
     def test_main_get_service_broker(self):
-        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_brokers/ade9730c-4ee5-4290-ad37-0b15cecd2ca6',
                                                          OK,

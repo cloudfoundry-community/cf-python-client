@@ -1,12 +1,11 @@
 import sys
 import unittest
 
-
-from cloudfoundry_client.imported import BAD_REQUEST, OK, reduce
-from imported import CREATED, mock
 import cloudfoundry_client.main as main
 from abstract_test_case import AbstractTestCase
+from cloudfoundry_client.imported import BAD_REQUEST, OK, reduce
 from fake_requests import mock_response
+from imported import CREATED, patch, call
 
 
 class TestApps(unittest.TestCase, AbstractTestCase):
@@ -139,9 +138,9 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         application = self.client.apps.start('app_id')
         self.client.put.assert_called_with(self.client.put.return_value.url,
                                            json=dict(state='STARTED'))
-        self.client.get.assert_has_calls([mock.call(mock_summary.url),
-                                          mock.call(mock_instances_stopped.url),
-                                          mock.call(mock_instances_started.url)],
+        self.client.get.assert_has_calls([call(mock_summary.url),
+                                          call(mock_instances_stopped.url),
+                                          call(mock_instances_started.url)],
                                          any_order=False)
         self.assertIsNotNone(application)
 
@@ -186,13 +185,13 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(application.space())
         cpt = reduce(lambda increment, _: increment + 1, application.routes(), 0)
         self.assertEqual(cpt, 1)
-        self.client.get.assert_has_calls([mock.call(side_effect.url) for side_effect in self.client.get.side_effect],
+        self.client.get.assert_has_calls([call(side_effect.url) for side_effect in self.client.get.side_effect],
                                          any_order=False)
 
-    @mock.patch.object(sys, 'argv', ['main', 'list_apps'])
+    @patch.object(sys, 'argv', ['main', 'list_apps'])
     def test_main_list_apps(self):
-        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
-                        new=lambda: self.client):
+        with patch('cloudfoundry_client.main.build_client_from_configuration',
+                   new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/apps',
                                                          OK,
                                                          None,
@@ -200,10 +199,10 @@ class TestApps(unittest.TestCase, AbstractTestCase):
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
 
-    @mock.patch.object(sys, 'argv', ['main', 'get_app', '906775ea-622e-4bc7-af5d-9aab3b652f81'])
+    @patch.object(sys, 'argv', ['main', 'get_app', '906775ea-622e-4bc7-af5d-9aab3b652f81'])
     def test_main_get_app(self):
-        with mock.patch('cloudfoundry_client.main.build_client_from_configuration',
-                        new=lambda: self.client):
+        with patch('cloudfoundry_client.main.build_client_from_configuration',
+                   new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81',
                                                          OK,
                                                          None,
