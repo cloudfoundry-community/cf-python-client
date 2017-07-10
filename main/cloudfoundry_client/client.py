@@ -37,14 +37,17 @@ class CloudFoundryClient(CredentialManager):
         self.spaces = EntityManager(target_endpoint, self, '/v2/spaces')
         self.services = EntityManager(target_endpoint, self, '/v2/services')
         self.routes = EntityManager(target_endpoint, self, '/v2/routes')
-        self._loggregator_endpoint = info['logging_endpoint']
+        self._loggregator_endpoint = info.get('logging_endpoint', None)
         self._loggregator = None
 
     @property
     def loggregator(self):
         if self._loggregator is None:
-            from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
-            self._loggregator = LoggregatorManager(self._loggregator_endpoint, self)
+            if self._loggregator_endpoint is None:
+                raise NotImplementedError('No loggregator endpoint for this instance')
+            else:
+                from cloudfoundry_client.loggregator.loggregator import LoggregatorManager
+                self._loggregator = LoggregatorManager(self._loggregator_endpoint, self)
         return self._loggregator
 
     @staticmethod
