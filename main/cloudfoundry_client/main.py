@@ -186,7 +186,7 @@ def main():
         if command_description['allow_creation']:
             create_parser = subparsers.add_parser('create_%s' % domain)
             create_parser.add_argument('entity', metavar='entities', type=str, nargs=1,
-                                       help='Either a path of the json file containing the %s or a json object' % domain)
+                                       help='Either a path of the json file containing the %s or a json object or the json %s object' % (domain, domain))
         if command_description['allow_deletion']:
             delete_parser = subparsers.add_parser('delete_%s' % domain)
             delete_parser.add_argument('id', metavar='ids', type=str, nargs=1,
