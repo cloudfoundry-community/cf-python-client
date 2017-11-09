@@ -1,7 +1,7 @@
 import logging
 import os
 
-from imported import ConfigParser, NoSectionError, NoOptionError
+from imported import ConfigParser, NoSectionError, NoOptionError, HTTPConnection
 from cloudfoundry_client.client import CloudFoundryClient
 
 _client = None
@@ -11,8 +11,12 @@ _app_guid = None
 
 
 def _init_logging():
+    HTTPConnection.debuglevel = 1
     logging.basicConfig(level=logging.DEBUG,
                         format='%(levelname)5s - %(name)s -  %(message)s')
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    requests_log.setLevel(logging.DEBUG)
+    requests_log.propagate = True
 
 
 def get_resource_dir():

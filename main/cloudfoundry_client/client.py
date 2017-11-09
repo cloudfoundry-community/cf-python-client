@@ -73,3 +73,8 @@ class CloudFoundryClient(CredentialManager):
                 return False
         else:
             return False
+
+    @staticmethod
+    def _token_request_headers(_):
+        return dict(Accept='application/json')
+
