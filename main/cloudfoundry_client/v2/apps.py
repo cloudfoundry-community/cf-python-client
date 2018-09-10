@@ -49,19 +49,19 @@ class AppManager(EntityManager):
         return self.client.service_bindings._list('%s/%s/service_bindings' % (self.entity_uri, application_guid),
                                                  **kwargs)
 
-    def start(self, application_guid, check_time=0.5, timeout=300, async=False):
+    def start(self, application_guid, check_time=0.5, timeout=300, asynchronous=False):
         result = super(AppManager, self)._update(application_guid,
                                                  dict(state='STARTED'))
-        if async:
+        if asynchronous:
             return result
         else:
             summary = self.get_summary(application_guid)
             self._wait_for_instances_in_state(application_guid, summary['instances'], 'RUNNING', check_time, timeout)
             return result
 
-    def stop(self, application_guid, check_time=0.5, timeout=500, async=False):
+    def stop(self, application_guid, check_time=0.5, timeout=500, asynchronous=False):
         result = super(AppManager, self)._update(application_guid, dict(state='STOPPED'))
-        if async:
+        if asynchronous:
             return result
         else:
             self._wait_for_instances_in_state(application_guid, 0, 'STOPPED', check_time, timeout)
