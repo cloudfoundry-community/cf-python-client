@@ -18,7 +18,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response(
-            '/v2/service_plans?q=service_guid%20IN%20service_id',
+            '/v2/service_plans?q=service_guid%3Aservice_id',
             OK,
             None,
             'v2', 'service_plans', 'GET_response.json')
@@ -38,7 +38,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
 
     def test_list_instances(self):
         self.client.get.return_value = mock_response(
-            '/v2/service_plans/plan_id/service_instances?q=space_guid%20IN%20space_id',
+            '/v2/service_plans/plan_id/service_instances?q=space_guid%3Aspace_id',
             OK,
             None,
             'v2', 'apps', 'GET_{id}_routes_response.json')

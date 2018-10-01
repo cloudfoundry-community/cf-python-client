@@ -29,7 +29,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
 
     def test_list_filtered(self):
         self.client.get.return_value = mock_response(
-            '/v2/apps?q=name%20IN%20application_name&results-per-page=1&q=space_guid%20IN%20space_guid',
+            '/v2/apps?q=name%3Aapplication_name&results-per-page=1&q=space_guid%3Aspace_guid',
             OK,
             None,
             'v2', 'apps', 'GET_space_guid_name_response.json')
@@ -69,7 +69,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
 
     def test_list_routes(self):
         self.client.get.return_value = mock_response(
-            '/v2/apps/app_id/routes?q=route_guid%20IN%20route_id',
+            '/v2/apps/app_id/routes?q=route_guid%3Aroute_id',
             OK,
             None,
             'v2', 'apps', 'GET_{id}_routes_response.json')

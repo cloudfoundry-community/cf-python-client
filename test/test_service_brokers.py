@@ -18,7 +18,7 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response(
-            '/v2/service_brokers?q=space_guid%20IN%20space_guid',
+            '/v2/service_brokers?q=space_guid%3Aspace_guid',
             OK,
             None,
             'v2', 'service_bindings', 'GET_response.json')

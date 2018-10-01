@@ -18,7 +18,7 @@ class TestRoutes(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response(
-            '/v2/routes?q=organization_guid%20IN%20organization_guid',
+            '/v2/routes?q=organization_guid%3Aorganization_guid',
             OK,
             None,
             'v2', 'routes', 'GET_response.json')

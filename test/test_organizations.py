@@ -17,7 +17,7 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_list(self):
-        self.client.get.return_value = mock_response('/v2/organizations?q=name%20IN%20organization_name',
+        self.client.get.return_value = mock_response('/v2/organizations?q=name%3Aorganization_name',
                                                      OK,
                                                      None,
                                                      'v2', 'organizations', 'GET_response.json')
