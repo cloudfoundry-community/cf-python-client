@@ -123,6 +123,27 @@ All managers provide the following methods:
 - ``_update``: the update operation. Since it is a generic operation (only takes a the resource id and a *dict* object), this operation is protected
 - ``_remove``: the delete operation. This operation is maintained protected.
 
+.. code-block:: python
+
+    # Assume you have an organization named `test-org` with a guid of `test-org-guid`
+    org_get = client.organizations.get('test-org-guid')
+    org_get_first = client.organizations.get_first(**{'name': 'test-org'})
+    org_from_list = list(client.organizations.list(**{'name': 'test-org'}))[0]
+    assert org_get == org_get_first == org_from_list
+
+    # You can also specify multiple values for a query parameter.
+    for organization in client.organizations.list(**{'name': ['org1', 'org2']}):
+    	print organization['metadata']['guid']
+
+    # Order and Paging parameters are also supported.
+    query = {
+    	'order-by': 'name',
+    	'order-direction': 'desc',
+    	'results-per-page': 100
+    }
+    for organization in client.organizations.list(**query):
+    	print organization['entity']['name']
+
 Command Line Interface
 ----------------------
 

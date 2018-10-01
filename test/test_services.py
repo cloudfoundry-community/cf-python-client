@@ -17,7 +17,7 @@ class TestServices(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_list(self):
-        self.client.get.return_value = mock_response('/v2/services?q=label%20IN%20some_label',
+        self.client.get.return_value = mock_response('/v2/services?q=label%3Asome_label',
                                                      OK,
                                                      None,
                                                      'v2', 'services', 'GET_response.json')

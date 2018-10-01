@@ -18,7 +18,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response(
-            '/v2/service_instances?q=service_plan_guid%20IN%20plan_id&q=space_guid%20IN%20space_guid',
+            '/v2/service_instances?q=service_plan_guid%3Aplan_id&q=space_guid%3Aspace_guid',
             OK,
             None,
             'v2', 'service_instances', 'GET_response.json')

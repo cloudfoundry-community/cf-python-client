@@ -18,7 +18,7 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response(
-            '/v2/service_bindings?q=service_instance_guid%20IN%20instance_guid',
+            '/v2/service_bindings?q=service_instance_guid%3Ainstance_guid',
             OK,
             None,
             'v2', 'service_bindings', 'GET_response.json')

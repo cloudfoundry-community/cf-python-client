@@ -17,7 +17,7 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_list(self):
-        self.client.get.return_value = mock_response('/v2/spaces?q=organization_guid%20IN%20org_id',
+        self.client.get.return_value = mock_response('/v2/spaces?q=organization_guid%3Aorg_id',
                                                      OK,
                                                      None,
                                                      'v2', 'spaces', 'GET_response.json')

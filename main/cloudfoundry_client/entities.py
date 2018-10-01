@@ -139,14 +139,23 @@ class EntityManager(object):
 
     @staticmethod
     def _get_url_filtered(url, **kwargs):
-        list_query_paramters = ['page', 'results-per-page', 'order-direction']
+        list_query_parameters = ['page', 'results-per-page', 'order-direction']
+        list_multi_parameters = ['order-by']
 
         def _append_encoded_parameter(parameters, args):
             parameter_name, parameter_value = args[0], args[1]
-            if parameter_name in list_query_paramters:
+            if parameter_name in list_query_parameters:
                 parameters.append('%s=%s' % (parameter_name, str(parameter_value)))
+            elif parameter_name in list_multi_parameters:
+                value_list = parameter_value
+                if not isinstance(value_list, (list, tuple)):
+                    value_list = [value_list]
+                for value in value_list:
+                    parameters.append('%s=%s' % (parameter_name, str(value)))
+            elif isinstance(parameter_value, (list, tuple)):
+                parameters.append('q=%s' % quote('%s IN %s' % (parameter_name, ','.join(parameter_value))))
             else:
-                parameters.append('q=%s' % quote('%s IN %s' % (parameter_name, str(parameter_value))))
+                parameters.append('q=%s' % quote('%s:%s' % (parameter_name, str(parameter_value))))
             return parameters
 
         if len(kwargs) > 0:
