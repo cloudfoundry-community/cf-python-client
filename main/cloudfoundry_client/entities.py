@@ -43,20 +43,6 @@ class Entity(JsonObject):
             raise
 
 
-class InvalidStatusCode(Exception):
-    def __init__(self, status_code, body):
-        self.status_code = status_code
-        self.body = body
-
-    def __str__(self):
-        if self.body is None:
-            return '%d' % self.status_code
-        elif type(self.body) == str:
-            return '%d : %s' % (self.status_code, self.body)
-        else:
-            return '%d : %s' % (self.status_code, json.dumps(self.body))
-
-
 class EntityManager(object):
     def __init__(self, target_endpoint, client, entity_uri, entity_builder=None):
         self.target_endpoint = target_endpoint
@@ -67,14 +53,13 @@ class EntityManager(object):
 
     def _get(self, requested_path, entity_builder=None):
         url = '%s%s' % (self.target_endpoint, requested_path)
-        response = EntityManager._check_response(self.client.get(url))
+        response = self.client.get(url)
         _logger.debug('GET - %s - %s', requested_path, response.text)
         return self._read_response(response, entity_builder)
 
     def _list(self, requested_path, entity_builder=None, **kwargs):
         url_requested = EntityManager._get_url_filtered('%s%s' % (self.target_endpoint, requested_path), **kwargs)
-        response = EntityManager._check_response(self.client
-                                                 .get(url_requested))
+        response = self.client.get(url_requested)
         entity_builder = self._get_entity_builder(entity_builder)
         while True:
             _logger.debug('GET - %s - %s', url_requested, response.text)
@@ -85,23 +70,23 @@ class EntityManager(object):
                 break
             else:
                 url_requested = '%s%s' % (self.target_endpoint, response_json['next_url'])
-                response = EntityManager._check_response(self.client.get(url_requested))
+                response = self.client.get(url_requested)
 
     def _create(self, data):
         url = '%s%s' % (self.target_endpoint, self.entity_uri)
-        response = EntityManager._check_response(self.client.post(url, json=data))
+        response = self.client.post(url, json=data)
         _logger.debug('POST - %s - %s', url, response.text)
         return self._read_response(response)
 
     def _update(self, resource_id, data):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
-        response = EntityManager._check_response(self.client.put(url, json=data))
+        response = self.client.put(url, json=data)
         _logger.debug('PUT - %s - %s', url, response.text)
         return self._read_response(response)
 
     def _remove(self, resource_id):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
-        response = EntityManager._check_response(self.client.delete(url))
+        response = self.client.delete(url)
         _logger.debug('DELETE - %s - %s', url, response.text)
 
     def __iter__(self):
@@ -164,13 +149,3 @@ class EntityManager(object):
         else:
             return url
 
-    @staticmethod
-    def _check_response(response):
-        if int(response.status_code / 100) == 2:
-            return response
-        else:
-            try:
-                body = response.json()
-            except Exception:
-                body = response.text
-            raise InvalidStatusCode(response.status_code, body)

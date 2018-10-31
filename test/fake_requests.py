@@ -1,7 +1,7 @@
 import os
 from json import loads
 
-from imported import SEE_OTHER
+from imported import SEE_OTHER, iterate_text
 
 
 class MockResponse(object):
@@ -21,8 +21,7 @@ class MockResponse(object):
         return loads(self.text, **kwargs)
 
     def __iter__(self):
-        for b in self.text:
-            yield b
+        return iterate_text(self.text)
 
 
 TARGET_ENDPOINT = "http://somewhere.org"

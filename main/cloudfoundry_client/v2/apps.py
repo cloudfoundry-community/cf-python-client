@@ -3,7 +3,8 @@ import logging
 from time import sleep
 
 from cloudfoundry_client.imported import BAD_REQUEST
-from cloudfoundry_client.entities import JsonObject, Entity, EntityManager, InvalidStatusCode
+from cloudfoundry_client.entities import JsonObject, Entity, EntityManager
+from cloudfoundry_client.errors import InvalidStatusCode
 
 _logger = logging.getLogger(__name__)
 
@@ -23,6 +24,12 @@ class _Application(Entity):
 
     def summary(self):
         return self.client.apps.get_summary(self['metadata']['guid'])
+
+    def recent_logs(self):
+        return self.client.doppler.recent_logs(self['metadata']['guid'])
+
+    def stream_logs(self):
+        return self.client.doppler.stream_logs(self['metadata']['guid'])
 
 
 class AppManager(EntityManager):

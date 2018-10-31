@@ -1,5 +1,6 @@
 import json
 import types
+import re
 
 from imported import MagicMock, patch
 
@@ -33,6 +34,6 @@ class AbstractTestCase(object):
             fake_info_response = mock_response('/v2/info', 200, None)
             fake_info_response.text = json.dumps(dict(api_version='2.X',
                                                       authorization_endpoint=TARGET_ENDPOINT,
-                                                      logging_endpoint=TARGET_ENDPOINT))
+                                                      doppler_logging_endpoint=re.sub('^http', 'ws', TARGET_ENDPOINT)))
             fake_requests.get.return_value = fake_info_response
             self.client = CloudFoundryClient(TARGET_ENDPOINT)

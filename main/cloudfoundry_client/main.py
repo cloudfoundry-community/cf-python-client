@@ -1,17 +1,17 @@
 #!/usr/bin/python
 import argparse
+import json
 import logging
 import os
 import re
 import sys
-import json
 
 from requests.exceptions import ConnectionError
 
-from cloudfoundry_client.imported import NOT_FOUND
 from cloudfoundry_client import __version__
 from cloudfoundry_client.client import CloudFoundryClient
-from cloudfoundry_client.entities import InvalidStatusCode
+from cloudfoundry_client.errors import InvalidStatusCode
+from cloudfoundry_client.imported import NOT_FOUND
 
 __all__ = ['main', 'build_client_from_configuration']
 
@@ -62,6 +62,7 @@ def import_from_clf_cli():
             f.write(json.dumps(dict(target_endpoint=cf_cli_data['Target'],
                                     skip_ssl_verification=True,
                                     refresh_token=cf_cli_data['RefreshToken']), indent=2))
+
 
 def build_client_from_configuration(previous_configuration=None):
     config_file = get_config_file()
@@ -125,8 +126,16 @@ def resolve_id(argument, get_by_name, domain_name, allow_search_by_name):
 
 
 def log_recent(client, application_guid):
-    for message in client.loggregator.get_recent(application_guid):
-        _logger.info(message.message)
+    for envelope in client.doppler.recent_logs(application_guid):
+        _logger.info(envelope)
+
+
+def stream_logs(client, application_guid):
+    try:
+        for envelope in client.doppler.stream_logs(application_guid):
+            _logger.info(envelope)
+    except KeyboardInterrupt:
+        pass
 
 
 def _get_client_domain(client, domain):
@@ -171,11 +180,12 @@ def main():
     commands['route'] = dict(list=(), name='host',
                              allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False,
                              display_name='Routes')
-    application_commands = dict(recent_logs=('get_recent_logs', 'Recent Logs',),
-                                env=('get_env', 'Get the environment of an application',),
-                                instances=('get_instances', 'Get the instances of an application',),
-                                stats=('get_stats', 'Get the stats of an application',),
-                                summary=('get_summary', 'Get the summary of an application',),
+    application_commands = dict(recent_logs=('recent_logs', 'Recent Logs',),
+                                stream_logs=('stream_logs', 'Stream Logs',),
+                                env=('env', 'Get the environment of an application',),
+                                instances=('instances', 'Get the instances of an application',),
+                                stats=('stats', 'Get the stats of an application',),
+                                summary=('summary', 'Get the summary of an application',),
                                 start=('start', 'Start an application',),
                                 stop=('stop', 'Stop an application',))
     application_extra_list_commands = dict(routes=('list_routes', 'List the routes(host) of an application', 'host'))
@@ -191,7 +201,7 @@ def main():
             description.append('   create_%s : Create a %s' % (domain, domain))
         if command_description['allow_deletion']:
             description.append('   delete_%s : Delete a %s' % (domain, domain))
-        if domain == 'application':
+        if domain == 'app':
             for command, application_command_description in list(application_commands.items()):
                 description.append('   %s : %s' % (command, application_command_description[1]))
             for command, application_command_description in list(application_extra_list_commands.items()):
@@ -221,11 +231,11 @@ def main():
                                        help='The id. Can be UUID or name (first found then)'
                                        if command_description['allow_retrieve_by_name'] else 'The id (UUID)')
         if domain == 'app':
-            for command, application_command_description in list(application_commands.items()):
+            for command, _ in list(application_commands.items()):
                 command_parser = subparsers.add_parser(command)
                 command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
                                             help='The id. Can be UUID or name (first found then)')
-            for command, application_command_description in list(application_extra_list_commands.items()):
+            for command, _ in list(application_extra_list_commands.items()):
                 command_parser = subparsers.add_parser(command)
                 command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
                                             help='The id. Can be UUID or name (first found then)')
@@ -239,6 +249,9 @@ def main():
         if arguments.action == 'recent_logs':
             resource_id = resolve_id(arguments.id[0], lambda x: client.apps.get_first(name=x), 'application', True)
             log_recent(client, resource_id)
+        elif arguments.action == 'stream_logs':
+            resource_id = resolve_id(arguments.id[0], lambda x: client.apps.get_first(name=x), 'application', True)
+            stream_logs(client, resource_id)
         elif application_commands.get(arguments.action) is not None:
             resource_id = resolve_id(arguments.id[0], lambda x: client.apps.get_first(name=x), 'application', True)
             print(getattr(client.apps, application_commands[arguments.action][0])(resource_id).json(indent=1))

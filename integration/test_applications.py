@@ -3,7 +3,7 @@ import unittest
 import logging
 import json
 
-from cloudfoundry_client.entities import InvalidStatusCode
+from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import NOT_FOUND, BAD_REQUEST
 
 _logger = logging.getLogger(__name__)

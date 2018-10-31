@@ -3,7 +3,7 @@
 build/
 cloudfoundry_client.egg-info/
 dist/
-main/cloudfoundry_client/loggregator/logmessage_pb2.py
+main/sandbox.py
 integration/sandbox.py
 integration/resources/test.properties
 .eggs/

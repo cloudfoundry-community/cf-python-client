@@ -14,12 +14,13 @@ class TestLoggregator(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_recents(self):
-        boundary = '7e061f8d6ec00677d6f6b17fcafec9eef2e3a2360e557f72e3e1116efcec'
-        self.client.get.return_value = mock_response('/recent?app=app_id',
+        boundary = 'd661b2c1426a3abcf1c0524d7fdbc774c42a767bdd6702141702d16047bc'
+        app_guid = 'app_id'
+        self.client.get.return_value = mock_response('/apps/%s/recentlogs' % app_guid,
                                                      OK,
                                                      {'content-type':
                                                           'multipart/x-protobuf; boundary=%s' % boundary},
                                                      'recents', 'GET_response.bin')
-        cpt = reduce(lambda increment, _: increment + 1, self.client.loggregator.get_recent('app_id'), 0)
+        cpt = reduce(lambda increment, _: increment + 1, self.client.doppler.recent_logs(app_guid), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url, stream=True)
-        self.assertEqual(cpt, 5946)
+        self.assertEqual(cpt, 200)
