@@ -26,13 +26,12 @@ class Info:
 
 
 class CloudFoundryClient(CredentialManager):
-    def __init__(self, target_endpoint, client_id='cf', client_secret='', proxy=None, skip_verification=False):
-        self.info = self._get_info(target_endpoint, proxy, skip_verification)
+    def __init__(self, target_endpoint, client_id='cf', client_secret='', proxy=None, verify=True):
+        self.info = self._get_info(target_endpoint, proxy, verify=verify)
         if not self.info.api_version.startswith('2.'):
             raise AssertionError('Only version 2 is supported for now. Found %s' % self.info.api_version)
-
         service_informations = ServiceInformation(None, '%s/oauth/token' % self.info.authorization_endpoint,
-                                                  client_id, client_secret, [], skip_verification)
+                                                  client_id, client_secret, [], verify)
         super(CloudFoundryClient, self).__init__(service_informations, proxy)
         CredentialManager.__init__(self, service_informations, proxy)
         self.service_plans = ServicePlanManager(target_endpoint, self)
@@ -62,11 +61,11 @@ class CloudFoundryClient(CredentialManager):
             return self._doppler
 
     @staticmethod
-    def _get_info(target_endpoint, proxy=None, skip_verification=False):
+    def _get_info(target_endpoint, proxy=None, verify=True):
         info_response = CloudFoundryClient._check_response(requests.get('%s/v2/info' % target_endpoint,
                                                                         proxies=proxy if proxy is not None else dict(
                                                                             http='', https=''),
-                                                                        verify=not skip_verification))
+                                                                        verify=verify))
         info = info_response.json()
         return Info(info['api_version'],
                     info['authorization_endpoint'],
