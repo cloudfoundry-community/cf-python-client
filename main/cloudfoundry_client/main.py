@@ -60,7 +60,7 @@ def import_from_clf_cli():
             raise IOError('Could not load informations from cf cli configuration')
         with open(get_config_file(), 'w') as f:
             f.write(json.dumps(dict(target_endpoint=cf_cli_data['Target'],
-                                    skip_ssl_verification=True,
+                                    verify=False,
                                     refresh_token=cf_cli_data['RefreshToken']), indent=2))
 
 
@@ -72,19 +72,19 @@ def build_client_from_configuration(previous_configuration=None):
                                                 lambda s: s.startswith('http://') or s.startswith('https://'),
                                                 default='' if previous_configuration is None else
                                                 previous_configuration.get('target_endpoint', ''))
-        skip_ssl_verification = _read_value_from_user('Skip ssl verification (true/false)',
+        verify = _read_value_from_user('Verify ssl (true/false)',
                                                       'Enter either true or false',
                                                       lambda s: s == 'true' or s == 'false',
-                                                      default='false' if previous_configuration is None else
+                                                      default='true' if previous_configuration is None else
                                                       json.dumps(
-                                                          previous_configuration.get('skip_ssl_verification', False)))
+                                                          previous_configuration.get('verify', True)))
         login = _read_value_from_user('Please enter your login')
         password = _read_value_from_user('Please enter your password')
-        client = CloudFoundryClient(target_endpoint, skip_verification=(skip_ssl_verification == 'true'))
+        client = CloudFoundryClient(target_endpoint, verify=(verify == 'true'))
         client.init_with_user_credentials(login, password)
         with open(config_file, 'w') as f:
             f.write(json.dumps(dict(target_endpoint=target_endpoint,
-                                    skip_ssl_verification=(skip_ssl_verification == 'true'),
+                                    verify=(verify == 'true'),
                                     refresh_token=client.refresh_token), indent=2))
         return client
     else:
@@ -93,7 +93,7 @@ def build_client_from_configuration(previous_configuration=None):
             with open(config_file, 'r') as f:
                 configuration = json.load(f)
                 client = CloudFoundryClient(configuration['target_endpoint'],
-                                            skip_verification=configuration['skip_ssl_verification'])
+                                            verify=configuration['verify'])
                 client.init_with_token(configuration['refresh_token'])
                 return client
         except Exception as ex:
