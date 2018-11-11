@@ -51,7 +51,7 @@ class CloudFoundryClient(CredentialManager):
         self._doppler = DopplerClient(self.info.doppler_endpoint,
                                       self.proxies[
                                           'http' if self.info.doppler_endpoint.startswith('ws://') else 'https'],
-                                      not self.service_information.skip_ssl_verifications,
+                                      self.service_information.verify,
                                       self) if self.info.doppler_endpoint is not None else None
 
     @property
