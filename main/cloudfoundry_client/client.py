@@ -46,6 +46,8 @@ class CloudFoundryClient(CredentialManager):
         self.spaces = EntityManager(target_endpoint, self, '/v2/spaces')
         self.services = EntityManager(target_endpoint, self, '/v2/services')
         self.routes = EntityManager(target_endpoint, self, '/v2/routes')
+        self.shared_domains = EntityManager(target_endpoint, self, '/v2/shared_domains')
+        self.private_domains = EntityManager(target_endpoint, self, '/v2/private_domains')
         self._doppler = DopplerClient(self.info.doppler_endpoint,
                                       self.proxies[
                                           'http' if self.info.doppler_endpoint.startswith('ws://') else 'https'],
