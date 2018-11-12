@@ -1,7 +1,7 @@
 import os
 from json import loads
 
-from imported import SEE_OTHER, iterate_text
+from imported import SEE_OTHER, iterate_text, MagicMock
 
 
 class MockSession(object):
@@ -35,13 +35,17 @@ class MockResponse(object):
 TARGET_ENDPOINT = "http://somewhere.org"
 
 
+def get_fixtures_path(*paths):
+    return os.path.join(os.path.dirname(__file__), 'fixtures', *paths)
+
+
 def mock_response(uri, status_code, headers, *path_parts):
     global TARGET_ENDPOINT
     if len(path_parts) > 0:
         file_name = path_parts[len(path_parts) - 1]
         extension_idx = file_name.rfind('.')
         binary_file = extension_idx >= 0 and file_name[extension_idx:] == '.bin'
-        with(open(os.path.join(os.path.dirname(__file__), 'fixtures', *path_parts),
+        with(open(get_fixtures_path(*path_parts),
                   'rb' if binary_file else 'r')) as f:
             return MockResponse(url='%s%s' % (TARGET_ENDPOINT, uri),
                                 status_code=status_code,
@@ -51,3 +55,12 @@ def mock_response(uri, status_code, headers, *path_parts):
         return MockResponse('%s%s' % (TARGET_ENDPOINT, uri),
                             status_code,
                             '')
+
+
+class FakeRequests(object):
+    def __init__(self):
+        self.Session = MagicMock()
+        self.post = MagicMock()
+        self.get = MagicMock()
+        self.put = MagicMock()
+        self.patch = MagicMock()

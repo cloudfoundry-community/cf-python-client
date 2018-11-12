@@ -37,6 +37,10 @@ class Entity(JsonObject):
 
 
 class EntityManager(object):
+    list_query_parameters = ['page', 'results-per-page', 'order-direction']
+
+    list_multi_parameters = ['order-by']
+
     def __init__(self, target_endpoint, client, entity_uri, entity_builder=None):
         self.target_endpoint = target_endpoint
         self.entity_uri = entity_uri
@@ -51,7 +55,7 @@ class EntityManager(object):
         return self._read_response(response, entity_builder)
 
     def _list(self, requested_path, entity_builder=None, **kwargs):
-        url_requested = EntityManager._get_url_filtered('%s%s' % (self.target_endpoint, requested_path), **kwargs)
+        url_requested = self._get_url_filtered('%s%s' % (self.target_endpoint, requested_path), **kwargs)
         response = self.client.get(url_requested)
         entity_builder = self._get_entity_builder(entity_builder)
         while True:
@@ -65,9 +69,9 @@ class EntityManager(object):
                 url_requested = '%s%s' % (self.target_endpoint, response_json['next_url'])
                 response = self.client.get(url_requested)
 
-    def _create(self, data):
+    def _create(self, data, **kwargs):
         url = '%s%s' % (self.target_endpoint, self.entity_uri)
-        return self._post(url, data)
+        return self._post(url, data, **kwargs)
 
     def _update(self, resource_id, data):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
@@ -77,8 +81,8 @@ class EntityManager(object):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
         self._delete(url)
 
-    def _post(self, url, data=None):
-        response = self.client.post(url, json=data)
+    def _post(self, url, data=None, **kwargs):
+        response = self.client.post(url, json=data, **kwargs)
         _logger.debug('POST - %s - %s', url, response.text)
         return self._read_response(response)
 
@@ -124,16 +128,13 @@ class EntityManager(object):
         else:
             return entity_builder
 
-    @staticmethod
-    def _get_url_filtered(url, **kwargs):
-        list_query_parameters = ['page', 'results-per-page', 'order-direction']
-        list_multi_parameters = ['order-by']
+    def _get_url_filtered(self, url, **kwargs):
 
         def _append_encoded_parameter(parameters, args):
             parameter_name, parameter_value = args[0], args[1]
-            if parameter_name in list_query_parameters:
+            if parameter_name in self.list_query_parameters:
                 parameters.append('%s=%s' % (parameter_name, str(parameter_value)))
-            elif parameter_name in list_multi_parameters:
+            elif parameter_name in self.list_multi_parameters:
                 value_list = parameter_value
                 if not isinstance(value_list, (list, tuple)):
                     value_list = [value_list]
@@ -150,4 +151,3 @@ class EntityManager(object):
                               "&".join(reduce(_append_encoded_parameter, sorted(list(kwargs.items())), [])))
         else:
             return url
-

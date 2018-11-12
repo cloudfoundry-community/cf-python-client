@@ -1,10 +1,12 @@
+import json
 import logging
+import os
 from time import sleep
 
-from cloudfoundry_client.v2.entities import Entity, EntityManager
-from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import BAD_REQUEST
+from cloudfoundry_client.json_object import JsonObject
+from cloudfoundry_client.v2.entities import Entity, EntityManager
 
 _logger = logging.getLogger(__name__)
 
@@ -68,7 +70,7 @@ class AppManager(EntityManager):
 
     def list_service_bindings(self, application_guid, **kwargs):
         return self.client.v2.service_bindings._list('%s/%s/service_bindings' % (self.entity_uri, application_guid),
-                                                  **kwargs)
+                                                     **kwargs)
 
     def start(self, application_guid, check_time=0.5, timeout=300, asynchronous=False):
         result = super(AppManager, self)._update(application_guid,
@@ -89,8 +91,7 @@ class AppManager(EntityManager):
             return result
 
     def restage(self, application_guid):
-        url = "%s%s/%s/restage" % (self.target_endpoint, self.entity_uri, application_guid)
-        return self._post(url)
+        return self._post("%s%s/%s/restage" % (self.target_endpoint, self.entity_uri, application_guid))
 
     def create(self, **kwargs):
         if kwargs.get('name') is None or kwargs.get('space_guid') is None:
@@ -104,6 +105,19 @@ class AppManager(EntityManager):
 
     def remove(self, application_guid):
         super(AppManager, self)._remove(application_guid)
+
+    def upload(self, application_guid, resources, application, asynchronous=False):
+        application_size = os.path.getsize(application)
+        with open(application, 'rb') as binary_file:
+            return self.client.put("%s%s/%s/bits" % (self.target_endpoint, self.entity_uri, application_guid),
+                                   params={"async": "true" if asynchronous else "false"} if asynchronous else None,
+                                   data=dict(resources=json.dumps(resources)),
+                                   files=dict(application=('application.zip',
+                                                           binary_file,
+                                                           'application/zip',
+                                                           {'Content-Length': application_size,
+                                                            'Content-Transfer-Encoding': 'binary'}))) \
+                .json(object_pairs_hook=JsonObject)
 
     @staticmethod
     def _generate_application_update_request(**kwargs):

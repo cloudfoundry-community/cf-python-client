@@ -1,33 +1,30 @@
 import json
-import types
-import re
 
-from imported import MagicMock, patch
+from oauth2_client.credentials_manager import CredentialManager
 
 from cloudfoundry_client.client import CloudFoundryClient
 from fake_requests import TARGET_ENDPOINT, mock_response
+from imported import MagicMock, patch
 
 
-def mock_class(clazz):
-    if not getattr(clazz, 'CLASS_MOCKED', False):
-        true_mother_class = clazz.__bases__
+def mock_cloudfoundry_client_class():
+    if not getattr(CloudFoundryClient, 'CLASS_MOCKED', False):
+        mocked_attributes = ['get', 'post', 'patch', 'put', 'delete']
 
-        class MockClass(object):
+        class MockClass(CredentialManager):
             def __init__(self, *args, **kwargs):
-                for mother_class in true_mother_class:
-                    for attribute_name in dir(mother_class):
-                        attribute = getattr(mother_class, attribute_name)
-                        if attribute_name != '__init__' and isinstance(attribute, types.MethodType) or isinstance(attribute, types.FunctionType):
-                            setattr(self, attribute_name, MagicMock())
+                super(MockClass, self).__init__(*args, **kwargs)
+                for attribute in mocked_attributes:
+                    setattr(self, attribute, MagicMock())
 
-        clazz.__bases__ = (MockClass,)
-        setattr(clazz, 'CLASS_MOCKED', True)
+        CloudFoundryClient.__bases__ = (MockClass,)
+        setattr(CloudFoundryClient, 'CLASS_MOCKED', True)
 
 
 class AbstractTestCase(object):
     @classmethod
     def mock_client_class(cls):
-        mock_class(CloudFoundryClient)
+        mock_cloudfoundry_client_class()
 
     def build_client(self):
         with patch('cloudfoundry_client.client.requests') as fake_requests:

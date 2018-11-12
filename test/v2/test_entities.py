@@ -8,7 +8,7 @@ from imported import MagicMock, call
 
 class TestEntities(unittest.TestCase):
     def test_query(self):
-        url = EntityManager._get_url_filtered('/v2/apps', **{'results-per-page': 20,
+        url = EntityManager('http://cf.api', None, '/v2/apps')._get_url_filtered('/v2/apps', **{'results-per-page': 20,
                                                              'order-direction': 'asc',
                                                              'page': 1,
                                                              'space_guid': 'id',
@@ -16,22 +16,22 @@ class TestEntities(unittest.TestCase):
         self.assertEqual('/v2/apps?order-by=id&order-direction=asc&page=1&results-per-page=20&q=space_guid%3Aid', url)
 
     def test_query_multi_order_by(self):
-        url = EntityManager._get_url_filtered('/v2/apps', **{'order-by': ['timestamp', 'id']})
+        url = EntityManager('http://cf.api', None, '/v2/apps')._get_url_filtered('/v2/apps', **{'order-by': ['timestamp', 'id']})
         self.assertEqual('/v2/apps?order-by=timestamp&order-by=id', url)
 
     def test_query_single_order_by(self):
-        url = EntityManager._get_url_filtered('/v2/apps', **{'order-by': 'timestamp'})
+        url = EntityManager('http://cf.api', None, '/v2/apps')._get_url_filtered('/v2/apps', **{'order-by': 'timestamp'})
         self.assertEqual('/v2/apps?order-by=timestamp', url)
 
     def test_query_in(self):
-        url = EntityManager._get_url_filtered('/v2/apps', **{'results-per-page': 20,
+        url = EntityManager('http://cf.api', None, '/v2/apps')._get_url_filtered('/v2/apps', **{'results-per-page': 20,
                                                              'order-direction': 'asc',
                                                              'page': 1,
                                                              'space_guid': ['id1', 'id2']})
         self.assertEqual('/v2/apps?order-direction=asc&page=1&results-per-page=20&q=space_guid%20IN%20id1%2Cid2', url)
 
     def test_multi_query(self):
-        url = EntityManager._get_url_filtered('/v2/events', **{'type': ['create', 'update'],
+        url = EntityManager('http://cf.api', None, '/v2/events')._get_url_filtered('/v2/events', **{'type': ['create', 'update'],
                                                                'organization_guid': 'org-id'})
         self.assertEqual('/v2/events?q=organization_guid%3Aorg-id&q=type%20IN%20create%2Cupdate', url)
 

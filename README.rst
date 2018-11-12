@@ -216,6 +216,18 @@ Command Line Interface
 
 The client comes with a command line interface. Run ``cloudfoundry-client`` command. At first execution, it will ask you information about the target platform and your credential (do not worry they are not saved). After that you may have a help by running ``cloudfoundry-client -h``
 
+Operations (experimental)
+-------------------------
+
+For now the only operation that is implemented is the push one.
+
+.. code-block:: python
+
+    from cloudfoundry_client.operations.push.push import PushOperation
+    operation = PushOperation(client)
+    operation.push(client.v2.spaces.get_first(name='My Space')['metadata']['guid'], path)
+
+
 Issues and contributions
 ------------------------
 

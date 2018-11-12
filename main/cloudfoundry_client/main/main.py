@@ -14,6 +14,7 @@ from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import NOT_FOUND
 from cloudfoundry_client.main.apps_command_domain import AppCommandDomain
 from cloudfoundry_client.main.command_domain import CommandDomain
+from cloudfoundry_client.main.operation_commands import generate_push_command
 from cloudfoundry_client.main.tasks_command_domain import TaskCommandDomain
 
 __all__ = ['main', 'build_client_from_configuration']
@@ -177,15 +178,24 @@ def main():
         CommandDomain(display_name='Routes', client_domain='routes', name_property='host', filter_list_parameters=[]),
         TaskCommandDomain()
     ]
-    description = []
+    operation_commands = []
+    operation_commands.append(generate_push_command())
+    descriptions = []
     for command in commands:
-        description.extend(command.description())
+        descriptions.extend(command.description())
+
+    descriptions.append('Operations')
+    for command, description in operation_commands:
+        descriptions.append('   %s: %s' % (command.entry, description))
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-V', '--version', action='version', version=__version__)
-    subparsers = parser.add_subparsers(title='Commands', dest='action', description='\n'.join(description))
+    subparsers = parser.add_subparsers(title='Commands', dest='action', description='\n'.join(descriptions))
     subparsers.add_parser('import_from_cf_cli', help='Copy CF CLI configuration into our configuration')
     for command in commands:
+        command.generate_parser(subparsers)
+
+    for command, _ in operation_commands:
         command.generate_parser(subparsers)
 
     arguments = parser.parse_args()
@@ -196,6 +206,10 @@ def main():
         for command in commands:
             if command.is_handled(arguments.action):
                 command.execute(client, arguments.action, arguments)
+                return
+        for command, _ in operation_commands:
+            if command.entry == arguments.action:
+                command.execute(client, arguments)
                 return
         raise ValueError("Domain not found for action %s" % arguments.action)
 

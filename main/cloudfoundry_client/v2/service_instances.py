@@ -3,6 +3,8 @@ from cloudfoundry_client.json_object import JsonObject
 
 
 class ServiceInstanceManager(EntityManager):
+    list_query_parameters = ['page', 'results-per-page', 'order-direction', 'return_user_provided_service_instances']
+
     def __init__(self, target_endpoint, client):
         super(ServiceInstanceManager, self).__init__(target_endpoint, client, '/v2/service_instances')
 

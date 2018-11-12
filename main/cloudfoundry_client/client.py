@@ -6,6 +6,8 @@ from oauth2_client.credentials_manager import CredentialManager, ServiceInformat
 from cloudfoundry_client.doppler.client import DopplerClient
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import UNAUTHORIZED
+from cloudfoundry_client.v2.jobs import JobManager
+from cloudfoundry_client.v2.resources import ResourceManager
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
 from cloudfoundry_client.v2.buildpacks import BuildpackManager
 from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
@@ -34,6 +36,7 @@ class V2(object):
     def __init__(self, target_endpoint, credential_manager):
         self.apps = AppManagerV2(target_endpoint, credential_manager)
         self.buildpacks = BuildpackManager(target_endpoint, credential_manager)
+        self.jobs = JobManager(target_endpoint, credential_manager)
         self.service_bindings = ServiceBindingManager(target_endpoint, credential_manager)
         self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
         self.service_instances = ServiceInstanceManager(target_endpoint, credential_manager)
@@ -47,6 +50,10 @@ class V2(object):
         self.shared_domains = EntityManagerV2(target_endpoint, credential_manager, '/v2/shared_domains')
         self.spaces = EntityManagerV2(target_endpoint, credential_manager, '/v2/spaces')
         self.stacks = EntityManagerV2(target_endpoint, credential_manager, '/v2/stacks')
+        self.user_provided_service_instances = EntityManagerV2(target_endpoint, credential_manager,
+                                                               '/v2/user_provided_service_instances')
+        # Resources implementation used by push operation
+        self.resources = ResourceManager(target_endpoint, credential_manager)
 
 
 class V3(object):
@@ -122,7 +129,7 @@ class CloudFoundryClient(CredentialManager):
                 result = json_data.get('code', 0) == 1000 and json_data.get('error_code', '') == 'CF-InvalidAuthToken'
                 _logger.info('_is_token_expired - %s' % str(result))
                 return result
-            except:
+            except Exception as _:
                 return False
         else:
             return False
