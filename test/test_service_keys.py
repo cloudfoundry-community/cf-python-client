@@ -24,7 +24,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
             None,
             'v2', 'service_keys', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
-                     self.client.service_keys.list(service_instance_guid='instance_guid'), 0)
+                     self.client.v2.service_keys.list(service_instance_guid='instance_guid'), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
@@ -34,7 +34,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
             OK,
             None,
             'v2', 'service_keys', 'GET_{id}_response.json')
-        result = self.client.service_keys.get('key_id')
+        result = self.client.v2.service_keys.get('key_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
 
@@ -44,7 +44,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
             CREATED,
             None,
             'v2', 'service_keys', 'POST_response.json')
-        service_key = self.client.service_keys.create('service_instance_id', 'name-127')
+        service_key = self.client.v2.service_keys.create('service_instance_id', 'name-127')
         self.client.post.assert_called_with(self.client.post.return_value.url,
                                             json=dict(service_instance_guid='service_instance_id',
                                                       name='name-127')
@@ -56,7 +56,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
             '/v2/service_keys/key_id',
             NO_CONTENT,
             None)
-        self.client.service_keys.remove('key_id')
+        self.client.v2.service_keys.remove('key_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
     @patch.object(sys, 'argv', ['main', 'list_service_keys'])

@@ -9,11 +9,11 @@ class TestOrganizations(unittest.TestCase):
     def test_list(self):
         cpt = 0
         client = build_client_from_configuration()
-        for organization in client.organizations.list():
+        for organization in client.v2.organizations.list():
             if cpt == 0:
-                organization = client.organizations.get(organization['metadata']['guid'])
+                organization = client.v2.organizations.get(organization['metadata']['guid'])
                 self.assertIsNotNone(organization)
-                organization = client.organizations.get_first(name=organization['entity']['name'])
+                organization = client.v2.organizations.get_first(name=organization['entity']['name'])
                 self.assertIsNotNone(organization)
                 _logger.debug(organization.json())
             cpt += 1

@@ -27,6 +27,25 @@ class Info:
         self.doppler_endpoint = doppler_endpoint
 
 
+class V2(object):
+    def __init__(self, target_endpoint, credential_manager):
+        self.apps = AppManager(target_endpoint, credential_manager)
+        self.buildpacks = BuildpackManager(target_endpoint, credential_manager)
+        self.service_bindings = ServiceBindingManager(target_endpoint, credential_manager)
+        self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
+        self.service_instances = ServiceInstanceManager(target_endpoint, credential_manager)
+        self.service_keys = ServiceKeyManager(target_endpoint, credential_manager)
+        self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
+        # Default implementations
+        self.organizations = EntityManager(target_endpoint, credential_manager, '/v2/organizations')
+        self.private_domains = EntityManager(target_endpoint, credential_manager, '/v2/private_domains')
+        self.routes = RouteManager(target_endpoint, credential_manager)
+        self.services = EntityManager(target_endpoint, credential_manager, '/v2/services')
+        self.shared_domains = EntityManager(target_endpoint, credential_manager, '/v2/shared_domains')
+        self.spaces = EntityManager(target_endpoint, credential_manager, '/v2/spaces')
+        self.stacks = EntityManager(target_endpoint, credential_manager, '/v2/stacks')
+
+
 class CloudFoundryClient(CredentialManager):
     def __init__(self, target_endpoint, client_id='cf', client_secret='', proxy=None, verify=True):
         self.info = self._get_info(target_endpoint, proxy, verify=verify)
@@ -36,28 +55,13 @@ class CloudFoundryClient(CredentialManager):
                                                   client_id, client_secret, [], verify)
         super(CloudFoundryClient, self).__init__(service_informations, proxy)
         CredentialManager.__init__(self, service_informations, proxy)
-        self.service_plans = ServicePlanManager(target_endpoint, self)
-        self.service_instances = ServiceInstanceManager(target_endpoint, self)
-        self.service_keys = ServiceKeyManager(target_endpoint, self)
-        self.service_bindings = ServiceBindingManager(target_endpoint, self)
-        self.service_brokers = ServiceBrokerManager(target_endpoint, self)
-        self.apps = AppManager(target_endpoint, self)
-        self.buildpacks = BuildpackManager(target_endpoint, self)
-        # Default implementations
-
-        self.organizations = EntityManager(target_endpoint, self, '/v2/organizations')
-        self.private_domains = EntityManager(target_endpoint, self, '/v2/private_domains')
-        self.routes = RouteManager(target_endpoint, self)
-        self.services = EntityManager(target_endpoint, self, '/v2/services')
-        self.shared_domains = EntityManager(target_endpoint, self, '/v2/shared_domains')
-        self.spaces = EntityManager(target_endpoint, self, '/v2/spaces')
-        self.stacks = EntityManager(target_endpoint, self, '/v2/stacks')
-
-        self._doppler = DopplerClient(self.info.doppler_endpoint,
-                                      self.proxies[
-                                          'http' if self.info.doppler_endpoint.startswith('ws://') else 'https'],
-                                      self.service_information.verify,
-                                      self) if self.info.doppler_endpoint is not None else None
+        self.v2 = V2(target_endpoint, self)
+        if self.info.doppler_endpoint is not None:
+            self._doppler = DopplerClient(self.info.doppler_endpoint,
+                                          self.proxies[
+                                              'http' if self.info.doppler_endpoint.startswith('ws://') else 'https'],
+                                          self.service_information.verify,
+                                          self) if self.info.doppler_endpoint is not None else None
 
     @property
     def doppler(self):

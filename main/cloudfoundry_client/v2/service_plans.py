@@ -9,5 +9,5 @@ class ServicePlanManager(EntityManager):
         raise NotImplementedError('No creation allowed')
 
     def list_instances(self, service_plan_guid, **kwargs):
-        return self.client.service_instances._list('%s/%s/service_instances' % (self.entity_uri, service_plan_guid),
+        return self.client.v2.service_instances._list('%s/%s/service_instances' % (self.entity_uri, service_plan_guid),
                                                   **kwargs)

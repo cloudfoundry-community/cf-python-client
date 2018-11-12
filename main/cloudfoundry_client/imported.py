@@ -14,7 +14,11 @@ if sys.version_info.major == 2:
     def bufferize_string(content):
         return content
 elif sys.version_info.major == 3:
-    from http.client import UNAUTHORIZED, BAD_REQUEST, NOT_FOUND, OK
+    from http import HTTPStatus
+    UNAUTHORIZED = HTTPStatus.UNAUTHORIZED.value
+    BAD_REQUEST = HTTPStatus.BAD_REQUEST.value
+    NOT_FOUND = HTTPStatus.NOT_FOUND.value
+    OK = HTTPStatus.OK.value
     from urllib.parse import quote, urlparse
     from functools import reduce
 

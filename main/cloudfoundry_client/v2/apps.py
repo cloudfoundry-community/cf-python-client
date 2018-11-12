@@ -1,29 +1,28 @@
-
 import logging
 from time import sleep
 
-from cloudfoundry_client.imported import BAD_REQUEST
 from cloudfoundry_client.entities import JsonObject, Entity, EntityManager
 from cloudfoundry_client.errors import InvalidStatusCode
+from cloudfoundry_client.imported import BAD_REQUEST
 
 _logger = logging.getLogger(__name__)
 
 
 class _Application(Entity):
     def instances(self):
-        return self.client.apps.get_instances(self['metadata']['guid'])
+        return self.client.v2.apps.get_instances(self['metadata']['guid'])
 
     def start(self):
-        return self.client.apps.start(self['metadata']['guid'])
+        return self.client.v2.apps.start(self['metadata']['guid'])
 
     def stop(self):
-        return self.client.apps.stop(self['metadata']['guid'])
+        return self.client.v2.apps.stop(self['metadata']['guid'])
 
     def stats(self):
-        return self.client.apps.get_stats(self['metadata']['guid'])
+        return self.client.v2.apps.get_stats(self['metadata']['guid'])
 
     def summary(self):
-        return self.client.apps.get_summary(self['metadata']['guid'])
+        return self.client.v2.apps.get_summary(self['metadata']['guid'])
 
     def recent_logs(self):
         return self.client.doppler.recent_logs(self['metadata']['guid'])
@@ -33,6 +32,11 @@ class _Application(Entity):
 
 
 class AppManager(EntityManager):
+    APPLICATION_FIELDS = ['name', 'memory', 'instances', 'disk_quota', 'space_guid', 'stack_guid', 'state', 'command',
+                          'buildpack', 'health_check_http_endpoint', 'health_check_type', 'health_check_timeout',
+                          'diego', 'enable_ssh', 'docker_image', 'docker_credentials', 'environment_json', 'production',
+                          'console', 'debug', 'staging_failed_reason', 'staging_failed_description', 'ports']
+
     def __init__(self, target_endpoint, client):
         super(AppManager, self).__init__(target_endpoint, client, '/v2/apps',
                                          lambda pairs: _Application(target_endpoint, client, pairs))
@@ -49,12 +53,18 @@ class AppManager(EntityManager):
     def get_summary(self, application_guid):
         return self._get('%s/%s/summary' % (self.entity_uri, application_guid), JsonObject)
 
+    def associate_route(self, application_guid, route_guid):
+        self.client.put('%s%s/%s/routes/%s' % (self.target_endpoint, self.entity_uri, application_guid, route_guid))
+
     def list_routes(self, application_guid, **kwargs):
-        return self.client.routes._list('%s/%s/routes' % (self.entity_uri, application_guid), **kwargs)
+        return self.client.v2.routes._list('%s/%s/routes' % (self.entity_uri, application_guid), **kwargs)
+
+    def remove_route(self, application_guid, route_guid):
+        self.client.delete('%s%s/%s/routes/%s' % (self.target_endpoint, self.entity_uri, application_guid, route_guid))
 
     def list_service_bindings(self, application_guid, **kwargs):
-        return self.client.service_bindings._list('%s/%s/service_bindings' % (self.entity_uri, application_guid),
-                                                 **kwargs)
+        return self.client.v2.service_bindings._list('%s/%s/service_bindings' % (self.entity_uri, application_guid),
+                                                  **kwargs)
 
     def start(self, application_guid, check_time=0.5, timeout=300, asynchronous=False):
         result = super(AppManager, self)._update(application_guid,
@@ -73,6 +83,20 @@ class AppManager(EntityManager):
         else:
             self._wait_for_instances_in_state(application_guid, 0, 'STOPPED', check_time, timeout)
             return result
+
+    def create(self, **kwargs):
+        if kwargs.get('name') is None or kwargs.get('space_guid') is None:
+            raise AssertionError('Please provide a name and a space_guid')
+        request = AppManager._generate_application_update_request(**kwargs)
+        return super(AppManager, self)._create(request)
+
+    def update(self, application_guid, **kwargs):
+        request = AppManager._generate_application_update_request(**kwargs)
+        return super(AppManager, self)._update(application_guid, request)
+
+    @staticmethod
+    def _generate_application_update_request(**kwargs):
+        return {key: kwargs[key] for key in AppManager.APPLICATION_FIELDS if key in kwargs}
 
     def _wait_for_instances_in_state(self, application_guid, number_required, state_expected, check_time, timeout):
         all_in_expected_state = False

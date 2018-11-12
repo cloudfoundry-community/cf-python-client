@@ -138,8 +138,8 @@ def stream_logs(client, application_guid):
         pass
 
 
-def _get_client_domain(client, domain):
-    return getattr(client, '%ss' % domain)
+def _get_v2_client_domain(client, domain):
+    return getattr(client.v2, '%ss' % domain)
 
 
 def main():
@@ -247,18 +247,18 @@ def main():
         client = build_client_from_configuration()
 
         if arguments.action == 'recent_logs':
-            resource_id = resolve_id(arguments.id[0], lambda x: client.apps.get_first(name=x), 'application', True)
+            resource_id = resolve_id(arguments.id[0], lambda x: client.v2.apps.get_first(name=x), 'application', True)
             log_recent(client, resource_id)
         elif arguments.action == 'stream_logs':
-            resource_id = resolve_id(arguments.id[0], lambda x: client.apps.get_first(name=x), 'application', True)
+            resource_id = resolve_id(arguments.id[0], lambda x: client.v2.apps.get_first(name=x), 'application', True)
             stream_logs(client, resource_id)
         elif application_commands.get(arguments.action) is not None:
-            resource_id = resolve_id(arguments.id[0], lambda x: client.apps.get_first(name=x), 'application', True)
-            print(getattr(client.apps, application_commands[arguments.action][0])(resource_id).json(indent=1))
+            resource_id = resolve_id(arguments.id[0], lambda x: client.v2.apps.get_first(name=x), 'application', True)
+            print(getattr(client.v2.apps, application_commands[arguments.action][0])(resource_id).json(indent=1))
         elif application_extra_list_commands.get(arguments.action) is not None:
-            resource_id = resolve_id(arguments.id[0], lambda x: client.apps.get_first(name=x), 'application', True)
+            resource_id = resolve_id(arguments.id[0], lambda x: client.v2.apps.get_first(name=x), 'application', True)
             name_property = application_extra_list_commands[arguments.action][2]
-            for entity in getattr(client.apps, application_extra_list_commands[arguments.action][0])(resource_id):
+            for entity in getattr(client.v2.apps, application_extra_list_commands[arguments.action][0])(resource_id):
                 print('%s - %s' % (entity['metadata']['guid'], entity['entity'][name_property]))
         elif arguments.action.find('list_') == 0:
             domain = arguments.action[len('list_'): len(arguments.action) - 1]
@@ -267,7 +267,7 @@ def main():
                 filter_value = getattr(arguments, filter_parameter)
                 if filter_value is not None:
                     filter_list[filter_parameter] = filter_value
-            for entity in _get_client_domain(client, domain).list(**filter_list):
+            for entity in _get_v2_client_domain(client, domain).list(**filter_list):
                 name_property = commands[domain]['name']
                 if name_property is not None:
                     print('%s - %s' % (entity['metadata']['guid'], entity['entity'][name_property]))
@@ -276,11 +276,11 @@ def main():
         elif arguments.action.find('get_') == 0:
             domain = arguments.action[len('get_'):]
             resource_id = resolve_id(arguments.id[0],
-                                     lambda x: _get_client_domain(client, domain).get_first(
+                                     lambda x: _get_v2_client_domain(client, domain).get_first(
                                          **{commands[domain]['name']: x}),
                                      domain,
                                      commands[domain]['allow_retrieve_by_name'])
-            print(_get_client_domain(client, domain).get(resource_id).json(indent=1))
+            print(_get_v2_client_domain(client, domain).get(resource_id).json(indent=1))
         elif arguments.action.find('create_') == 0:
             domain = arguments.action[len('create_'):]
             data = None
@@ -295,19 +295,19 @@ def main():
                     data = json.loads(arguments.entity[0])
                 except ValueError:
                     raise ValueError('entity: must be either a valid json file path or a json object')
-            print(_get_client_domain(client, domain)._create(data).json())
+            print(_get_v2_client_domain(client, domain)._create(data).json())
         elif arguments.action.find('delete_') == 0:
             domain = arguments.action[len('delete_'):]
             if is_guid(arguments.id[0]):
-                _get_client_domain(client, domain)._remove(arguments.id[0])
+                _get_v2_client_domain(client, domain)._remove(arguments.id[0])
             elif commands[domain]['allow_retrieve_by_name']:
                 filter_get = dict()
                 filter_get[commands[domain]['name']] = arguments.id[0]
-                entity = _get_client_domain(client, domain).get_first(**filter_get)
+                entity = _get_v2_client_domain(client, domain).get_first(**filter_get)
                 if entity is None:
                     raise InvalidStatusCode(NOT_FOUND, '%s with name %s' % (domain, arguments.id[0]))
                 else:
-                    _get_client_domain(client, domain)._remove(entity['metadata']['guid'])
+                    _get_v2_client_domain(client, domain)._remove(entity['metadata']['guid'])
             else:
                 raise ValueError('id: %s: does not allow search by name' % domain)
 

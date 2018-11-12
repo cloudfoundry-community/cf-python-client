@@ -21,7 +21,7 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
                                                      OK,
                                                      None,
                                                      'v2', 'spaces', 'GET_response.json')
-        cpt = reduce(lambda increment, _: increment + 1, self.client.spaces.list(organization_guid='org_id'), 0)
+        cpt = reduce(lambda increment, _: increment + 1, self.client.v2.spaces.list(organization_guid='org_id'), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
@@ -31,7 +31,7 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
             OK,
             None,
             'v2', 'spaces', 'GET_{id}_response.json')
-        result = self.client.spaces.get('space_id')
+        result = self.client.v2.spaces.get('space_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
 
@@ -58,7 +58,7 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
                 None,
                 'v2', 'service_instances', 'GET_response.json')
         ]
-        space = self.client.spaces.get('space_id')
+        space = self.client.v2.spaces.get('space_id')
         self.assertIsNotNone(space.organization())
         cpt = reduce(lambda increment, _: increment + 1, space.apps(), 0)
         self.assertEqual(cpt, 3)

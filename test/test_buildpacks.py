@@ -21,7 +21,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
                                                      OK,
                                                      None,
                                                      'v2', 'buildpacks', 'GET_response.json')
-        cpt = reduce(lambda increment, _: increment + 1, self.client.buildpacks.list(), 0)
+        cpt = reduce(lambda increment, _: increment + 1, self.client.v2.buildpacks.list(), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 3)
 
@@ -31,7 +31,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
             OK,
             None,
             'v2', 'buildpacks', 'GET_{id}_response.json')
-        result = self.client.buildpacks.get('buildpack_id')
+        result = self.client.v2.buildpacks.get('buildpack_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
 
@@ -41,7 +41,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
             CREATED,
             None,
             'v2', 'apps', 'PUT_{id}_response.json')
-        result = self.client.buildpacks.update('build_pack_id', dict(enabled=False))
+        result = self.client.v2.buildpacks.update('build_pack_id', dict(enabled=False))
         self.client.put.assert_called_with(self.client.put.return_value.url,
                                            json=dict(enabled=False))
         self.assertIsNotNone(result)

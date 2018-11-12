@@ -9,7 +9,10 @@ if sys.version_info.major == 2:
 
 elif sys.version_info.major == 3:
     from unittest.mock import patch, call, MagicMock
-    from http.client import SEE_OTHER, CREATED, NO_CONTENT
+    from http import HTTPStatus
+    SEE_OTHER = HTTPStatus.SEE_OTHER.value
+    CREATED = HTTPStatus.CREATED.value
+    NO_CONTENT = HTTPStatus.NO_CONTENT.value
     def iterate_text(text):
         for character in text:
             yield bytes([character])

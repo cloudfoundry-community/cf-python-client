@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 class TestNavigation(unittest.TestCase):
     def test_all(self):
         client = build_client_from_configuration()
-        for organization in client.organizations:
+        for organization in client.v2.organizations:
             if organization['metadata']['guid'] == client.org_guid:
                 for space in organization.spaces():
                     if space['metadata']['guid'] == client.space_guid:

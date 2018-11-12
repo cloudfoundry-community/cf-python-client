@@ -23,7 +23,7 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
             None,
             'v2', 'service_bindings', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
-                     self.client.service_brokers.list(space_guid='space_guid'), 0)
+                     self.client.v2.service_brokers.list(space_guid='space_guid'), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
@@ -33,7 +33,7 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
             OK,
             None,
             'v2', 'service_brokers', 'GET_{id}_response.json')
-        result = self.client.service_brokers.get('broker_id')
+        result = self.client.v2.service_brokers.get('broker_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
 
@@ -43,7 +43,7 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
             CREATED,
             None,
             'v2', 'service_brokers', 'POST_response.json')
-        service_broker = self.client.service_brokers.create('url', 'name', 'username', 'P@sswd1')
+        service_broker = self.client.v2.service_brokers.create('url', 'name', 'username', 'P@sswd1')
         self.client.post.assert_called_with(self.client.post.return_value.url,
                                             json=dict(broker_url='url',
                                                       name='name',
@@ -57,7 +57,7 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
             OK,
             None,
             'v2', 'service_brokers', 'PUT_{id}_response.json')
-        service_broker = self.client.service_brokers.update('broker_id',
+        service_broker = self.client.v2.service_brokers.update('broker_id',
                                                             broker_url='new-url',
                                                             auth_username='new-username',
                                                             auth_password='P@sswd2')
@@ -72,7 +72,7 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
             '/v2/service_brokers/broker_id',
             NO_CONTENT,
             None)
-        self.client.service_brokers.remove('broker_id')
+        self.client.v2.service_brokers.remove('broker_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
     @patch.object(sys, 'argv', ['main', 'list_service_brokers'])
