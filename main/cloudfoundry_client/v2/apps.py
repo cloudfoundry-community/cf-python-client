@@ -1,7 +1,7 @@
 import logging
 from time import sleep
 
-from cloudfoundry_client.entities import JsonObject, Entity, EntityManager
+from cloudfoundry_client.v2.entities import JsonObject, Entity, EntityManager
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import BAD_REQUEST
 

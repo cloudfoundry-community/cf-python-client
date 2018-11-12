@@ -1,4 +1,4 @@
-from cloudfoundry_client.entities import EntityManager
+from cloudfoundry_client.v2.entities import EntityManager
 
 
 class ServiceBindingManager(EntityManager):

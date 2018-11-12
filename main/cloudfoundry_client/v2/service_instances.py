@@ -1,4 +1,4 @@
-from cloudfoundry_client.entities import JsonObject, EntityManager
+from cloudfoundry_client.v2.entities import JsonObject, EntityManager
 
 
 class ServiceInstanceManager(EntityManager):

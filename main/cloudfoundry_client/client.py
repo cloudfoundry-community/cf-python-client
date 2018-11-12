@@ -4,7 +4,7 @@ import requests
 from oauth2_client.credentials_manager import CredentialManager, ServiceInformation
 
 from cloudfoundry_client.doppler.client import DopplerClient
-from cloudfoundry_client.entities import EntityManager
+from cloudfoundry_client.v2.entities import EntityManager
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import UNAUTHORIZED
 from cloudfoundry_client.v2.apps import AppManager

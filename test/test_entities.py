@@ -1,6 +1,6 @@
 import unittest
 
-from cloudfoundry_client.entities import EntityManager
+from cloudfoundry_client.v2.entities import EntityManager
 from cloudfoundry_client.imported import OK, reduce
 from fake_requests import TARGET_ENDPOINT, mock_response
 from imported import MagicMock, call
