@@ -170,6 +170,7 @@ Let's explain it with the next code
 Another example:
 
 .. code-block:: python
+
     app = client.v3.apps['app-guid']
     for task in app.tasks():
         task.cancel()
