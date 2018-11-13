@@ -4,17 +4,20 @@ import requests
 from oauth2_client.credentials_manager import CredentialManager, ServiceInformation
 
 from cloudfoundry_client.doppler.client import DopplerClient
-from cloudfoundry_client.v2.entities import EntityManager
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import UNAUTHORIZED
-from cloudfoundry_client.v2.apps import AppManager
+from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
 from cloudfoundry_client.v2.buildpacks import BuildpackManager
+from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
 from cloudfoundry_client.v2.routes import RouteManager
 from cloudfoundry_client.v2.service_bindings import ServiceBindingManager
 from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager
 from cloudfoundry_client.v2.service_instances import ServiceInstanceManager
 from cloudfoundry_client.v2.service_keys import ServiceKeyManager
 from cloudfoundry_client.v2.service_plans import ServicePlanManager
+from cloudfoundry_client.v3.apps import AppManager as AppManagerV3
+from cloudfoundry_client.v3.entities import EntityManager as EntityManagerV3
+from cloudfoundry_client.v3.tasks import TaskManager
 
 _logger = logging.getLogger(__name__)
 
@@ -29,7 +32,7 @@ class Info:
 
 class V2(object):
     def __init__(self, target_endpoint, credential_manager):
-        self.apps = AppManager(target_endpoint, credential_manager)
+        self.apps = AppManagerV2(target_endpoint, credential_manager)
         self.buildpacks = BuildpackManager(target_endpoint, credential_manager)
         self.service_bindings = ServiceBindingManager(target_endpoint, credential_manager)
         self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
@@ -37,13 +40,21 @@ class V2(object):
         self.service_keys = ServiceKeyManager(target_endpoint, credential_manager)
         self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
         # Default implementations
-        self.organizations = EntityManager(target_endpoint, credential_manager, '/v2/organizations')
-        self.private_domains = EntityManager(target_endpoint, credential_manager, '/v2/private_domains')
+        self.organizations = EntityManagerV2(target_endpoint, credential_manager, '/v2/organizations')
+        self.private_domains = EntityManagerV2(target_endpoint, credential_manager, '/v2/private_domains')
         self.routes = RouteManager(target_endpoint, credential_manager)
-        self.services = EntityManager(target_endpoint, credential_manager, '/v2/services')
-        self.shared_domains = EntityManager(target_endpoint, credential_manager, '/v2/shared_domains')
-        self.spaces = EntityManager(target_endpoint, credential_manager, '/v2/spaces')
-        self.stacks = EntityManager(target_endpoint, credential_manager, '/v2/stacks')
+        self.services = EntityManagerV2(target_endpoint, credential_manager, '/v2/services')
+        self.shared_domains = EntityManagerV2(target_endpoint, credential_manager, '/v2/shared_domains')
+        self.spaces = EntityManagerV2(target_endpoint, credential_manager, '/v2/spaces')
+        self.stacks = EntityManagerV2(target_endpoint, credential_manager, '/v2/stacks')
+
+
+class V3(object):
+    def __init__(self, target_endpoint, credential_manager):
+        self.apps = AppManagerV3(target_endpoint, credential_manager)
+        self.spaces = EntityManagerV3(target_endpoint, credential_manager, '/v3/spaces')
+        self.organizations = EntityManagerV3(target_endpoint, credential_manager, '/v3/organizations')
+        self.tasks = TaskManager(target_endpoint, credential_manager)
 
 
 class CloudFoundryClient(CredentialManager):
@@ -56,6 +67,7 @@ class CloudFoundryClient(CredentialManager):
         super(CloudFoundryClient, self).__init__(service_informations, proxy)
         CredentialManager.__init__(self, service_informations, proxy)
         self.v2 = V2(target_endpoint, self)
+        self.v3 = V3(target_endpoint, self)
         if self.info.doppler_endpoint is not None:
             self._doppler = DopplerClient(self.info.doppler_endpoint,
                                           self.proxies[

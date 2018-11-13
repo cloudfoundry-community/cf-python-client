@@ -1,7 +1,8 @@
 import logging
 from time import sleep
 
-from cloudfoundry_client.v2.entities import JsonObject, Entity, EntityManager
+from cloudfoundry_client.v2.entities import Entity, EntityManager
+from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import BAD_REQUEST
 
@@ -93,6 +94,9 @@ class AppManager(EntityManager):
     def update(self, application_guid, **kwargs):
         request = AppManager._generate_application_update_request(**kwargs)
         return super(AppManager, self)._update(application_guid, request)
+
+    def remove(self, application_guid):
+        super(AppManager, self)._remove(application_guid)
 
     @staticmethod
     def _generate_application_update_request(**kwargs):

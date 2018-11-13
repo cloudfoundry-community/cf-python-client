@@ -1,17 +1,10 @@
 import functools
-import json
 import logging
 
 from cloudfoundry_client.imported import quote, reduce
+from cloudfoundry_client.json_object import JsonObject
 
 _logger = logging.getLogger(__name__)
-
-
-class JsonObject(dict):
-    def __init__(self, *args, **kwargs):
-        super(JsonObject, self).__init__(*args, **kwargs)
-
-    json = json.dumps
 
 
 class Entity(JsonObject):
@@ -25,7 +18,7 @@ class Entity(JsonObject):
                 if suffix == 'url':
                     manager_name = domain_name if domain_name.endswith('s') else '%ss' % domain_name
                     try:
-                        other_manager = getattr(client, manager_name)
+                        other_manager = getattr(client.v2, manager_name)
                     except AttributeError:
                         # generic manager
 

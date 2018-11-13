@@ -2,7 +2,7 @@ import sys
 
 if sys.version_info.major == 2:
     from mock import patch, call, MagicMock
-    from httplib import SEE_OTHER, CREATED, NO_CONTENT
+    from httplib import SEE_OTHER, CREATED, NO_CONTENT, ACCEPTED
     def iterate_text(text):
         for character in text:
             yield character
@@ -13,6 +13,7 @@ elif sys.version_info.major == 3:
     SEE_OTHER = HTTPStatus.SEE_OTHER.value
     CREATED = HTTPStatus.CREATED.value
     NO_CONTENT = HTTPStatus.NO_CONTENT.value
+    ACCEPTED = HTTPStatus.ACCEPTED.value
     def iterate_text(text):
         for character in text:
             yield bytes([character])

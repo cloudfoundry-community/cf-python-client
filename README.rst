@@ -12,6 +12,7 @@ Installing
 
 From pip
 ~~~~~~~~
+
 .. code-block:: bash
 
     $ pip install cloudfoundry-client
@@ -50,7 +51,7 @@ To instanciate the client, nothing easier
     from cloudfoundry_client.client import CloudFoundryClient
     target_endpoint = 'https://somewhere.org'
     proxy = dict(http=os.environ.get('HTTP_PROXY', ''), https=os.environ.get('HTTPS_PROXY', ''))
-    client = CloudFoundryClient(target_endpoint, proxy=proxy, skip_verification=True)
+    client = CloudFoundryClient(target_endpoint, proxy=proxy, verify=False)
     client.init_with_user_credentials('login', 'password')
 
 And then you can use it as follows:
@@ -60,9 +61,12 @@ And then you can use it as follows:
     for organization in client.v2.organizations:
         print organization['metadata']['guid']
 
+API V2
+-------
+
 Entities
 ~~~~~~~~
-Entities returned by client calls (*organization*, *space*, *app*..) are navigable ie you can call the method associated with the *xxx_url* entity attribute
+Entities returned by api V2 calls (*organization*, *space*, *app*..) are navigable ie you can call the method associated with the *xxx_url* entity attribute
 (note that if the attribute's name ends with a list, it will be interpreted as a list of object. Other wise you will get a single entity).
 
 .. code-block:: python
@@ -145,6 +149,42 @@ All managers provide the following methods:
     }
     for organization in client.v2.organizations.list(**query):
     	print organization['entity']['name']
+
+API V3
+------
+
+Entities
+~~~~~~~~
+
+Entities returned by API V3 calls transcripts links by providing a call on the object with the name of the link itself.
+Let's explain it with the next code
+
+.. code-block:: python
+
+  for app in client.v3.apps.list(space_guids='space_guid'):
+    for task in app.tasks():
+        print('Task %s' % task['guid'])
+    app.stop()
+    space = app.space()
+
+Another example:
+
+.. code-block:: python
+    app = client.v3.apps['app-guid']
+    for task in app.tasks():
+        task.cancel()
+    for task in client.v3.tasks.list(app_guids=['app-guid-1', 'app-guid-2']):
+        task.cancel()
+
+
+Available managers on API V3 are:
+
+- ``apps``
+- ``organizations``
+- ``spaces``
+- ``tasks``
+
+The managers provide the same methods as the V2 managers.
 
 Application logs
 ----------------

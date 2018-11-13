@@ -199,6 +199,13 @@ class TestApps(unittest.TestCase, AbstractTestCase):
                                                      instances=1, disk_quota=1024, health_check_type="port"))
         self.assertIsNotNone(application)
 
+    def test_remove(self):
+        self.client.delete.return_value = mock_response(
+            '/v2/apps/app_id',
+            NO_CONTENT, None)
+        self.client.v2.apps.remove('app_id')
+        self.client.delete.assert_called_with(self.client.delete.return_value.url)
+
     def test_entity(self):
         self.client.get.side_effect = [
             mock_response(
@@ -236,6 +243,16 @@ class TestApps(unittest.TestCase, AbstractTestCase):
                                                          'v2', 'apps', 'GET_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
+
+    @patch.object(sys, 'argv', ['main', 'delete_app', '906775ea-622e-4bc7-af5d-9aab3b652f81'])
+    def test_main_delete_apps(self):
+        with patch('cloudfoundry_client.main.build_client_from_configuration',
+                   new=lambda: self.client):
+            self.client.delete.return_value = mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81',
+                                                         NO_CONTENT,
+                                                         None)
+            main.main()
+            self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
     @patch.object(sys, 'argv', ['main', 'get_app', '906775ea-622e-4bc7-af5d-9aab3b652f81'])
     def test_main_get_app(self):
