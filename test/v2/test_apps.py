@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-import cloudfoundry_client.main as main
+import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import BAD_REQUEST, OK, reduce
@@ -235,7 +235,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
 
     @patch.object(sys, 'argv', ['main', 'list_apps'])
     def test_main_list_apps(self):
-        with patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/apps',
                                                          OK,
@@ -246,7 +246,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
 
     @patch.object(sys, 'argv', ['main', 'delete_app', '906775ea-622e-4bc7-af5d-9aab3b652f81'])
     def test_main_delete_apps(self):
-        with patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.delete.return_value = mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81',
                                                          NO_CONTENT,
@@ -256,7 +256,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
 
     @patch.object(sys, 'argv', ['main', 'get_app', '906775ea-622e-4bc7-af5d-9aab3b652f81'])
     def test_main_get_app(self):
-        with patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81',
                                                          OK,

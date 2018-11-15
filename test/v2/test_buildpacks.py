@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-import cloudfoundry_client.main as main
+import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
@@ -48,7 +48,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
 
     @patch.object(sys, 'argv', ['main', 'list_buildpacks'])
     def test_main_list_buildpacks(self):
-        with patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/buildpacks',
                                                          OK,
@@ -59,7 +59,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
 
     @patch.object(sys, 'argv', ['main', 'get_buildpack', '6e72c33b-dff0-4020-8603-bcd8a4eb05e4'])
     def test_main_get_buildpack(self):
-        with patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/buildpacks/6e72c33b-dff0-4020-8603-bcd8a4eb05e4',
                                                          OK,

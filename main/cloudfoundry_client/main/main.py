@@ -12,6 +12,8 @@ from cloudfoundry_client import __version__
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import NOT_FOUND
+from cloudfoundry_client.main.apps_command_domain import AppCommandDomain
+from cloudfoundry_client.main.command_domain import CommandDomain
 
 __all__ = ['main', 'build_client_from_configuration']
 
@@ -41,6 +43,7 @@ def get_user_directory():
             raise IOError('%s exists but is not a directory')
         os.mkdir(dir_conf)
     return dir_conf
+
 
 def get_config_file():
     return os.path.join(get_user_directory(), '.cf_client_python.json')
@@ -73,11 +76,11 @@ def build_client_from_configuration(previous_configuration=None):
                                                 default='' if previous_configuration is None else
                                                 previous_configuration.get('target_endpoint', ''))
         verify = _read_value_from_user('Verify ssl (true/false)',
-                                                      'Enter either true or false',
-                                                      lambda s: s == 'true' or s == 'false',
-                                                      default='true' if previous_configuration is None else
-                                                      json.dumps(
-                                                          previous_configuration.get('verify', True)))
+                                       'Enter either true or false',
+                                       lambda s: s == 'true' or s == 'false',
+                                       default='true' if previous_configuration is None else
+                                       json.dumps(
+                                           previous_configuration.get('verify', True)))
         login = _read_value_from_user('Please enter your login')
         password = _read_value_from_user('Please enter your password')
         client = CloudFoundryClient(target_endpoint, verify=(verify == 'true'))
@@ -103,9 +106,6 @@ def build_client_from_configuration(previous_configuration=None):
                 _logger.exception("Could not restore configuration. Cleaning and recreating")
                 os.remove(config_file)
                 return build_client_from_configuration(configuration)
-
-
-
 
 
 def is_guid(s):
@@ -148,168 +148,54 @@ def main():
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
 
-    commands = dict()
-    commands['organization'] = dict(list=(), name='name', allow_retrieve_by_name=True, allow_creation=True,
-                                    allow_deletion=True, display_name='Organizations')
-    commands['space'] = dict(list=('organization_guid',), name='name', allow_retrieve_by_name=True, allow_creation=True,
-                             allow_deletion=True, display_name='Spaces')
-    commands['app'] = dict(list=('organization_guid', 'space_guid',), name='name',
-                           allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True,
-                           display_name='Applications')
-    commands['service'] = dict(list=('service_broker_guid',), name='label', allow_retrieve_by_name=True,
-                               allow_creation=True,
-                               allow_deletion=True, display_name='Services')
-    commands['service_plan'] = dict(list=('service_guid', 'service_instance_guid', 'service_broker_guid'), name='name',
-                                    allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False,
-                                    display_name='Service plans')
-    commands['service_instance'] = dict(list=('organization_guid', 'space_guid', 'service_plan_guid'), name='name',
-                                        allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True,
-                                        display_name='Service instances')
-    commands['service_key'] = dict(list=('service_instance_guid',), name='name',
-                                        allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True,
-                                        display_name='Service keys')
-    commands['service_binding'] = dict(list=('app_guid', 'service_instance_guid'), name=None,
-                                       allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True,
-                                       display_name='Service bindings')
-    commands['service_broker'] = dict(list=('name', 'space_guid'), name='name',
-                                      allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True,
-                                      display_name='Service brokers')
-    commands['buildpack'] = dict(list=(), name='name',
-                                 allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False,
-                                 display_name='Buildpacks')
-    commands['route'] = dict(list=(), name='host',
-                             allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False,
-                             display_name='Routes')
-    application_commands = dict(recent_logs=('recent_logs', 'Recent Logs',),
-                                stream_logs=('stream_logs', 'Stream Logs',),
-                                env=('env', 'Get the environment of an application',),
-                                instances=('instances', 'Get the instances of an application',),
-                                stats=('stats', 'Get the stats of an application',),
-                                summary=('summary', 'Get the summary of an application',),
-                                start=('start', 'Start an application',),
-                                stop=('stop', 'Stop an application',))
-    application_extra_list_commands = dict(routes=('list_routes', 'List the routes(host) of an application', 'host'))
+    commands = [
+        CommandDomain(display_name='Organizations', client_domain='organizations', filter_list_parameters=[],
+                      allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True),
+        CommandDomain(display_name='Spaces', client_domain='spaces', filter_list_parameters=['organization_guid'],
+                      allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True),
+        AppCommandDomain(),
+        CommandDomain(display_name='Services', client_domain='services', filter_list_parameters=['service_broker_guid'],
+                      name_property='label', allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True),
+        CommandDomain(display_name='Service Plans', client_domain='service_plans',
+                      filter_list_parameters=['service_guid', 'service_instance_guid', 'service_broker_guid']),
+        CommandDomain(display_name='Service Instances', client_domain='service_instances',
+                      filter_list_parameters=['organization_guid', 'space_guid', 'service_plan_guid'],
+                      allow_creation=True, allow_deletion=True),
+        CommandDomain(display_name='Service Keys', client_domain='service_keys',
+                      filter_list_parameters=['service_instance_guid'],
+                      allow_creation=True, allow_deletion=True),
+        CommandDomain(display_name='Service Bindings', client_domain='service_bindings',
+                      filter_list_parameters=['app_guid', 'service_instance_guid'], name_property=None,
+                      allow_creation=True, allow_deletion=True),
+        CommandDomain(display_name='Service Broker', client_domain='service_brokers',
+                      filter_list_parameters=['name', 'space_guid'],
+                      allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True),
+        CommandDomain(display_name='Buildpacks', client_domain='buildpacks',
+                      filter_list_parameters=[], allow_retrieve_by_name=False,
+                      allow_creation=False, allow_deletion=False),
+        CommandDomain(display_name='Routes', client_domain='routes', name_property='host', filter_list_parameters=[])
+    ]
     description = []
-    for domain, command_description in list(commands.items()):
-        description.append(' %s' % command_description['display_name'])
-        description.append('   list_%ss : List %ss' % (domain, domain))
-        description.append('   get_%s : Get a %s by %s' % (domain, domain,
-                                                           'UUID or name (first found then)'
-                                                           if command_description['allow_retrieve_by_name']
-                                                           else 'UUID'))
-        if command_description['allow_creation']:
-            description.append('   create_%s : Create a %s' % (domain, domain))
-        if command_description['allow_deletion']:
-            description.append('   delete_%s : Delete a %s' % (domain, domain))
-        if domain == 'app':
-            for command, application_command_description in list(application_commands.items()):
-                description.append('   %s : %s' % (command, application_command_description[1]))
-            for command, application_command_description in list(application_extra_list_commands.items()):
-                description.append('   %s : %s' % (command, application_command_description[1]))
-        description.append('')
+    for command in commands:
+        description.extend(command.description())
 
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-V', '--version', action='version', version=__version__)
     subparsers = parser.add_subparsers(title='Commands', dest='action', description='\n'.join(description))
     subparsers.add_parser('import_from_cf_cli', help='Copy CF CLI configuration into our configuration')
-    for domain, command_description in list(commands.items()):
-        list_parser = subparsers.add_parser('list_%ss' % domain)
-        for filter_parameter in command_description['list']:
-            list_parser.add_argument('-%s' % filter_parameter, action='store', dest=filter_parameter, type=str,
-                                     default=None, help='Filter with %s' % filter_parameter)
-        get_parser = subparsers.add_parser('get_%s' % domain)
-        get_parser.add_argument('id', metavar='ids', type=str, nargs=1,
-                                help='The id. Can be UUID or name (first found then)'
-                                if command_description['allow_retrieve_by_name'] else 'The id (UUID)')
-        if command_description['allow_creation']:
-            create_parser = subparsers.add_parser('create_%s' % domain)
-            create_parser.add_argument('entity', metavar='entities', type=str, nargs=1,
-                                       help='Either a path of the json file containing the %s or a json object or the json %s object' % (domain, domain))
-        if command_description['allow_deletion']:
-            delete_parser = subparsers.add_parser('delete_%s' % domain)
-            delete_parser.add_argument('id', metavar='ids', type=str, nargs=1,
-                                       help='The id. Can be UUID or name (first found then)'
-                                       if command_description['allow_retrieve_by_name'] else 'The id (UUID)')
-        if domain == 'app':
-            for command, _ in list(application_commands.items()):
-                command_parser = subparsers.add_parser(command)
-                command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
-                                            help='The id. Can be UUID or name (first found then)')
-            for command, _ in list(application_extra_list_commands.items()):
-                command_parser = subparsers.add_parser(command)
-                command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
-                                            help='The id. Can be UUID or name (first found then)')
+    for command in commands:
+        command.generate_parser(subparsers)
 
     arguments = parser.parse_args()
     if arguments.action == 'import_from_cf_cli':
         import_from_clf_cli()
     else:
         client = build_client_from_configuration()
-
-        if arguments.action == 'recent_logs':
-            resource_id = resolve_id(arguments.id[0], lambda x: client.v2.apps.get_first(name=x), 'application', True)
-            log_recent(client, resource_id)
-        elif arguments.action == 'stream_logs':
-            resource_id = resolve_id(arguments.id[0], lambda x: client.v2.apps.get_first(name=x), 'application', True)
-            stream_logs(client, resource_id)
-        elif application_commands.get(arguments.action) is not None:
-            resource_id = resolve_id(arguments.id[0], lambda x: client.v2.apps.get_first(name=x), 'application', True)
-            print(getattr(client.v2.apps, application_commands[arguments.action][0])(resource_id).json(indent=1))
-        elif application_extra_list_commands.get(arguments.action) is not None:
-            resource_id = resolve_id(arguments.id[0], lambda x: client.v2.apps.get_first(name=x), 'application', True)
-            name_property = application_extra_list_commands[arguments.action][2]
-            for entity in getattr(client.v2.apps, application_extra_list_commands[arguments.action][0])(resource_id):
-                print('%s - %s' % (entity['metadata']['guid'], entity['entity'][name_property]))
-        elif arguments.action.find('list_') == 0:
-            domain = arguments.action[len('list_'): len(arguments.action) - 1]
-            filter_list = dict()
-            for filter_parameter in commands[domain]['list']:
-                filter_value = getattr(arguments, filter_parameter)
-                if filter_value is not None:
-                    filter_list[filter_parameter] = filter_value
-            for entity in _get_v2_client_domain(client, domain).list(**filter_list):
-                name_property = commands[domain]['name']
-                if name_property is not None:
-                    print('%s - %s' % (entity['metadata']['guid'], entity['entity'][name_property]))
-                else:
-                    print(entity['metadata']['guid'])
-        elif arguments.action.find('get_') == 0:
-            domain = arguments.action[len('get_'):]
-            resource_id = resolve_id(arguments.id[0],
-                                     lambda x: _get_v2_client_domain(client, domain).get_first(
-                                         **{commands[domain]['name']: x}),
-                                     domain,
-                                     commands[domain]['allow_retrieve_by_name'])
-            print(_get_v2_client_domain(client, domain).get(resource_id).json(indent=1))
-        elif arguments.action.find('create_') == 0:
-            domain = arguments.action[len('create_'):]
-            data = None
-            if os.path.isfile(arguments.entity[0]):
-                with open(arguments.entity[0], 'r') as f:
-                    try:
-                        data = json.load(f)
-                    except ValueError:
-                        raise ValueError('entity: file %s does not contain valid json data' % arguments.entity[0])
-            else:
-                try:
-                    data = json.loads(arguments.entity[0])
-                except ValueError:
-                    raise ValueError('entity: must be either a valid json file path or a json object')
-            print(_get_v2_client_domain(client, domain)._create(data).json())
-        elif arguments.action.find('delete_') == 0:
-            domain = arguments.action[len('delete_'):]
-            if is_guid(arguments.id[0]):
-                _get_v2_client_domain(client, domain)._remove(arguments.id[0])
-            elif commands[domain]['allow_retrieve_by_name']:
-                filter_get = dict()
-                filter_get[commands[domain]['name']] = arguments.id[0]
-                entity = _get_v2_client_domain(client, domain).get_first(**filter_get)
-                if entity is None:
-                    raise InvalidStatusCode(NOT_FOUND, '%s with name %s' % (domain, arguments.id[0]))
-                else:
-                    _get_v2_client_domain(client, domain)._remove(entity['metadata']['guid'])
-            else:
-                raise ValueError('id: %s: does not allow search by name' % domain)
+        for command in commands:
+            if command.is_handled(arguments.action):
+                command.execute(client, arguments.action, arguments)
+                return
+        raise ValueError("Domain not found for action %s" % arguments.action)
 
 
 if __name__ == "__main__":

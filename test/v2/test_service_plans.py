@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-import cloudfoundry_client.main as main
+import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
@@ -76,7 +76,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
 
     @patch.object(sys, 'argv', ['main', 'list_service_plans'])
     def test_main_list_service_plans(self):
-        with patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_plans',
                                                          OK,
@@ -87,7 +87,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
 
     @patch.object(sys, 'argv', ['main', 'get_service_plan', '5d8f3b0f-6b5b-487f-8fed-4c2d9b812a72'])
     def test_main_get_service_plan(self):
-        with patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_plans/5d8f3b0f-6b5b-487f-8fed-4c2d9b812a72',
                                                          OK,

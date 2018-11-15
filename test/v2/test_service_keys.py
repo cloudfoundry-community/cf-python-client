@@ -2,7 +2,7 @@ import json
 import sys
 import unittest
 
-import cloudfoundry_client.main as main
+import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
@@ -61,7 +61,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
 
     @patch.object(sys, 'argv', ['main', 'list_service_keys'])
     def test_main_list_service_keys(self):
-        with patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_keys',
                                                          OK,
@@ -72,7 +72,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
 
     @patch.object(sys, 'argv', ['main', 'get_service_key', '67755c27-28ed-4087-9688-c07d92f3bcc9'])
     def test_main_get_service_key(self):
-        with patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_keys/67755c27-28ed-4087-9688-c07d92f3bcc9',
                                                          OK,
@@ -85,7 +85,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
         dict(service_instance_guid='service_instance_id',
              name='name-127'))])
     def test_main_create_service_key(self):
-        with patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.post.return_value = mock_response(
                 '/v2/service_keys',
@@ -100,7 +100,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
 
     @patch.object(sys, 'argv', ['main', 'delete_service_key', '67755c27-28ed-4087-9688-c07d92f3bcc9'])
     def test_main_delete_service_key(self):
-        with patch('cloudfoundry_client.main.build_client_from_configuration',
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.delete.return_value = mock_response(
                 '/v2/service_keys/67755c27-28ed-4087-9688-c07d92f3bcc9',
