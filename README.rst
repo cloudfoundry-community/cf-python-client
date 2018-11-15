@@ -194,6 +194,7 @@ Application logs
 Recent logs of an application can be get as follows:
 
 .. code-block:: python
+
     app = client.v2.apps['app-guid']
     for log in app.recent_logs():
         print(log)
@@ -202,6 +203,7 @@ Recent logs of an application can be get as follows:
 Logs can also be streamed using a websocket as follows:
 
 .. code-block:: python
+
     import cloudfoundry_client.droppler.envelope_pb2.Envelope
     app = client.v2.apps['app-guid']
     for log in app.stream_logs():
@@ -213,9 +215,7 @@ Logs can also be streamed using a websocket as follows:
 Command Line Interface
 ----------------------
 
-The client comes with a command line interface. Run ``cloudfoundry-client`` command. At first execution, it will ask you
- information about the target platform and your credential (do not worry they are not saved). After that you may have a help
-by running ``cloudfoundry-client -h``
+The client comes with a command line interface. Run ``cloudfoundry-client`` command. At first execution, it will ask you information about the target platform and your credential (do not worry they are not saved). After that you may have a help by running ``cloudfoundry-client -h``
 
 Issues and contributions
 ------------------------
