@@ -1,3 +1,4 @@
+import functools
 import json
 import os
 import re
@@ -16,11 +17,13 @@ class Command(object):
 
 class CommandDomain(object):
     def __init__(self, display_name, client_domain, filter_list_parameters,
-                 name_property='name', allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False,
+                 api_version='v2', name_property='name',
+                 allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False,
                  extra_methods=None):
         self.display_name = display_name
         self.client_domain = client_domain
-        self.entity_name = client_domain[:len(client_domain)-1]
+        self.api_version = api_version
+        self.entity_name = client_domain[:len(client_domain) - 1]
         self.filter_list_parameters = filter_list_parameters
         self.name_property = name_property
         self.allow_retrieve_by_name = allow_retrieve_by_name
@@ -44,9 +47,9 @@ class CommandDomain(object):
         description = [' %s' % self.display_name,
                        '   %s : List %ss' % (self._list_entry(), self.entity_name),
                        '   %s : Get a %s by %s' % (self._get_entry(), self.entity_name,
-                                                       'UUID or name (first found then)'
-                                                       if self.allow_retrieve_by_name
-                                                       else 'UUID')]
+                                                   'UUID or name (first found then)'
+                                                   if self.allow_retrieve_by_name
+                                                   else 'UUID')]
         if self.allow_creation:
             description.append('   %s : Create a %s' % (self._create_entry(), self.entity_name))
 
@@ -65,8 +68,8 @@ class CommandDomain(object):
     def execute(self, client, action, arguments):
         return self.commands[action].execute(client, arguments)
 
-    def _get_v2_client_domain(self, client):
-        return getattr(client.v2, self.client_domain)
+    def _get_client_domain(self, client):
+        return getattr(getattr(client, self.api_version), self.client_domain)
 
     @staticmethod
     def is_guid(s):
@@ -84,6 +87,16 @@ class CommandDomain(object):
         else:
             raise ValueError('id: %s: does not allow search by name' % self.client_domain)
 
+    @staticmethod
+    def id(entity):
+        return entity['metadata']['guid']
+
+    def name(self, entity):
+        return entity['entity'][self.name_property]
+
+    def find_by_name(self, client, name):
+        return self._get_client_domain(client).get_first(**{self.name_property: name})
+
     def create(self):
         entry = self._create_entry()
 
@@ -100,7 +113,7 @@ class CommandDomain(object):
                     data = json.loads(arguments.entity[0])
                 except ValueError:
                     raise ValueError('entity: must be either a valid json file path or a json object')
-            print(self._get_v2_client_domain(client)._create(data).json())
+            print(self._get_client_domain(client)._create(data).json())
 
         def generate_parser(parser):
             create_parser = parser.add_parser(entry)
@@ -115,15 +128,13 @@ class CommandDomain(object):
 
         def execute(client, arguments):
             if self.is_guid(arguments.id[0]):
-                self._get_v2_client_domain(client)._remove(arguments.id[0])
+                self._get_client_domain(client)._remove(arguments.id[0])
             elif self.allow_retrieve_by_name:
-                filter_get = dict()
-                filter_get[self.name_property] = arguments.id[0]
-                entity = self._get_v2_client_domain(client).get_first(**filter_get)
+                entity = self.find_by_name(client, arguments.id[0])
                 if entity is None:
                     raise InvalidStatusCode(NOT_FOUND, '%s with name %s' % (self.client_domain, arguments.id[0]))
                 else:
-                    self._get_v2_client_domain(client)._remove(entity['metadata']['guid'])
+                    self._get_client_domain(client)._remove(self.id(entity))
             else:
                 raise ValueError('id: %s: does not allow search by name' % self.client_domain)
 
@@ -140,9 +151,8 @@ class CommandDomain(object):
 
         def execute(client, arguments):
             resource_id = self.resolve_id(arguments.id[0],
-                                          lambda x: self._get_v2_client_domain().get_first(
-                                              **{self.name_property: x}))
-            print(self._get_v2_client_domain(client).get(resource_id).json(indent=1))
+                                          functools.partial(self.find_by_name, client))
+            print(self._get_client_domain(client).get(resource_id).json(indent=1))
 
         def generate_parser(parser):
             get_parser = parser.add_parser(entry)
@@ -161,11 +171,11 @@ class CommandDomain(object):
                 filter_value = getattr(arguments, filter_parameter)
                 if filter_value is not None:
                     filter_list[filter_parameter] = filter_value
-            for entity in self._get_v2_client_domain(client).list(**filter_list):
+            for entity in self._get_client_domain(client).list(**filter_list):
                 if self.name_property is not None:
-                    print('%s - %s' % (entity['metadata']['guid'], entity['entity'][self.name_property]))
+                    print('%s - %s' % (self.id(entity), self.name(entity)))
                 else:
-                    print(entity['metadata']['guid'])
+                    print(self.id(entity))
 
         def generate_parser(parser):
             list_parser = parser.add_parser(entry)

@@ -14,6 +14,7 @@ from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import NOT_FOUND
 from cloudfoundry_client.main.apps_command_domain import AppCommandDomain
 from cloudfoundry_client.main.command_domain import CommandDomain
+from cloudfoundry_client.main.tasks_command_domain import TaskCommandDomain
 
 __all__ = ['main', 'build_client_from_configuration']
 
@@ -173,7 +174,8 @@ def main():
         CommandDomain(display_name='Buildpacks', client_domain='buildpacks',
                       filter_list_parameters=[], allow_retrieve_by_name=False,
                       allow_creation=False, allow_deletion=False),
-        CommandDomain(display_name='Routes', client_domain='routes', name_property='host', filter_list_parameters=[])
+        CommandDomain(display_name='Routes', client_domain='routes', name_property='host', filter_list_parameters=[]),
+        TaskCommandDomain()
     ]
     description = []
     for command in commands:

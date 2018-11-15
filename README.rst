@@ -2,6 +2,7 @@ Cloudfoundry python client
 ==========================
 .. image:: https://img.shields.io/pypi/v/cloudfoundry-client.svg
     :target: https://pypi.python.org/pypi/cloudfoundry-client
+
 .. image:: https://img.shields.io/github/license/antechrestos/cf-python-client.svg
     :target: https://raw.githubusercontent.com/antechrestos/cf-python-client/master/LICENSE
 
@@ -44,7 +45,7 @@ You may build the client and use it in your code
 
 Client
 ~~~~~~
-To instanciate the client, nothing easier
+To instantiate the client, nothing easier
 
 .. code-block:: python
 

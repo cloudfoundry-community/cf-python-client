@@ -67,11 +67,13 @@ setup(name=package_name,
           "Programming Language :: Python :: 3.3",
           "Programming Language :: Python :: 3.4",
           "Programming Language :: Python :: 3.5",
+          "Programming Language :: Python :: 3.6",
+          "Programming Language :: Python :: 3.7",
           "Topic :: Communications",
       ],
       entry_points={
           'console_scripts': [
-              'cloudfoundry-client = %s.main:main' % package_directory,
+              'cloudfoundry-client = %s.main.main:main' % package_directory,
           ]
       },
       cmdclass=dict(generate=GenerateCommand),

@@ -131,7 +131,7 @@ class EntityManager(object):
             if isinstance(parameter_value, (list, tuple)):
                 parameters.append('%s=%s' % (parameter_name, quote(','.join(parameter_value))))
             else:
-                parameters.append('%s=%s' % quote(str(parameter_value)))
+                parameters.append('%s=%s' % (parameter_name, quote(str(parameter_value))))
             return parameters
 
         if len(kwargs) > 0:

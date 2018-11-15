@@ -27,7 +27,7 @@ class AppCommandDomain(CommandDomain):
 
     def recent_logs(self):
         def execute(client, arguments):
-            resource_id = self.resolve_id(arguments.id[0], lambda x: self._get_v2_client_domain(client).get_first(name=x))
+            resource_id = self.resolve_id(arguments.id[0], lambda x: self._get_client_domain(client).get_first(name=x))
             for envelope in client.doppler.recent_logs(resource_id):
                 print(envelope)
 
@@ -35,7 +35,7 @@ class AppCommandDomain(CommandDomain):
 
     def stream_logs(self):
         def execute(client, arguments):
-            resource_id = self.resolve_id(arguments.id[0], lambda x: self._get_v2_client_domain(client).get_first(name=x))
+            resource_id = self.resolve_id(arguments.id[0], lambda x: self._get_client_domain(client).get_first(name=x))
             try:
                 for envelope in client.doppler.stream_logs(resource_id):
                     print(envelope)
@@ -46,15 +46,15 @@ class AppCommandDomain(CommandDomain):
 
     def simple_extra_command(self, entry):
         def execute(client, arguments):
-            resource_id = self.resolve_id(arguments.id[0], lambda x: self._get_v2_client_domain(client).get_first(name=x))
-            print(getattr(self._get_v2_client_domain(client), entry)(resource_id).json(indent=1))
+            resource_id = self.resolve_id(arguments.id[0], lambda x: self._get_client_domain(client).get_first(name=x))
+            print(getattr(self._get_client_domain(client), entry)(resource_id).json(indent=1))
 
         return Command(entry, self._generate_id_command_parser(entry), execute)
 
     def app_routes(self):
         def execute(client, arguments):
-            resource_id = self.resolve_id(arguments.id[0], lambda x: self._get_v2_client_domain(client).get_first(name=x))
-            for entity in getattr(self._get_v2_client_domain(client), 'list_routes')(resource_id):
+            resource_id = self.resolve_id(arguments.id[0], lambda x: self._get_client_domain(client).get_first(name=x))
+            for entity in getattr(self._get_client_domain(client), 'list_routes')(resource_id):
                 print('%s - %s' % (entity['metadata']['guid'], entity['entity']['host']))
 
         return Command('app_routes', self._generate_id_command_parser('app_routes'), execute)

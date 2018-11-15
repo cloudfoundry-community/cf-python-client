@@ -15,8 +15,7 @@ class TaskManager(EntityManager):
             request['memory_in_mb'] = memory_in_mb
         if droplet_guid is not None:
             request['droplet_guid'] = droplet_guid
-        url = '%s/v3/apps/%s/tasks' % (self.target_endpoint, application_guid)
-        return self._post(url, data=request)
+        return self._post('%s/v3/apps/%s/tasks' % (self.target_endpoint, application_guid), data=request)
 
     def cancel(self, task_guid):
         return self._post('%s/v3/tasks/%s/actions/cancel' % (self.target_endpoint, task_guid))
