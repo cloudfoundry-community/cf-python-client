@@ -59,14 +59,12 @@ class V3(object):
 
 class CloudFoundryClient(CredentialManager):
     def __init__(self, target_endpoint, client_id='cf', client_secret='', proxy=None, verify=True):
-        info = CloudFoundryClient._get_info(target_endpoint, proxy, verify=verify)
+        info = self._get_info(target_endpoint, proxy, verify=verify)
         if not info.api_version.startswith('2.'):
             raise AssertionError('Only version 2 is supported for now. Found %s' % info.api_version)
-        service_information = CloudFoundryClient._service_information(info.authorization_endpoint,
-                                                                      client_id,
-                                                                      client_secret,
-                                                                      verify)
-        super(CloudFoundryClient, self).__init__(service_information, proxy)
+        service_information = ServiceInformation(None, '%s/oauth/token' % info.authorization_endpoint,
+                                                 client_id, client_secret, [], verify)
+        super(CloudFoundryClient, self).__init__(service_information, proxies=proxy)
         self.v2 = V2(target_endpoint, self)
         self.v3 = V3(target_endpoint, self)
         self._doppler = DopplerClient(info.doppler_endpoint,
@@ -75,11 +73,6 @@ class CloudFoundryClient(CredentialManager):
                                       self.service_information.verify,
                                       self) if info.doppler_endpoint is not None else None
         self.info = info
-
-    @staticmethod
-    def _service_information(authorization_endpoint, client_id, client_secret, verify):
-        return ServiceInformation(None, '%s/oauth/token' % authorization_endpoint,
-                                  client_id, client_secret, [], verify)
 
     @property
     def doppler(self):
