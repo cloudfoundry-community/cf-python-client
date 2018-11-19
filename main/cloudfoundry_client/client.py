@@ -59,21 +59,27 @@ class V3(object):
 
 class CloudFoundryClient(CredentialManager):
     def __init__(self, target_endpoint, client_id='cf', client_secret='', proxy=None, verify=True):
-        self.info = self._get_info(target_endpoint, proxy, verify=verify)
-        if not self.info.api_version.startswith('2.'):
-            raise AssertionError('Only version 2 is supported for now. Found %s' % self.info.api_version)
-        service_informations = ServiceInformation(None, '%s/oauth/token' % self.info.authorization_endpoint,
-                                                  client_id, client_secret, [], verify)
-        super(CloudFoundryClient, self).__init__(service_informations, proxy)
-        CredentialManager.__init__(self, service_informations, proxy)
+        info = CloudFoundryClient._get_info(target_endpoint, proxy, verify=verify)
+        if not info.api_version.startswith('2.'):
+            raise AssertionError('Only version 2 is supported for now. Found %s' % info.api_version)
+        service_information = CloudFoundryClient._service_information(info.authorization_endpoint,
+                                                                      client_id,
+                                                                      client_secret,
+                                                                      verify)
+        super(CloudFoundryClient, self).__init__(service_information, proxy)
         self.v2 = V2(target_endpoint, self)
         self.v3 = V3(target_endpoint, self)
-        if self.info.doppler_endpoint is not None:
-            self._doppler = DopplerClient(self.info.doppler_endpoint,
-                                          self.proxies[
-                                              'http' if self.info.doppler_endpoint.startswith('ws://') else 'https'],
-                                          self.service_information.verify,
-                                          self) if self.info.doppler_endpoint is not None else None
+        self._doppler = DopplerClient(info.doppler_endpoint,
+                                      self.proxies[
+                                          'http' if info.doppler_endpoint.startswith('ws://') else 'https'],
+                                      self.service_information.verify,
+                                      self) if info.doppler_endpoint is not None else None
+        self.info = info
+
+    @staticmethod
+    def _service_information(authorization_endpoint, client_id, client_secret, verify):
+        return ServiceInformation(None, '%s/oauth/token' % authorization_endpoint,
+                                  client_id, client_secret, [], verify)
 
     @property
     def doppler(self):
