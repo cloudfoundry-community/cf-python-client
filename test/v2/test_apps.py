@@ -206,6 +206,15 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.client.v2.apps.remove('app_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
+    def test_restage(self):
+        self.client.post.return_value = mock_response(
+            '/v2/apps/app_id/restage',
+            CREATED,
+            None,
+            'v2', 'apps', 'POST_response.json')
+        self.client.v2.apps.restage('app_id')
+        self.client.post.assert_called_with(self.client.post.return_value.url)
+
     def test_entity(self):
         self.client.get.side_effect = [
             mock_response(
