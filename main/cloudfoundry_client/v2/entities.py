@@ -67,18 +67,27 @@ class EntityManager(object):
 
     def _create(self, data):
         url = '%s%s' % (self.target_endpoint, self.entity_uri)
+        return self._post(url, data)
+
+    def _update(self, resource_id, data):
+        url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
+        return self._put(url, data)
+
+    def _remove(self, resource_id):
+        url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
+        self._delete(url)
+
+    def _post(self, url, data=None):
         response = self.client.post(url, json=data)
         _logger.debug('POST - %s - %s', url, response.text)
         return self._read_response(response)
 
-    def _update(self, resource_id, data):
-        url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
+    def _put(self, url, data=None):
         response = self.client.put(url, json=data)
         _logger.debug('PUT - %s - %s', url, response.text)
         return self._read_response(response)
 
-    def _remove(self, resource_id):
-        url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
+    def _delete(self, url):
         response = self.client.delete(url)
         _logger.debug('DELETE - %s - %s', url, response.text)
 

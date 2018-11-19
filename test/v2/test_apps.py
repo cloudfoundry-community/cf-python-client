@@ -69,9 +69,10 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(application)
 
     def test_associate_route(self):
-        self.client.put.return_value = mock_response('/v2/apps/app_id/routes/route_id', NO_CONTENT, None)
+        self.client.put.return_value = mock_response('/v2/apps/app_id/routes/route_id', CREATED, None,
+                                                     'v2', 'apps', 'PUT_{id}_routes_{route_id}_response.json')
         self.client.v2.apps.associate_route('app_id', 'route_id')
-        self.client.put.assert_called_with(self.client.put.return_value.url)
+        self.client.put.assert_called_with(self.client.put.return_value.url, json=None)
 
     def test_list_routes(self):
         self.client.get.return_value = mock_response(
@@ -121,6 +122,16 @@ class TestApps(unittest.TestCase, AbstractTestCase):
             'v2', 'apps', 'GET_{id}_response.json')
         application = self.client.v2.apps.get('app_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
+        self.assertIsNotNone(application)
+
+    def test_restage(self):
+        self.client.post.return_value = mock_response(
+            '/v2/apps/app_id/restage',
+            OK,
+            None,
+            'v2', 'apps', 'POST_{id}_restage_response.json')
+        application = self.client.v2.apps.restage('app_id')
+        self.client.post.assert_called_with(self.client.post.return_value.url, json=None)
         self.assertIsNotNone(application)
 
     def test_start(self):

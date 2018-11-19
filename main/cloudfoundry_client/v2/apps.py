@@ -58,13 +58,13 @@ class AppManager(EntityManager):
         return self._get('%s/%s/summary' % (self.entity_uri, application_guid), JsonObject)
 
     def associate_route(self, application_guid, route_guid):
-        self.client.put('%s%s/%s/routes/%s' % (self.target_endpoint, self.entity_uri, application_guid, route_guid))
+        self._put('%s%s/%s/routes/%s' % (self.target_endpoint, self.entity_uri, application_guid, route_guid))
 
     def list_routes(self, application_guid, **kwargs):
         return self.client.v2.routes._list('%s/%s/routes' % (self.entity_uri, application_guid), **kwargs)
 
     def remove_route(self, application_guid, route_guid):
-        self.client.delete('%s%s/%s/routes/%s' % (self.target_endpoint, self.entity_uri, application_guid, route_guid))
+        self._delete('%s%s/%s/routes/%s' % (self.target_endpoint, self.entity_uri, application_guid, route_guid))
 
     def list_service_bindings(self, application_guid, **kwargs):
         return self.client.v2.service_bindings._list('%s/%s/service_bindings' % (self.entity_uri, application_guid),
@@ -90,9 +90,7 @@ class AppManager(EntityManager):
 
     def restage(self, application_guid):
         url = "%s%s/%s/restage" % (self.target_endpoint, self.entity_uri, application_guid)
-        response = self.client.v2.apps.client.post(url)
-        _logger.debug("POST - %s - %s", url, response.text)
-        return self._read_response(response)
+        return self._post(url)
 
     def create(self, **kwargs):
         if kwargs.get('name') is None or kwargs.get('space_guid') is None:
