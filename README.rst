@@ -219,4 +219,13 @@ The client comes with a command line interface. Run ``cloudfoundry-client`` comm
 
 Issues and contributions
 ------------------------
+
 Please submit issue/pull request.
+
+You can run tests by doing so. In the project directory:
+
+.. code-block:: bash
+
+    $ export PYTHONPATH=main
+    $ python -m unittest discover test
+
