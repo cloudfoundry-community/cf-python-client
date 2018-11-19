@@ -25,6 +25,9 @@ class _Application(Entity):
     def summary(self):
         return self.client.v2.apps.get_summary(self['metadata']['guid'])
 
+    def restage(self):
+        return self.client.v2.apps.restage(self['metadata']['guid'])
+
     def recent_logs(self):
         return self.client.doppler.recent_logs(self['metadata']['guid'])
 
@@ -84,6 +87,12 @@ class AppManager(EntityManager):
         else:
             self._wait_for_instances_in_state(application_guid, 0, 'STOPPED', check_time, timeout)
             return result
+
+    def restage(self, application_guid):
+        url = "%s%s/%s/restage" % (self.target_endpoint, self.entity_uri, application_guid)
+        response = self.client.v2.apps.client.post(url)
+        _logger.debug("POST - %s - %s", url, response.text)
+        return self._read_response(response)
 
     def create(self, **kwargs):
         if kwargs.get('name') is None or kwargs.get('space_guid') is None:
