@@ -188,9 +188,9 @@ class TestApps(unittest.TestCase, AbstractTestCase):
             None,
             'v2', 'apps', 'POST_response.json')
         application = self.client.v2.apps.create(name='test', space_guid='1fbb3e81-4f55-4fd3-9820-45febbd5e53e',
-                                              stack_guid='82f9c01c-72f2-4d3e-b5ed-eab97a6203cf', memory=1024,
-                                              instances=1,
-                                              disk_quota=1024, health_check_type="port")
+                                                 stack_guid='82f9c01c-72f2-4d3e-b5ed-eab97a6203cf', memory=1024,
+                                                 instances=1,
+                                                 disk_quota=1024, health_check_type="port")
         self.client.post.assert_called_with(self.client.post.return_value.url,
                                             json=dict(name='test', space_guid='1fbb3e81-4f55-4fd3-9820-45febbd5e53e',
                                                       stack_guid='82f9c01c-72f2-4d3e-b5ed-eab97a6203cf', memory=1024,
@@ -203,8 +203,9 @@ class TestApps(unittest.TestCase, AbstractTestCase):
             CREATED,
             None,
             'v2', 'apps', 'PUT_{id}_response.json')
-        application = self.client.v2.apps.update('app_id', stack_guid='82f9c01c-72f2-4d3e-b5ed-eab97a6203cf', memory=1024,
-                                              instances=1, disk_quota=1024, health_check_type="port")
+        application = self.client.v2.apps.update('app_id', stack_guid='82f9c01c-72f2-4d3e-b5ed-eab97a6203cf',
+                                                 memory=1024,
+                                                 instances=1, disk_quota=1024, health_check_type="port")
         self.client.put.assert_called_with(self.client.put.return_value.url,
                                            json=dict(stack_guid='82f9c01c-72f2-4d3e-b5ed-eab97a6203cf', memory=1024,
                                                      instances=1, disk_quota=1024, health_check_type="port"))
@@ -260,8 +261,8 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.delete.return_value = mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81',
-                                                         NO_CONTENT,
-                                                         None)
+                                                            NO_CONTENT,
+                                                            None)
             main.main()
             self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
@@ -275,3 +276,14 @@ class TestApps(unittest.TestCase, AbstractTestCase):
                                                          'v2', 'apps', 'GET_{id}_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
+
+    @patch.object(sys, 'argv', ['main', 'restage', '906775ea-622e-4bc7-af5d-9aab3b652f81'])
+    def test_main_restage_app(self):
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
+                   new=lambda: self.client):
+            self.client.post.return_value = mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81/restage',
+                                                          CREATED,
+                                                          None,
+                                                          'v2', 'apps', 'POST_{id}_restage_response.json')
+            main.main()
+            self.client.post.assert_called_with(self.client.post.return_value.url, json=None)

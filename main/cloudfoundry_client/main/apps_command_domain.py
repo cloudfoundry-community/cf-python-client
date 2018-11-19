@@ -22,6 +22,8 @@ class AppCommandDomain(CommandDomain):
                                                                'Start an application',),
                                                               (self.simple_extra_command('stop'),
                                                                'Stop an application',),
+                                                              (self.simple_extra_command('restage'),
+                                                               'Restage an application',),
                                                               (self.app_routes(),
                                                                'List the routes(host) of an application')])
 
