@@ -124,16 +124,6 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(application)
 
-    def test_restage(self):
-        self.client.post.return_value = mock_response(
-            '/v2/apps/app_id/restage',
-            OK,
-            None,
-            'v2', 'apps', 'POST_{id}_restage_response.json')
-        application = self.client.v2.apps.restage('app_id')
-        self.client.post.assert_called_with(self.client.post.return_value.url, json=None)
-        self.assertIsNotNone(application)
-
     def test_start(self):
         self.client.put.return_value = mock_response(
             '/v2/apps/app_id',
@@ -223,9 +213,9 @@ class TestApps(unittest.TestCase, AbstractTestCase):
             '/v2/apps/app_id/restage',
             CREATED,
             None,
-            'v2', 'apps', 'POST_response.json')
+            'v2', 'apps', 'POST_{id}_restage_response.json')
         self.client.v2.apps.restage('app_id')
-        self.client.post.assert_called_with(self.client.post.return_value.url)
+        self.client.post.assert_called_with(self.client.post.return_value.url, json=None)
 
     def test_entity(self):
         self.client.get.side_effect = [
