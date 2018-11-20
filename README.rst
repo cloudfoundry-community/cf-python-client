@@ -140,7 +140,7 @@ All managers provide the following methods:
 
     # You can also specify multiple values for a query parameter.
     for organization in client.v2.organizations.list(**{'name': ['org1', 'org2']}):
-    	print organization['metadata']['guid']
+        print organization['metadata']['guid']
 
     # Order and Paging parameters are also supported.
     query = {
@@ -149,7 +149,7 @@ All managers provide the following methods:
     	'results-per-page': 100
     }
     for organization in client.v2.organizations.list(**query):
-    	print organization['entity']['name']
+        print organization['entity']['name']
 
 API V3
 ------
@@ -211,7 +211,6 @@ Logs can also be streamed using a websocket as follows:
         print(log)
 
 
-
 Command Line Interface
 ----------------------
 
@@ -228,4 +227,8 @@ You can run tests by doing so. In the project directory:
 
     $ export PYTHONPATH=main
     $ python -m unittest discover test
+    # or even
+    $ python setup.py test
+
+
 
