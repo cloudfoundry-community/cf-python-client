@@ -58,7 +58,11 @@ class V3(object):
 
 
 class CloudFoundryClient(CredentialManager):
-    def __init__(self, target_endpoint, client_id='cf', client_secret='', proxy=None, verify=True):
+    def __init__(self, target_endpoint, client_id='cf', client_secret='', **kwargs):
+        proxy = kwargs.get('proxy', dict(http='', https=''))
+        verify = kwargs.get('verify', True)
+        self.token_format = kwargs.get('token_format')
+        self.login_hint = kwargs.get('login_hint')
         info = self._get_info(target_endpoint, proxy, verify=verify)
         if not info.api_version.startswith('2.'):
             raise AssertionError('Only version 2 is supported for now. Found %s' % info.api_version)
@@ -110,6 +114,20 @@ class CloudFoundryClient(CredentialManager):
     @staticmethod
     def _token_request_headers(_):
         return dict(Accept='application/json')
+
+    def _grant_password_request(self, login, password):
+        request = super(CloudFoundryClient, self)._grant_password_request(login, password)
+        if self.token_format is not None:
+            request['token_format'] = self.token_format
+        if self.login_hint is not None:
+            request['login_hint'] = self.login_hint
+        return request
+
+    def _grant_refresh_token_request(self, refresh_token):
+        request = super(CloudFoundryClient, self)._grant_refresh_token_request(refresh_token)
+        if self.token_format is not None:
+            request['token_format'] = self.token_format
+        return request
 
     def get(self, url, params=None, **kwargs):
         response = super(CloudFoundryClient, self).get(url, params, **kwargs)
