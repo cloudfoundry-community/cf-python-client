@@ -4,6 +4,14 @@ from json import loads
 from imported import SEE_OTHER, iterate_text
 
 
+class MockSession(object):
+    def __init__(self):
+        self.headers = dict()
+        self.proxies = None
+        self.verify = True
+        self.trust_env = False
+
+
 class MockResponse(object):
     def __init__(self, url, status_code, text, headers=None):
         self.status_code = status_code

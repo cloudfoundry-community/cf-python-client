@@ -1,3 +1,4 @@
+import json
 import logging
 
 import requests
@@ -5,7 +6,7 @@ from oauth2_client.credentials_manager import CredentialManager, ServiceInformat
 
 from cloudfoundry_client.doppler.client import DopplerClient
 from cloudfoundry_client.errors import InvalidStatusCode
-from cloudfoundry_client.imported import UNAUTHORIZED
+from cloudfoundry_client.imported import UNAUTHORIZED, quote
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
 from cloudfoundry_client.v2.buildpacks import BuildpackManager
 from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
@@ -120,7 +121,7 @@ class CloudFoundryClient(CredentialManager):
         if self.token_format is not None:
             request['token_format'] = self.token_format
         if self.login_hint is not None:
-            request['login_hint'] = self.login_hint
+            request['login_hint'] = quote(json.dumps(self.login_hint, separators=(',', ':')))
         return request
 
     def _grant_refresh_token_request(self, refresh_token):
