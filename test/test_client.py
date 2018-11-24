@@ -6,6 +6,7 @@ from cloudfoundry_client.imported import OK
 from fake_requests import MockResponse, MockSession
 from fake_requests import TARGET_ENDPOINT
 from imported import patch
+from cloudfoundry_client.imported import quote
 
 
 class TestCloudfoundryClient(unittest.TestCase):
@@ -77,7 +78,8 @@ class TestCloudfoundryClient(unittest.TestCase):
                                                 status_code=OK,
                                                 text=json.dumps(dict(access_token='access-token',
                                                                      refresh_token='refresh-token')))
-        client = CloudFoundryClient(TARGET_ENDPOINT, login_hint=dict(origin='uaa'))
+        client = CloudFoundryClient(TARGET_ENDPOINT, login_hint=quote(json.dumps(dict(origin='uaa'),
+                                                                                 separators=(',', ':'))))
         client.init_with_user_credentials('somebody', 'p@s$w0rd')
         self.assertEqual('Bearer access-token', session.headers.get('Authorization'))
         mocked_post.assert_called_with(mocked_post.return_value.url,

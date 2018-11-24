@@ -1,4 +1,3 @@
-import json
 import logging
 
 import requests
@@ -6,7 +5,7 @@ from oauth2_client.credentials_manager import CredentialManager, ServiceInformat
 
 from cloudfoundry_client.doppler.client import DopplerClient
 from cloudfoundry_client.errors import InvalidStatusCode
-from cloudfoundry_client.imported import UNAUTHORIZED, quote
+from cloudfoundry_client.imported import UNAUTHORIZED
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
 from cloudfoundry_client.v2.buildpacks import BuildpackManager
 from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
@@ -60,6 +59,22 @@ class V3(object):
 
 class CloudFoundryClient(CredentialManager):
     def __init__(self, target_endpoint, client_id='cf', client_secret='', **kwargs):
+        """"
+        :param target_endpoint :the target endpoint
+        :param client_id: the client_id
+        :param client_secret: the client secret
+        :param proxy: a dict object with entries http and https
+        :param verify: parameter directly passed to underlying requests library.
+            (optional) Either a boolean, in which case it controls whether we verify
+            the server's TLS certificate, or a string, in which case it must be a path
+            to a CA bundle to use. Defaults to ``True``.
+        :param token_format: string Can be set to opaque to retrieve an opaque and revocable token.
+            See UAA API specifications
+        :param login_hint: string. Indicates the identity provider to be used.
+            The passed string has to be a URL-Encoded JSON Object, containing the field origin with value as origin_key
+            of an identity provider. Note that this identity provider must support the grant type password.
+            See UAA API specifications
+        """
         proxy = kwargs.get('proxy', dict(http='', https=''))
         verify = kwargs.get('verify', True)
         self.token_format = kwargs.get('token_format')
@@ -121,7 +136,7 @@ class CloudFoundryClient(CredentialManager):
         if self.token_format is not None:
             request['token_format'] = self.token_format
         if self.login_hint is not None:
-            request['login_hint'] = quote(json.dumps(self.login_hint, separators=(',', ':')))
+            request['login_hint'] = self.login_hint
         return request
 
     def _grant_refresh_token_request(self, refresh_token):
