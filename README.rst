@@ -204,9 +204,12 @@ Logs can also be streamed using a websocket as follows:
 
 .. code-block:: python
 
-    import cloudfoundry_client.droppler.envelope_pb2.Envelope
     app = client.v2.apps['app-guid']
     for log in app.stream_logs():
+        # read message infinitely (use break to exit... it will close the underlying websocket)
+        print(log)
+    # or
+    for log in client.doppler.stream_logs('app-guid'):
         # read message infinitely (use break to exit... it will close the underlying websocket)
         print(log)
 
