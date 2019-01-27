@@ -2,6 +2,7 @@ import logging
 import functools
 from cloudfoundry_client.imported import quote, reduce
 from cloudfoundry_client.json_object import JsonObject
+from cloudfoundry_client.request_object import Request
 
 _logger = logging.getLogger(__name__)
 
@@ -117,6 +118,10 @@ class EntityManager(object):
     def _read_response(self, response):
         result = response.json(object_pairs_hook=JsonObject)
         return self._entity(result)
+
+    @staticmethod
+    def _request(**mandatory_parameters):
+        return Request(**mandatory_parameters)
 
     def _entity(self, result):
         if 'guid' in result:

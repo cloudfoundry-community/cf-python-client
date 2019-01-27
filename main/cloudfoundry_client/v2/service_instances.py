@@ -9,25 +9,17 @@ class ServiceInstanceManager(EntityManager):
         super(ServiceInstanceManager, self).__init__(target_endpoint, client, '/v2/service_instances')
 
     def create(self, space_guid, instance_name, plan_guid, parameters=None, tags=None):
-        request = dict(name=instance_name,
-                       space_guid=space_guid,
-                       service_plan_guid=plan_guid)
-        if parameters is not None:
-            request['parameters'] = parameters
-        if tags is not None:
-            request['tags'] = tags
+        request = self._request(name=instance_name, space_guid=space_guid, service_plan_guid=plan_guid)
+        request['parameters'] = parameters
+        request['tags'] = tags
         return super(ServiceInstanceManager, self)._create(request)
 
     def update(self, instance_guid, instance_name=None, plan_guid=None, parameters=None, tags=None):
-        request = dict()
-        if instance_name is not None:
-            request['name'] = instance_name
-        if plan_guid is not None:
-            request['service_plan_guid'] = plan_guid
-        if parameters is not None:
-            request['parameters'] = parameters
-        if tags is not None:
-            request['tags'] = tags
+        request = self._request()
+        request['name'] = instance_name
+        request['service_plan_guid'] = plan_guid
+        request['parameters'] = parameters
+        request['tags'] = tags
         return super(ServiceInstanceManager, self)._update(instance_guid, request)
 
     def list_permissions(self, instance_guid):
