@@ -10,4 +10,4 @@ class ServicePlanManager(EntityManager):
 
     def list_instances(self, service_plan_guid, **kwargs):
         return self.client.v2.service_instances._list('%s/%s/service_instances' % (self.entity_uri, service_plan_guid),
-                                                  **kwargs)
+                                                      **kwargs)

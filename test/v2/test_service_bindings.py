@@ -43,14 +43,16 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
             CREATED,
             None,
             'v2', 'service_bindings', 'POST_response.json')
-        service_bindiing = self.client.v2.service_bindings.create('app_guid', 'instance_guid',
-                                                               dict(the_service_broker='wants this object'))
+        service_binding = self.client.v2.service_bindings.create('app_guid', 'instance_guid',
+                                                               dict(the_service_broker='wants this object'),
+                                                                 'binding_name')
         self.client.post.assert_called_with(self.client.post.return_value.url,
                                             json=dict(app_guid='app_guid',
                                                       service_instance_guid='instance_guid',
+                                                      name='binding_name',
                                                       parameters=dict(
                                                           the_service_broker='wants this object')))
-        self.assertIsNotNone(service_bindiing)
+        self.assertIsNotNone(service_binding)
 
     def test_delete(self):
         self.client.delete.return_value = mock_response(

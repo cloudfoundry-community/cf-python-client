@@ -3,6 +3,7 @@ import logging
 
 from cloudfoundry_client.imported import quote, reduce
 from cloudfoundry_client.json_object import JsonObject
+from cloudfoundry_client.request_object import Request
 
 _logger = logging.getLogger(__name__)
 
@@ -121,6 +122,10 @@ class EntityManager(object):
         entity_builder = self._get_entity_builder(other_entity_builder)
         result = response.json(object_pairs_hook=JsonObject)
         return entity_builder(list(result.items()))
+
+    @staticmethod
+    def _request(**mandatory_parameters):
+        return Request(**mandatory_parameters)
 
     def _get_entity_builder(self, entity_builder):
         if entity_builder is None:
