@@ -23,8 +23,8 @@ class FileHelper(object):
         with zipfile.ZipFile(path, 'r') as zip_ref:
             for entry in zip_ref.namelist():
                 filename = os.path.basename(entry)
-                if not filename:
-                    os.makedirs(os.path.join(tmp_dir, entry), exist_ok=True)
+                if not filename and not os.path.isdir(os.path.join(tmp_dir, entry)):
+                    os.makedirs(os.path.join(tmp_dir, entry))
                 else:
                     zip_ref.extract(entry, tmp_dir)
 
