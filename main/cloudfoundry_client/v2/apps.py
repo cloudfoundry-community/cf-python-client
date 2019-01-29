@@ -24,6 +24,9 @@ class _Application(Entity):
     def stats(self):
         return self.client.v2.apps.get_stats(self['metadata']['guid'])
 
+    def env(self):
+        return self.client.v2.apps.get_env(self['metadata']['guid'])
+
     def summary(self):
         return self.client.v2.apps.get_summary(self['metadata']['guid'])
 
