@@ -17,6 +17,7 @@ from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager
 from cloudfoundry_client.v2.service_instances import ServiceInstanceManager
 from cloudfoundry_client.v2.service_keys import ServiceKeyManager
 from cloudfoundry_client.v2.service_plans import ServicePlanManager
+from cloudfoundry_client.v2.users import UserManager
 from cloudfoundry_client.v3.apps import AppManager as AppManagerV3
 from cloudfoundry_client.v3.entities import EntityManager as EntityManagerV3
 from cloudfoundry_client.v3.tasks import TaskManager
@@ -42,6 +43,7 @@ class V2(object):
         self.service_instances = ServiceInstanceManager(target_endpoint, credential_manager)
         self.service_keys = ServiceKeyManager(target_endpoint, credential_manager)
         self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
+        self.users = ServicePlanManager(target_endpoint, credential_manager)
         # Default implementations
         self.organizations = EntityManagerV2(target_endpoint, credential_manager, '/v2/organizations')
         self.private_domains = EntityManagerV2(target_endpoint, credential_manager, '/v2/private_domains')
