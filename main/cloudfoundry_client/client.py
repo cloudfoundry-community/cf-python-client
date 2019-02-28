@@ -6,18 +6,17 @@ from oauth2_client.credentials_manager import CredentialManager, ServiceInformat
 from cloudfoundry_client.doppler.client import DopplerClient
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import UNAUTHORIZED
-from cloudfoundry_client.v2.jobs import JobManager
-from cloudfoundry_client.v2.resources import ResourceManager
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
 from cloudfoundry_client.v2.buildpacks import BuildpackManager
 from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
+from cloudfoundry_client.v2.jobs import JobManager
+from cloudfoundry_client.v2.resources import ResourceManager
 from cloudfoundry_client.v2.routes import RouteManager
 from cloudfoundry_client.v2.service_bindings import ServiceBindingManager
 from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager
 from cloudfoundry_client.v2.service_instances import ServiceInstanceManager
 from cloudfoundry_client.v2.service_keys import ServiceKeyManager
 from cloudfoundry_client.v2.service_plans import ServicePlanManager
-from cloudfoundry_client.v2.users import UserManager
 from cloudfoundry_client.v3.apps import AppManager as AppManagerV3
 from cloudfoundry_client.v3.entities import EntityManager as EntityManagerV3
 from cloudfoundry_client.v3.tasks import TaskManager
@@ -43,7 +42,6 @@ class V2(object):
         self.service_instances = ServiceInstanceManager(target_endpoint, credential_manager)
         self.service_keys = ServiceKeyManager(target_endpoint, credential_manager)
         self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
-        self.users = UserManager(target_endpoint, credential_manager)
         # Default implementations
         self.organizations = EntityManagerV2(target_endpoint, credential_manager, '/v2/organizations')
         self.private_domains = EntityManagerV2(target_endpoint, credential_manager, '/v2/private_domains')
@@ -54,6 +52,7 @@ class V2(object):
         self.stacks = EntityManagerV2(target_endpoint, credential_manager, '/v2/stacks')
         self.user_provided_service_instances = EntityManagerV2(target_endpoint, credential_manager,
                                                                '/v2/user_provided_service_instances')
+        self.users = EntityManagerV2(target_endpoint, credential_manager, '/v2/users')
         # Resources implementation used by push operation
         self.resources = ResourceManager(target_endpoint, credential_manager)
 
