@@ -13,7 +13,7 @@ from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import NOT_FOUND
 from cloudfoundry_client.main.apps_command_domain import AppCommandDomain
-from cloudfoundry_client.main.command_domain import CommandDomain
+from cloudfoundry_client.main.command_domain import CommandDomain, Command
 from cloudfoundry_client.main.operation_commands import generate_push_command
 from cloudfoundry_client.main.tasks_command_domain import TaskCommandDomain
 
@@ -144,6 +144,19 @@ def _get_v2_client_domain(client, domain):
     return getattr(client.v2, '%ss' % domain)
 
 
+def generate_oauth_token_command():
+    entry = 'oauth-token'
+
+    def generate_parser(parser):
+        parser.add_parser(entry)
+
+    def execute(client, arguments):
+        token = client._access_token
+        print(token if token is not None else 'No token')
+
+    return Command(entry, generate_parser, execute), 'Display oauth token'
+
+
 def main():
     logging.basicConfig(level=logging.INFO,
                         format='%(message)s')
@@ -178,8 +191,9 @@ def main():
         CommandDomain(display_name='Routes', client_domain='routes', name_property='host', filter_list_parameters=[]),
         TaskCommandDomain()
     ]
-    operation_commands = []
-    operation_commands.append(generate_push_command())
+    operation_commands = [generate_push_command()]
+    others_commands = [generate_oauth_token_command()]
+
     descriptions = []
     for command in commands:
         descriptions.extend(command.description())
@@ -188,15 +202,20 @@ def main():
     for command, description in operation_commands:
         descriptions.append('   %s: %s' % (command.entry, description))
 
+    descriptions.append('Others')
+    for command, description in others_commands:
+        descriptions.append('   %s: %s' % (command.entry, description))
+
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-V', '--version', action='version', version=__version__)
     subparsers = parser.add_subparsers(title='Commands', dest='action', description='\n'.join(descriptions))
     subparsers.add_parser('import_from_cf_cli', help='Copy CF CLI configuration into our configuration')
+
     for command in commands:
         command.generate_parser(subparsers)
-
-    for command, _ in operation_commands:
-        command.generate_parser(subparsers)
+    for other_command_domain in [operation_commands, others_commands]:
+        for command, _ in other_command_domain:
+            command.generate_parser(subparsers)
 
     arguments = parser.parse_args()
     if arguments.action == 'import_from_cf_cli':
@@ -207,10 +226,12 @@ def main():
             if command.is_handled(arguments.action):
                 command.execute(client, arguments.action, arguments)
                 return
-        for command, _ in operation_commands:
-            if command.entry == arguments.action:
-                command.execute(client, arguments)
-                return
+        for other_command_domain in [operation_commands, others_commands]:
+            for command, _ in other_command_domain:
+                if command.entry == arguments.action:
+                    command.execute(client, arguments)
+                    return
+
         raise ValueError("Domain not found for action %s" % arguments.action)
 
 
