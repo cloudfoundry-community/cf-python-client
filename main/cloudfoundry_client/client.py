@@ -52,6 +52,8 @@ class V2(object):
         self.stacks = EntityManagerV2(target_endpoint, credential_manager, '/v2/stacks')
         self.user_provided_service_instances = EntityManagerV2(target_endpoint, credential_manager,
                                                                '/v2/user_provided_service_instances')
+        self.security_groups = EntityManagerV2(
+            target_endpoint, credential_manager, '/v2/security_groups')
         self.users = EntityManagerV2(target_endpoint, credential_manager, '/v2/users')
         # Resources implementation used by push operation
         self.resources = ResourceManager(target_endpoint, credential_manager)
