@@ -109,6 +109,7 @@ So far the implemented managers that are available are:
 - ``routes``
 - ``shared_domains``
 - ``private_domains``
+- ``security_groups``
 
 Note that even if, while navigating, you reach an entity manager that does not exist, the get will be performed and you will get the expected entities.
 For example, event entity manager is not yet implemented but you can do
