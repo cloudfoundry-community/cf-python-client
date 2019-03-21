@@ -141,6 +141,13 @@ class CloudFoundryClient(CredentialManager):
     def _token_request_headers(_):
         return dict(Accept='application/json')
 
+    def __getattr__(self, item):
+        sub_attr = getattr(self.v2, item, None)
+        if sub_attr is not None:
+            return sub_attr
+        else:
+            raise AttributeError("type '%s' has no attribute '%s'" % (type(self).__name__, item))
+
     def _grant_password_request(self, login, password):
         request = super(CloudFoundryClient, self)._grant_password_request(login, password)
         if self.token_format is not None:
