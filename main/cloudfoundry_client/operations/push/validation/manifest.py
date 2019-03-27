@@ -14,7 +14,9 @@ class ManifestReader(object):
     @staticmethod
     def load_application_manifests(manifest_path):
         with open(manifest_path, 'r') as fp:
-            manifest = yaml.load(fp)
+            manifest = yaml.safe_load(fp)
+            if manifest is None:
+                raise AssertionError('No valid yaml document found')
             ManifestReader._validate_manifest(os.path.dirname(manifest_path), manifest)
             return manifest['applications']
 

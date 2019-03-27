@@ -5,6 +5,32 @@ from cloudfoundry_client.operations.push.validation.manifest import ManifestRead
 
 
 class TestManifestReader(unittest.TestCase):
+    def test_empty_manifest_should_raise_exception(self):
+        manifest_file = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'fixtures', 'operations',
+                                     'manifest_empty.yml')
+        self.assertRaises(AssertionError, lambda: ManifestReader.load_application_manifests(manifest_file))
+
+    def test_manifest_should_be_read(self):
+        manifest_file = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'fixtures', 'operations',
+                                     'manifest.yml')
+        applications = ManifestReader.load_application_manifests(manifest_file)
+        self.assertEqual(1, len(applications))
+        self.assertEqual(dict(docker=dict(username='the-user', password='P@SsW0r$', image='some-image'),
+                              name='the-name', routes=[dict(route='first-route'), dict(route='second-route')]),
+                         applications[0])
+
+    def test_complex_manifest_should_be_read(self):
+        manifest_file = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'fixtures', 'operations',
+                                     'manifest_complex.yml')
+        applications = ManifestReader.load_application_manifests(manifest_file)
+        self.assertEqual(2, len(applications))
+        self.assertEqual(dict(name='bigapp', buildpacks=['staticfile_buildpack'], memory=1024,
+                              path=os.path.abspath(os.path.join(os.path.dirname(manifest_file), 'big'))),
+                         applications[0])
+        self.assertEqual(dict(name='smallapp', buildpacks=['staticfile_buildpack'], memory=256,
+                              path=os.path.abspath(os.path.join(os.path.dirname(manifest_file), 'small'))),
+                         applications[1])
+
     def test_name_should_be_set(self):
         manifest = dict(path='test/')
         self.assertRaises(AssertionError, lambda: ManifestReader._validate_application_manifest('.', manifest))
@@ -50,7 +76,7 @@ class TestManifestReader(unittest.TestCase):
         ManifestReader._validate_application_manifest('.', manifest)
 
     def test_valid_application_with_docker_and_routes(self):
-        manifest = dict(docker=dict(username='ther-user', password='P@SsW0r$', image='some-image'),
+        manifest = dict(docker=dict(username='the-user', password='P@SsW0r$', image='some-image'),
                         name='the-name', routes=[dict(route='first-route'), dict(route='second-route')])
         ManifestReader._validate_application_manifest('.', manifest)
 

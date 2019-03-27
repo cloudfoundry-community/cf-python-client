@@ -1,0 +1,15 @@
+---
+defaults: &defaults
+  buildpacks:
+    - staticfile_buildpack
+  memory: 1G
+
+
+applications:
+  - name: bigapp
+    <<: *defaults
+    path: big/
+  - name: smallapp
+    <<: *defaults
+    path: small/
+    memory: 256M
