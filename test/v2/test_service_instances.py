@@ -44,15 +44,18 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
             None,
             'v2', 'service_instances', 'POST_response.json')
         service_instance = self.client.v2.service_instances.create('space_guid', 'name', 'plan_id',
-                                                                parameters=dict(the_service_broker="wants this object"),
-                                                                tags=['mongodb'])
+                                                                   parameters=dict(
+                                                                       the_service_broker="wants this object"),
+                                                                   tags=['mongodb'],
+                                                                   accepts_incomplete=True)
         self.client.post.assert_called_with(self.client.post.return_value.url,
                                             json=dict(name='name',
                                                       space_guid='space_guid',
                                                       service_plan_guid='plan_id',
                                                       parameters=dict(
                                                           the_service_broker="wants this object"),
-                                                      tags=['mongodb'])
+                                                      tags=['mongodb']),
+                                            params=dict(accepts_incomplete="true")
                                             )
         self.assertIsNotNone(service_instance)
 
@@ -63,7 +66,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
             None,
             'v2', 'service_instances', 'PUT_{id}_response.json')
         service_instance = self.client.v2.service_instances.update('instance_id', instance_name='new-name',
-                                                                tags=['other-tag'])
+                                                                   tags=['other-tag'])
         self.client.put.assert_called_with(self.client.put.return_value.url,
                                            json=dict(name='new-name',
                                                      tags=['other-tag']))

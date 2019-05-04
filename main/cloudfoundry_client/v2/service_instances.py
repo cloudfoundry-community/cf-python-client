@@ -8,11 +8,12 @@ class ServiceInstanceManager(EntityManager):
     def __init__(self, target_endpoint, client):
         super(ServiceInstanceManager, self).__init__(target_endpoint, client, '/v2/service_instances')
 
-    def create(self, space_guid, instance_name, plan_guid, parameters=None, tags=None):
+    def create(self, space_guid, instance_name, plan_guid, parameters=None, tags=None, accepts_incomplete=False):
         request = self._request(name=instance_name, space_guid=space_guid, service_plan_guid=plan_guid)
         request['parameters'] = parameters
         request['tags'] = tags
-        return super(ServiceInstanceManager, self)._create(request)
+        params = None if not accepts_incomplete else dict(accepts_incomplete="true")
+        return super(ServiceInstanceManager, self)._create(request, params=params)
 
     def update(self, instance_guid, instance_name=None, plan_guid=None, parameters=None, tags=None):
         request = self._request()
