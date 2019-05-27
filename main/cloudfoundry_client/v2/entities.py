@@ -74,26 +74,26 @@ class EntityManager(object):
         url = '%s%s' % (self.target_endpoint, self.entity_uri)
         return self._post(url, data, **kwargs)
 
-    def _update(self, resource_id, data):
+    def _update(self, resource_id, data, **kwargs):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
-        return self._put(url, data)
+        return self._put(url, data, **kwargs)
 
-    def _remove(self, resource_id):
+    def _remove(self, resource_id, **kwargs):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
-        self._delete(url)
+        self._delete(url, **kwargs)
 
     def _post(self, url, data=None, **kwargs):
         response = self.client.post(url, json=data, **kwargs)
         _logger.debug('POST - %s - %s', url, response.text)
         return self._read_response(response)
 
-    def _put(self, url, data=None):
-        response = self.client.put(url, json=data)
+    def _put(self, url, data=None, **kwargs):
+        response = self.client.put(url, json=data, **kwargs)
         _logger.debug('PUT - %s - %s', url, response.text)
         return self._read_response(response)
 
-    def _delete(self, url):
-        response = self.client.delete(url)
+    def _delete(self, url, **kwargs):
+        response = self.client.delete(url, **kwargs)
         _logger.debug('DELETE - %s - %s', url, response.text)
 
     def __iter__(self):
