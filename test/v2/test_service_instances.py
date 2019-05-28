@@ -69,8 +69,63 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
                                                                    tags=['other-tag'])
         self.client.put.assert_called_with(self.client.put.return_value.url,
                                            json=dict(name='new-name',
-                                                     tags=['other-tag']))
+                                                     tags=['other-tag']), params=None)
         self.assertIsNotNone(service_instance)
+
+    def test_update(self):
+        self.client.put.return_value = mock_response(
+            '/v2/service_instances/instance_id',
+            OK,
+            None,
+            'v2', 'service_instances', 'PUT_{id}_response.json')
+        service_instance = self.client.v2.service_instances.update('instance_id', instance_name='new-name',
+                                                                   tags=['other-tag'], accepts_incomplete=True)
+        self.client.put.assert_called_with(self.client.put.return_value.url,
+                                           json=dict(name='new-name',
+                                                     tags=['other-tag']), params={'accepts_incomplete': 'true'})
+        self.assertIsNotNone(service_instance)
+
+    def test_delete_accepts_incomplete(self):
+        self.client.delete.return_value = mock_response(
+            '/v2/service_instances/instance_id',
+            NO_CONTENT,
+            None)
+        self.client.v2.service_instances.remove('instance_id', accepts_incomplete=True)
+        self.client.delete.assert_called_with(self.client.delete.return_value.url,
+                                            params=dict(accepts_incomplete="true"))
+
+        self.client.delete.return_value = mock_response(
+          '/v2/service_instances/instance_id',
+          NO_CONTENT,
+          None)
+        self.client.v2.service_instances.remove('instance_id', accepts_incomplete="true")
+        self.client.delete.assert_called_with(self.client.delete.return_value.url,
+                                            params=dict(accepts_incomplete="true"))
+
+    def test_delete_purge(self):
+        self.client.delete.return_value = mock_response(
+            '/v2/service_instances/instance_id',
+            NO_CONTENT,
+            None)
+        self.client.v2.service_instances.remove('instance_id', accepts_incomplete=True, purge=True)
+        self.client.delete.assert_called_with(self.client.delete.return_value.url,
+                                            params=dict(accepts_incomplete='true', purge="true"))
+
+        self.client.delete.return_value = mock_response(
+          '/v2/service_instances/instance_id',
+          NO_CONTENT,
+          None)
+        self.client.v2.service_instances.remove('instance_id', purge="true")
+        self.client.delete.assert_called_with(self.client.delete.return_value.url,
+                                            params=dict(purge="true"))
+
+        self.client.delete.return_value = mock_response(
+          '/v2/service_instances/instance_id',
+          NO_CONTENT,
+          None)
+        self.client.v2.service_instances.remove('instance_id', purge="true")
+        self.client.delete.assert_called_with(self.client.delete.return_value.url,
+                                            params=dict(purge="true"))
 
     def test_delete(self):
         self.client.delete.return_value = mock_response(
@@ -78,7 +133,8 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
             NO_CONTENT,
             None)
         self.client.v2.service_instances.remove('instance_id')
-        self.client.delete.assert_called_with(self.client.delete.return_value.url)
+        self.client.delete.assert_called_with(self.client.delete.return_value.url,
+                                            params={})
 
     def test_entity(self):
         self.client.get.side_effect = [
