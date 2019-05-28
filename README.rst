@@ -53,7 +53,13 @@ To instantiate the client, nothing easier
     target_endpoint = 'https://somewhere.org'
     proxy = dict(http=os.environ.get('HTTP_PROXY', ''), https=os.environ.get('HTTPS_PROXY', ''))
     client = CloudFoundryClient(target_endpoint, proxy=proxy, verify=False)
+    # init with user credentials
     client.init_with_user_credentials('login', 'password')
+    # init with refresh token (that will retrieve a fresh access token)
+    client.init_with_token('refresh-token')
+    # init with access and refresh token (if the above method is not convenient)
+    client.refresh_token = 'refresh-token'
+    client._access_token = 'access-token'
 
 And then you can use it as follows:
 
