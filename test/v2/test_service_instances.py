@@ -134,7 +134,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
             None)
         self.client.v2.service_instances.remove('instance_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url,
-                                            params=None)
+                                            params={})
 
     def test_entity(self):
         self.client.get.side_effect = [

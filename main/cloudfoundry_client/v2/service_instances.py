@@ -34,5 +34,4 @@ class ServiceInstanceManager(EntityManager):
             parameters['accepts_incomplete'] = "true"
         if purge:
             parameters['purge']= "true"
-        params = None if not bool(parameters) else parameters
-        super(ServiceInstanceManager, self)._remove(instance_guid, params=params)
+        super(ServiceInstanceManager, self)._remove(instance_guid, params=parameters)
