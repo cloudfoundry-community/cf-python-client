@@ -66,7 +66,7 @@ And then you can use it as follows:
 .. code-block:: python
 
     for organization in client.v2.organizations:
-        print organization['metadata']['guid']
+        print(organization['metadata']['guid'])
 
 API V2
 -------
@@ -96,7 +96,7 @@ Or else:
 .. code-block:: python
 
     for app in client.v2.apps:
-        print app.summary()
+        print(app.summary())
 
 Available managers
 ~~~~~~~~~~~~~~~~~~
@@ -147,7 +147,7 @@ All managers provide the following methods:
 
     # You can also specify multiple values for a query parameter.
     for organization in client.v2.organizations.list(**{'name': ['org1', 'org2']}):
-        print organization['metadata']['guid']
+        print(organization['metadata']['guid'])
 
     # Order and Paging parameters are also supported.
     query = {
@@ -156,7 +156,7 @@ All managers provide the following methods:
     	'results-per-page': 100
     }
     for organization in client.v2.organizations.list(**query):
-        print organization['entity']['name']
+        print(organization['entity']['name'])
 
 API V3
 ------
