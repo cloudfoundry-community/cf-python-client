@@ -104,7 +104,7 @@ class PushOperation(object):
     def _build_default_route(self, space, app, random_route):
         shared_domain = None
         for domain in self.client.v2.shared_domains.list():
-            if not domain['entity']['internal']:
+            if not domain['entity'].get('internal', False):
                 shared_domain = domain
                 break
         if shared_domain is None:
