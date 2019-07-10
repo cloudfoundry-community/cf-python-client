@@ -1,3 +1,4 @@
+import fnmatch
 import json
 import logging
 import os
@@ -10,6 +11,27 @@ from cloudfoundry_client.operations.push.file_helper import FileHelper
 from cloudfoundry_client.operations.push.validation.manifest import ManifestReader
 
 _logger = logging.getLogger(__name__)
+
+
+class _CfIgnore(object):
+    def __init__(self, application_path):
+        ignore_file_path = os.path.join(application_path, '.cfignore')
+        if os.path.isfile(ignore_file_path):
+            with open(ignore_file_path, 'r') as ignore_file:
+                self.ignore_items = [line.strip('\n ') for line in ignore_file.readlines()]
+        else:
+            self.ignore_items = []
+
+    def is_entry_ignored(self, relative_file):
+        def is_relative_file_ignored(cf_ignore_entry, file_path):
+            _logger.debug('is_relative_file_ignored - %s - %s', cf_ignore_entry, file_path)
+            return fnmatch.fnmatch('/%s' % file_path
+                                   if cf_ignore_entry.startswith('/') and not file_path.startswith('/')
+                                   else file_path,
+                                   cf_ignore_entry)
+
+        return any([is_relative_file_ignored(ignore_item, relative_file)
+                    for ignore_item in self.ignore_items])
 
 
 class PushOperation(object):
@@ -51,6 +73,7 @@ class PushOperation(object):
     def _create_application(self, space, app_manifest):
         _logger.debug("Creating application %s", app_manifest['name'])
         request = self._build_request_from_manifest(app_manifest)
+        request['environment_json'] = PushOperation._merge_environment(None, app_manifest)
         request['space_guid'] = space['metadata']['guid']
         if request.get('health-check-type') == 'http' and request.get('health-check-http-endpoint') is None:
             request['health-check-http-endpoint'] = '/'
@@ -77,12 +100,15 @@ class PushOperation(object):
             request['diego'] = True
             if 'username' in docker and 'password' in docker:
                 request['docker_credentials'] = dict(username=docker['username'], password=docker['password'])
+        buildpacks = request.pop('buildpacks', None)
+        if 'buildpack' not in request and buildpacks is not None and len(buildpacks) > 0:
+            request['buildpack'] = buildpacks[0]
         return request
 
     @staticmethod
     def _merge_environment(app, app_manifest):
         environment = dict()
-        if 'environment_json' in app['entity']:
+        if app is not None and 'environment_json' in app['entity']:
             environment.update(app['entity']['environment_json'])
         if 'env' in app_manifest:
             environment.update(app_manifest['env'])
@@ -210,14 +236,14 @@ class PushOperation(object):
                         return host, domain, domains[domain]
         raise AssertionError('Cannot find domain for route %s' % route)
 
-    def _upload_application(self, app, path):
+    def _upload_application(self, app, application_path):
         _logger.debug('Uploading application %s', app['entity']['name'])
-        if os.path.isfile(path):
-            self._upload_application_zip(app, path)
-        elif os.path.isdir(path):
-            self._upload_application_directory(app, path)
+        if os.path.isfile(application_path):
+            self._upload_application_zip(app, application_path)
+        elif os.path.isdir(application_path):
+            self._upload_application_directory(app, application_path)
         else:
-            raise AssertionError('Path %s is neither a directory nor a file' % path)
+            raise AssertionError('Path %s is neither a directory nor a file' % application_path)
 
     def _upload_application_zip(self, app, path):
         _logger.debug('Unzipping file %s', path)
@@ -228,11 +254,11 @@ class PushOperation(object):
         finally:
             shutil.rmtree(tmp_dir)
 
-    def _upload_application_directory(self, app, path):
-        _logger.debug('Uploading application from directory %s', path)
+    def _upload_application_directory(self, app, application_path):
+        _logger.debug('Uploading application from directory %s', application_path)
         _, temp_file = tempfile.mkstemp()
         try:
-            resource_descriptions_by_path = PushOperation._load_all_resources(path)
+            resource_descriptions_by_path = PushOperation._load_all_resources(application_path)
 
             def generate_key(item):
                 return '%s-%d' % (item["sha1"], item["size"])
@@ -244,9 +270,9 @@ class PushOperation(object):
             _logger.debug('Already uploaded %d / %d items',
                           len(already_uploaded_entries), len(resource_descriptions_by_path))
 
-            FileHelper.zip(temp_file, path,
-                           lambda item: generate_key(
-                               resource_descriptions_by_path[item]) not in already_uploaded_entries)
+            FileHelper.zip(temp_file, application_path,
+                           lambda item: item in resource_descriptions_by_path
+                                        and generate_key(resource_descriptions_by_path[item]) not in already_uploaded_entries)
             _logger.debug('Diff zip file built: %s', temp_file)
             resources = [
                 dict(fn=resource_path,
@@ -266,15 +292,18 @@ class PushOperation(object):
             _logger.debug('Skipping remove of zip file')
 
     @staticmethod
-    def _load_all_resources(path):
+    def _load_all_resources(top_directory):
         application_items = {}
-        for directory, file_names in FileHelper.walk(path):
+        cf_ignore = _CfIgnore(top_directory)
+        for directory, file_names in FileHelper.walk(top_directory):
             for file_name in file_names:
-                file_location = os.path.join(path, directory, file_name)
-                application_items[os.path.join(directory, file_name)] = dict(
-                    sha1=FileHelper.sha1(file_location),
-                    size=FileHelper.size(file_location),
-                    mode=FileHelper.mode(file_location))
+                relative_file_location = os.path.join(directory, file_name)
+                if not cf_ignore.is_entry_ignored(relative_file_location):
+                    absolute_file_location = os.path.join(top_directory, relative_file_location)
+                    application_items[relative_file_location] = dict(
+                        sha1=FileHelper.sha1(absolute_file_location),
+                        size=FileHelper.size(absolute_file_location),
+                        mode=FileHelper.mode(absolute_file_location))
         return application_items
 
     def _bind_services(self, space, app, services):

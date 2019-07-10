@@ -6,10 +6,10 @@ import zipfile
 
 class FileHelper(object):
     @staticmethod
-    def zip(file_location, path, accept=None):
+    def zip(file_location, directory_path, accept=None):
         with zipfile.ZipFile(file_location, 'w', zipfile.ZIP_DEFLATED) as archive_out:
-            for dir_path, file_names in FileHelper.walk(path):
-                dir_full_location = os.path.join(path, dir_path)
+            for dir_path, file_names in FileHelper.walk(directory_path):
+                dir_full_location = os.path.join(directory_path, dir_path)
                 if len(dir_path) > 0:
                     archive_out.write(dir_full_location, dir_path, zipfile.ZIP_STORED)
                 for file_name in file_names:

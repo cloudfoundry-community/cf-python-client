@@ -1,3 +1,4 @@
+import json
 import os
 import re
 
@@ -44,10 +45,9 @@ class ManifestReader(object):
             ManifestReader._convert_positive(app_manifest, field)
         for field in ManifestReader.BOOLEAN_FIELDS:
             ManifestReader._convert_boolean(app_manifest, field)
-
+        ManifestReader._convert_environment(app_manifest)
         ManifestReader._check_deprecated_attributes(app_manifest)
         ManifestReader._validate_routes(app_manifest)
-
 
     @staticmethod
     def _check_deprecated_attributes(app_manifest):
@@ -120,3 +120,12 @@ class ManifestReader(object):
                 manifest['path'] = os.path.abspath(path)
             else:
                 manifest['path'] = os.path.abspath(os.path.join(manifest_directory, path))
+
+    @staticmethod
+    def _convert_environment(app_manifest):
+        environment = app_manifest.get('env', None)
+        if environment is not None:
+            if type(environment) != dict:
+                raise AssertionError("'env' entry must be a dictionary")
+            app_manifest['env'] = {key: json.dumps(value) for key, value in environment.items() if value is not None and type(value) != str}
+            app_manifest['env'].update({key: value for key, value in environment.items() if value is not None and type(value) == str})
