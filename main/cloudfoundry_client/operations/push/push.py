@@ -115,11 +115,12 @@ class PushOperation(object):
         elif random_route:
             route = self.client.v2.routes.create_host_route(shared_domain['metadata']['guid'],
                                                             space['metadata']['guid'],
-                                                            '%s-%d' % (app['entity']['name'], int(time.time())))
+                                                            self._to_host(
+                                                                '%s-%d' % (app['entity']['name'], int(time.time()))))
         else:
             route = self.client.v2.routes.create_host_route(shared_domain['metadata']['guid'],
                                                             space['metadata']['guid'],
-                                                            app['entity']['name'])
+                                                            self._to_host(app['entity']['name']))
         self.client.v2.apps.associate_route(app['metadata']['guid'], route['metadata']['guid'])
 
     def _build_new_requested_routes(self, organization, space, app, existing_routes, requested_routes):
@@ -293,12 +294,6 @@ class PushOperation(object):
                 _logger.debug('Binding %s to %s', app["entity"]["name"], service_name)
                 self.client.v2.service_bindings.create(app['metadata']['guid'], service_instance_guid)
 
-    @staticmethod
-    def _restart_application(app):
-        _logger.debug("Restarting application")
-        app.stop()
-        app.start()
-
     def _poll_job(self, job):
         def job_not_ended(j):
             return j['entity']['status'] in ['queued', 'running']
@@ -320,3 +315,19 @@ class PushOperation(object):
             raise AssertionError('Job of upload exceeded in error: %s', json.dumps(job['entity']['error_details']))
         else:
             _logger.debug('Job ended with status %s', job['entity']['status'])
+
+    @staticmethod
+    def _restart_application(app):
+        _logger.debug("Restarting application")
+        app.stop()
+        app.start()
+
+    @staticmethod
+    def _to_host(host):
+        def no_space(h):
+            return re.sub('[\s_]+', "-", h)
+
+        def only_alphabetical_and_hyphen(h):
+            return re.sub("[^a-z0-9-]", "", h)
+
+        return only_alphabetical_and_hyphen(no_space(host))

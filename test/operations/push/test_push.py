@@ -40,6 +40,10 @@ class TestPushOperation(TestCase, AbstractTestCase):
         self.assertEqual(666, port)
         self.assertEqual('', path)
 
+    def test_to_host_should_remove_unwanted_characters(self):
+        host = PushOperation._to_host('idzone-3.0.7-rec-tb1_bobby')
+        self.assertEquals('idzone-307-rec-tb1-bobby', host)
+
     @patch.object(sys, 'argv', ['main', 'push_app', get_fixtures_path('fake', 'manifest_main.yml'), '-space_guid',
                                 'space_id'])
     def test_main_push(self):
