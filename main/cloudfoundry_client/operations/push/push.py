@@ -1,4 +1,3 @@
-import fnmatch
 import json
 import logging
 import os
@@ -7,31 +6,11 @@ import shutil
 import tempfile
 import time
 
+from cloudfoundry_client.operations.push.cf_ignore import CfIgnore
 from cloudfoundry_client.operations.push.file_helper import FileHelper
 from cloudfoundry_client.operations.push.validation.manifest import ManifestReader
 
 _logger = logging.getLogger(__name__)
-
-
-class _CfIgnore(object):
-    def __init__(self, application_path):
-        ignore_file_path = os.path.join(application_path, '.cfignore')
-        if os.path.isfile(ignore_file_path):
-            with open(ignore_file_path, 'r') as ignore_file:
-                self.ignore_items = [line.strip('\n ') for line in ignore_file.readlines()]
-        else:
-            self.ignore_items = []
-
-    def is_entry_ignored(self, relative_file):
-        def is_relative_file_ignored(cf_ignore_entry, file_path):
-            _logger.debug('is_relative_file_ignored - %s - %s', cf_ignore_entry, file_path)
-            return fnmatch.fnmatch('/%s' % file_path
-                                   if cf_ignore_entry.startswith('/') and not file_path.startswith('/')
-                                   else file_path,
-                                   cf_ignore_entry)
-
-        return any([is_relative_file_ignored(ignore_item, relative_file)
-                    for ignore_item in self.ignore_items])
 
 
 class PushOperation(object):
@@ -294,7 +273,7 @@ class PushOperation(object):
     @staticmethod
     def _load_all_resources(top_directory):
         application_items = {}
-        cf_ignore = _CfIgnore(top_directory)
+        cf_ignore = CfIgnore(top_directory)
         for directory, file_names in FileHelper.walk(top_directory):
             for file_name in file_names:
                 relative_file_location = os.path.join(directory, file_name)
