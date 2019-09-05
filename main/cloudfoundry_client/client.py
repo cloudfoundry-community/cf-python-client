@@ -64,6 +64,7 @@ class V3(object):
         self.apps = AppManagerV3(target_endpoint, credential_manager)
         self.spaces = EntityManagerV3(target_endpoint, credential_manager, '/v3/spaces')
         self.organizations = EntityManagerV3(target_endpoint, credential_manager, '/v3/organizations')
+        self.service_instances = EntityManagerV3(target_endpoint, credential_manager, '/v3/service_instances')
         self.tasks = TaskManager(target_endpoint, credential_manager)
 
 
