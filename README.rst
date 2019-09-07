@@ -190,6 +190,7 @@ Available managers on API V3 are:
 
 - ``apps``
 - ``organizations``
+- ``service_instances``
 - ``spaces``
 - ``tasks``
 
