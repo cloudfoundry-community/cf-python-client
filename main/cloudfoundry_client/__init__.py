@@ -1,5 +1,5 @@
 """
-    This module provides a client library for cloudfoundry_client v2.
+    This module provides a client library for cloudfoundry_client v2/v3.
 """
 
-__version__ = "1.6.1"
+__version__ = "1.7.0"
