@@ -1,0 +1,33 @@
+{
+  "total_results": 1,
+  "total_pages": 1,
+  "prev_url": null,
+  "next_url": null,
+  "resources": [
+    {
+      "metadata": {
+        "guid": "78bb64f9-6800-4fba-9c38-6ef949d82244",
+        "url": "/v2/events/78bb64f9-6800-4fba-9c38-6ef949d82244",
+        "created_at": "2016-06-08T16:41:25Z",
+        "updated_at": "2016-06-08T16:41:26Z"
+      },
+      "entity": {
+        "type": "audit.route.delete-request",
+        "actor": "uaa-id-84",
+        "actor_type": "user",
+        "actor_name": "user@example.com",
+        "actee": "994e9ba0-7434-4c16-bf19-b18a652becc8",
+        "actee_type": "route",
+        "actee_name": "host-5",
+        "timestamp": "2016-06-08T16:41:25Z",
+        "metadata": {
+          "request": {
+            "recursive": true
+          }
+        },
+        "space_guid": "0d88db65-460d-4c72-895a-10c41bb9875c",
+        "organization_guid": "2fc4dbf4-4b89-46a7-aba1-4920c51a33d6"
+      }
+    }
+  ]
+}

@@ -108,6 +108,7 @@ So far the implemented managers that are available are:
 - ``service_bindings``
 - ``service_brokers``
 - ``apps``
+- ``events``
 - ``buildpacks``
 - ``organizations``
 - ``spaces``

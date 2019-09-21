@@ -8,6 +8,7 @@ from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import UNAUTHORIZED
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
 from cloudfoundry_client.v2.buildpacks import BuildpackManager
+from cloudfoundry_client.v2.events import EventManager
 from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
 from cloudfoundry_client.v2.jobs import JobManager
 from cloudfoundry_client.v2.resources import ResourceManager
@@ -43,6 +44,7 @@ class V2(object):
         self.service_keys = ServiceKeyManager(target_endpoint, credential_manager)
         self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
         # Default implementations
+        self.event = EventManager(target_endpoint, credential_manager)
         self.organizations = EntityManagerV2(target_endpoint, credential_manager, '/v2/organizations')
         self.private_domains = EntityManagerV2(target_endpoint, credential_manager, '/v2/private_domains')
         self.routes = RouteManager(target_endpoint, credential_manager)
