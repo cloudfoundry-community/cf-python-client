@@ -17,3 +17,12 @@ class InvalidStatusCode(Exception):
             return '%d : %s' % (self.status_code, self.body)
         else:
             return '%d : %s' % (self.status_code, json.dumps(self.body))
+
+
+class InvalidEntity(Exception):
+    def __init__(self, **kwargs):
+        super(InvalidEntity, self).__init__()
+        self.raw_entity = dict(**kwargs)
+
+    def __str__(self):
+        return 'InvalidEntity: %s' % json.dumps(self.raw_entity)

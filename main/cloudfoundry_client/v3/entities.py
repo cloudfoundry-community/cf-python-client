@@ -1,5 +1,7 @@
 import logging
 import functools
+
+from cloudfoundry_client.errors import InvalidEntity
 from cloudfoundry_client.imported import quote, reduce
 from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.request_object import Request
@@ -8,7 +10,7 @@ _logger = logging.getLogger(__name__)
 
 
 class Entity(JsonObject):
-    def __init__(self, client, entity_manager, *args, **kwargs):
+    def __init__(self, entity_manager, *args, **kwargs):
         super(Entity, self).__init__(*args, **kwargs)
         try:
             def default_method(m, u):
@@ -17,9 +19,8 @@ class Entity(JsonObject):
             for link_name, link in self.get('links', {}).items():
                 if link_name != 'self':
                     link_method = link.get('method', 'GET').lower()
-                    new_method = None
                     ref = link['href']
-                    if link_method== 'get':
+                    if link_method == 'get':
                         new_method = functools.partial(entity_manager._paginate, ref) if link_name.endswith('s')\
                             else functools.partial(entity_manager._get, ref)
                     elif link_method == 'post':
@@ -33,7 +34,7 @@ class Entity(JsonObject):
                     new_method.__name__ = link_name
                     setattr(self, link_name, new_method)
         except KeyError:
-            raise
+            raise InvalidEntity(**self)
 
 
 class EntityManager(object):
@@ -125,7 +126,7 @@ class EntityManager(object):
 
     def _entity(self, result):
         if 'guid' in result:
-            return Entity(self.client, self, **result)
+            return Entity(self, **result)
         else:
             return result
 

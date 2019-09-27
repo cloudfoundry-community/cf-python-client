@@ -1,6 +1,7 @@
 import functools
 import logging
 
+from cloudfoundry_client.errors import InvalidEntity
 from cloudfoundry_client.imported import quote, reduce
 from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.request_object import Request
@@ -14,6 +15,9 @@ class Entity(JsonObject):
         self.target_endpoint = target_endpoint
         self.client = client
         try:
+            if 'entity' not in self:
+                raise InvalidEntity(**self)
+
             for attribute, value in list(self['entity'].items()):
                 domain_name, suffix = attribute.rpartition('_')[::2]
                 if suffix == 'url':
@@ -34,7 +38,7 @@ class Entity(JsonObject):
                     new_method.__name__ = domain_name
                     setattr(self, domain_name, new_method)
         except KeyError:
-            raise
+            raise InvalidEntity(**self)
 
 
 class EntityManager(object):
