@@ -185,6 +185,10 @@ def main():
         CommandDomain(display_name='Service Broker', client_domain='service_brokers',
                       filter_list_parameters=['name', 'space_guid'],
                       allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True),
+        # exception, the name is not only 'strip trailing "s" from domain name'
+        CommandDomain(display_name='Service Plan Visibilities', client_domain='service_plan_visibilities',
+                      filter_list_parameters=['organization_guid', 'service_plan_guid'], name_property=None,
+                      allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True),
         CommandDomain(display_name='Buildpacks', client_domain='buildpacks',
                       filter_list_parameters=[], allow_retrieve_by_name=False,
                       allow_creation=False, allow_deletion=False),
