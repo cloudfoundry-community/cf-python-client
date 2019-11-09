@@ -17,6 +17,7 @@ from cloudfoundry_client.v2.service_bindings import ServiceBindingManager
 from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager
 from cloudfoundry_client.v2.service_instances import ServiceInstanceManager
 from cloudfoundry_client.v2.service_keys import ServiceKeyManager
+from cloudfoundry_client.v2.service_plan_visibilities import ServicePlanVisibilityManager
 from cloudfoundry_client.v2.service_plans import ServicePlanManager
 from cloudfoundry_client.v3.apps import AppManager as AppManagerV3
 from cloudfoundry_client.v3.entities import EntityManager as EntityManagerV3
@@ -42,6 +43,7 @@ class V2(object):
         self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
         self.service_instances = ServiceInstanceManager(target_endpoint, credential_manager)
         self.service_keys = ServiceKeyManager(target_endpoint, credential_manager)
+        self.service_plan_visibilities = ServicePlanVisibilityManager(target_endpoint, credential_manager)
         self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
         # Default implementations
         self.event = EventManager(target_endpoint, credential_manager)
