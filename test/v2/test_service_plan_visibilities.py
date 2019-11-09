@@ -1,3 +1,4 @@
+import json
 import sys
 import unittest
 
@@ -43,7 +44,8 @@ class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
             CREATED,
             None,
             'v2', 'service_plan_visibilities', 'POST_response.json')
-        service_plan_visibilities = self.client.v2.service_plan_visibilities.create('service_plan_guid', 'organization_guid')
+        service_plan_visibilities = self.client.v2.service_plan_visibilities.create('service_plan_guid',
+                                                                                    'organization_guid')
         self.client.post.assert_called_with(self.client.post.return_value.url,
                                             json=dict(service_plan_guid='service_plan_guid',
                                                       organization_guid='organization_guid'))
@@ -72,6 +74,23 @@ class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
         self.client.v2.service_plan_visibilities.remove('guid')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
+    @patch.object(sys, 'argv', ['main', 'create_service_plan_visibility', json.dumps(
+        dict(service_plan_guid='service-plan-id',
+             organization_guid='organization-id'))])
+    def test_main_create_service_plan_visibility(self):
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
+                   new=lambda: self.client):
+            self.client.post.return_value = mock_response(
+                '/v2/service_plan_visibilities',
+                CREATED,
+                None,
+                'v2', 'service_plan_visibilities', 'POST_response.json')
+            main.main()
+            self.client.post.assert_called_with(self.client.post.return_value.url,
+                                                json=dict(service_plan_guid='service-plan-id',
+                                                          organization_guid='organization-id')
+                                                )
+
     @patch.object(sys, 'argv', ['main', 'list_service_plan_visibilities'])
     def test_main_list_service_plan_visibilities(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
@@ -83,14 +102,24 @@ class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
 
-    # looks funny "visibilitIE"
-    @patch.object(sys, 'argv', ['main', 'get_service_plan_visibilitie', 'a353104b-1290-418c-bc03-0e647afd0853'])
-    def test_main_get_service_plan_visibilities(self):
+    @patch.object(sys, 'argv', ['main', 'get_service_plan_visibility', 'a353104b-1290-418c-bc03-0e647afd0853'])
+    def test_main_get_service_plan_visibility(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.get.return_value = mock_response('/v2/service_plan_visibilities/a353104b-1290-418c-bc03-0e647afd0853',
-                                                         OK,
-                                                         None,
-                                                         'v2', 'service_plan_visibilities', 'GET_{id}_response.json')
+            self.client.get.return_value = mock_response(
+                '/v2/service_plan_visibilities/a353104b-1290-418c-bc03-0e647afd0853',
+                OK,
+                None,
+                'v2', 'service_plan_visibilities', 'GET_{id}_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
+
+    @patch.object(sys, 'argv', ['main', 'delete_service_plan_visibility', '906775ea-622e-4bc7-af5d-9aab3b652f81'])
+    def test_main_delete_service_plan_visibility(self):
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
+                   new=lambda: self.client):
+            self.client.delete.return_value = mock_response('/v2/service_plan_visibilities/906775ea-622e-4bc7-af5d-9aab3b652f81',
+                                                            NO_CONTENT,
+                                                            None)
+            main.main()
+            self.client.delete.assert_called_with(self.client.delete.return_value.url)

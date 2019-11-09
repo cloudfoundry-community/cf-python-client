@@ -4,7 +4,7 @@ from cloudfoundry_client.main.command_domain import CommandDomain, Command
 class AppCommandDomain(CommandDomain):
     def __init__(self):
         super(AppCommandDomain, self).__init__(display_name='Applications',
-                                               client_domain='apps',
+                                               entity_name='app',
                                                filter_list_parameters=['organization_guid', 'space_guid'],
                                                allow_retrieve_by_name=True,
                                                allow_deletion=True,

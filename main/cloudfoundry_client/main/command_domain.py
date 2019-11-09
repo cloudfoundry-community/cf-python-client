@@ -16,14 +16,14 @@ class Command(object):
 
 
 class CommandDomain(object):
-    def __init__(self, display_name, client_domain, filter_list_parameters,
+    def __init__(self, display_name, entity_name, filter_list_parameters,
                  api_version='v2', name_property='name',
                  allow_retrieve_by_name=False, allow_creation=False, allow_deletion=False,
                  extra_methods=None):
         self.display_name = display_name
-        self.client_domain = client_domain
+        self.client_domain = self.plural(entity_name)
         self.api_version = api_version
-        self.entity_name = client_domain[:len(client_domain) - 1]
+        self.entity_name = entity_name
         self.filter_list_parameters = filter_list_parameters
         self.name_property = name_property
         self.allow_retrieve_by_name = allow_retrieve_by_name
@@ -72,8 +72,19 @@ class CommandDomain(object):
         return getattr(getattr(client, self.api_version), self.client_domain)
 
     @staticmethod
+    def plural(entity_name):
+        if entity_name.endswith('y') and not (re.match(r'.+[aeiou]y', entity_name)):
+            return '%sies' % entity_name[:len(entity_name) - 1]
+        else:
+            return '%ss' % entity_name
+
+    @staticmethod
     def is_guid(s):
         return re.match(r'[\d|a-z]{8}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{12}', s.lower()) is not None
+
+    @staticmethod
+    def id(entity):
+        return entity['metadata']['guid']
 
     def resolve_id(self, argument, get_by_name):
         if CommandDomain.is_guid(argument):
@@ -86,10 +97,6 @@ class CommandDomain(object):
                 raise InvalidStatusCode(NOT_FOUND, '%s with name %s' % (self.client_domain, argument))
         else:
             raise ValueError('id: %s: does not allow search by name' % self.client_domain)
-
-    @staticmethod
-    def id(entity):
-        return entity['metadata']['guid']
 
     def name(self, entity):
         return entity['entity'][self.name_property]
@@ -186,7 +193,7 @@ class CommandDomain(object):
         return Command(entry, generate_parser, execute)
 
     def _list_entry(self):
-        return 'list_%ss' % self.entity_name
+        return 'list_%s' % self.plural(self.entity_name)
 
     def _create_entry(self):
         return 'create_%s' % self.entity_name

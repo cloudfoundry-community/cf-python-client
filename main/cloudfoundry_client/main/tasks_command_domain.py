@@ -6,7 +6,7 @@ from cloudfoundry_client.main.command_domain import CommandDomain, Command
 
 class TaskCommandDomain(CommandDomain):
     def __init__(self):
-        super(TaskCommandDomain, self).__init__(display_name='Tasks', client_domain='tasks',
+        super(TaskCommandDomain, self).__init__(display_name='Tasks', entity_name='task',
                                                 filter_list_parameters=['names', 'app_guids', 'space_guids',
                                                                         'organization_guids'],
                                                 api_version='v3', allow_creation=True, allow_deletion=False,
