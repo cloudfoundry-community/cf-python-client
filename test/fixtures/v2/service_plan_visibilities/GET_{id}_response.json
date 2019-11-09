@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "guid": "a353104b-1290-418c-bc03-0e647afd0853",
+    "url": "/v2/service_plan_visibilities/a353104b-1290-418c-bc03-0e647afd0853",
+    "created_at": "2016-06-08T16:41:31Z",
+    "updated_at": "2016-06-08T16:41:26Z"
+  },
+  "entity": {
+    "service_plan_guid": "2bf35919-3922-49f3-9e14-5fee035a1b05",
+    "organization_guid": "e02678c3-44fb-4c0c-bd45-9354053c0707",
+    "service_plan_url": "/v2/service_plans/2bf35919-3922-49f3-9e14-5fee035a1b05",
+    "organization_url": "/v2/organizations/e02678c3-44fb-4c0c-bd45-9354053c0707"
+  }
+}
