@@ -103,6 +103,7 @@ Available managers
 So far the implemented managers that are available are:
 
 - ``service_plans``
+- ``service_plan_visibilities``
 - ``service_instances``
 - ``service_keys``
 - ``service_bindings``
