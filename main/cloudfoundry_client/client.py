@@ -7,7 +7,7 @@ from cloudfoundry_client.doppler.client import DopplerClient
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import UNAUTHORIZED
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
-from cloudfoundry_client.v2.buildpacks import BuildpackManager
+from cloudfoundry_client.v2.buildpacks import BuildpackManagerV2
 from cloudfoundry_client.v2.events import EventManager
 from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
 from cloudfoundry_client.v2.jobs import JobManager
@@ -20,6 +20,7 @@ from cloudfoundry_client.v2.service_keys import ServiceKeyManager
 from cloudfoundry_client.v2.service_plan_visibilities import ServicePlanVisibilityManager
 from cloudfoundry_client.v2.service_plans import ServicePlanManager
 from cloudfoundry_client.v3.apps import AppManager as AppManagerV3
+from cloudfoundry_client.v3.buildpacks import BuildpackManager as BuildpackManagerV3
 from cloudfoundry_client.v3.entities import EntityManager as EntityManagerV3
 from cloudfoundry_client.v3.tasks import TaskManager
 
@@ -37,7 +38,7 @@ class Info:
 class V2(object):
     def __init__(self, target_endpoint, credential_manager):
         self.apps = AppManagerV2(target_endpoint, credential_manager)
-        self.buildpacks = BuildpackManager(target_endpoint, credential_manager)
+        self.buildpacks = BuildpackManagerV2(target_endpoint, credential_manager)
         self.jobs = JobManager(target_endpoint, credential_manager)
         self.service_bindings = ServiceBindingManager(target_endpoint, credential_manager)
         self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
@@ -66,6 +67,7 @@ class V2(object):
 class V3(object):
     def __init__(self, target_endpoint, credential_manager):
         self.apps = AppManagerV3(target_endpoint, credential_manager)
+        self.buildpacks = BuildpackManagerV3(target_endpoint, credential_manager)
         self.spaces = EntityManagerV3(target_endpoint, credential_manager, '/v3/spaces')
         self.organizations = EntityManagerV3(target_endpoint, credential_manager, '/v3/organizations')
         self.service_instances = EntityManagerV3(target_endpoint, credential_manager, '/v3/service_instances')
