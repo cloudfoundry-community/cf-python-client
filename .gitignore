@@ -7,3 +7,4 @@ main/sandbox.py
 integration/sandbox.py
 integration/resources/test.properties
 .eggs/
+.venv
