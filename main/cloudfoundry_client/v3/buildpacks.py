@@ -21,3 +21,7 @@ class BuildpackManager(EntityManager):
             }
         }
         return super(BuildpackManager, self)._create(data)
+
+    def remove(self, buildpack_guid):
+        super(BuildpackManager, self)._remove(buildpack_guid)
+

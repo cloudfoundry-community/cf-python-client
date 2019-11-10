@@ -34,3 +34,12 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
         result = self.client.v3.buildpacks.get('buildpack_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
+
+    def test_remove(self):
+        self.client.delete.return_value = mock_response(
+            '/v3/buildpacks/buildpack_id',
+            NO_CONTENT,
+            None)
+        self.client.v3.buildpacks.remove('buildpack_id')
+        self.client.delete.assert_called_with(self.client.delete.return_value.url)
+
