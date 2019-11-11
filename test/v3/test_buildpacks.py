@@ -4,6 +4,7 @@ from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.imported import OK, reduce
 from cloudfoundry_client.v3.entities import Entity
 from fake_requests import mock_response
+from imported import call, NO_CONTENT
 
 
 class TestBuildpacks(unittest.TestCase, AbstractTestCase):
