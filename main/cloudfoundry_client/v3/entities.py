@@ -58,6 +58,11 @@ class EntityManager(object):
         _logger.debug('PUT - %s - %s', url, response.text)
         return self._read_response(response)
 
+    def _patch(self, data, url):
+        response = self.client.patch(url, json=data)
+        _logger.debug('PATCH - %s - %s', url, response.text)
+        return self._read_response(response)
+
     def _delete(self, url):
         response = self.client.delete(url)
         _logger.debug('DELETE - %s - %s', url, response.text)
@@ -88,7 +93,7 @@ class EntityManager(object):
 
     def _update(self, resource_id, data):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
-        return self._put(data, url)
+        return self._patch(data, url)
 
     def _remove(self, resource_id):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
