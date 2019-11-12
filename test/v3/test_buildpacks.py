@@ -57,8 +57,8 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
                                                    'position': 42,
                                                    'stack': 'windows64',
                                                    'metadata': {
-                                                       'labels': {},
-                                                       'annotations': {}
+                                                       'labels': None,
+                                                       'annotations': None
                                                    }
                                              })
         self.assertIsNotNone(result)
