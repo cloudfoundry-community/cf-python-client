@@ -39,20 +39,29 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
 
-    #def test_update(self):
-    #    self.client.patch.return_value = mock_response(
-    #        '/v3/buildpacks/buildpack_id',
-    #        patch,
-    #        None,
-    #        'v3', 'buildpacks', 'PATCH_{id}_response.json')
-    #    result = self.client.v3.buildpacks.update('buildpack_id', 'ruby_buildpack',
-    #                                              enabled=True,
-    #                                              position=42,
-    #                                              stack='windows64')
-    #    print(result)
-    #    self.client.patch.assert_called_with(self.client.patch.return_value.url,
-    #                                         json=dict(enabled=True))
-    #    self.assertIsNotNone(result)
+    def test_update(self):
+        self.client.patch.return_value = mock_response(
+            '/v3/buildpacks/buildpack_id',
+            OK,
+            None,
+            'v3', 'buildpacks', 'PATCH_{id}_response.json')
+        result = self.client.v3.buildpacks.update('buildpack_id', 'ruby_buildpack',
+                                                  enabled=True,
+                                                  position=42,
+                                                  stack='windows64')
+        print(result)
+        self.client.patch.assert_called_with(self.client.patch.return_value.url,
+                                             json={'locked': False,
+                                                   'name': 'ruby_buildpack',
+                                                   'enabled': True,
+                                                   'position': 42,
+                                                   'stack': 'windows64',
+                                                   'metadata': {
+                                                       'labels': {},
+                                                       'annotations': {}
+                                                   }
+                                             })
+        self.assertIsNotNone(result)
 
     def test_remove(self):
         self.client.delete.return_value = mock_response(

@@ -25,3 +25,20 @@ class BuildpackManager(EntityManager):
     def remove(self, buildpack_guid):
         super(BuildpackManager, self)._remove(buildpack_guid)
 
+    # get and list are from main
+    def update(self, buildpack_guid, name, position=0, enabled=True,
+               locked=False, stack='', meta_labels={}, meta_annotations={}):
+        # XXX
+        data = {
+            'name': name,
+            'position': position,
+            'enabled': enabled,
+            'locked': locked,
+            'stack': stack,
+            'metadata': {
+                'labels': meta_labels,
+                'annotations': meta_annotations
+            }
+        }
+        return super(BuildpackManager, self)._update(buildpack_guid, data)
+
