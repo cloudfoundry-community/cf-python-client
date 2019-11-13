@@ -43,8 +43,8 @@ class EntityManager(object):
         self.entity_uri = entity_uri
         self.client = client
 
-    def _post(self, url, data=None):
-        response = self.client.post(url, json=data)
+    def _post(self, url, data=None, files=None):
+        response = self.client.post(url, json=data, files=files)
         _logger.debug('POST - %s - %s', url, response.text)
         return self._read_response(response)
 
@@ -56,6 +56,11 @@ class EntityManager(object):
     def _put(self, data, url):
         response = self.client.put(url, json=data)
         _logger.debug('PUT - %s - %s', url, response.text)
+        return self._read_response(response)
+
+    def _patch(self, data, url):
+        response = self.client.patch(url, json=data)
+        _logger.debug('PATCH - %s - %s', url, response.text)
         return self._read_response(response)
 
     def _delete(self, url):
@@ -84,11 +89,16 @@ class EntityManager(object):
 
     def _create(self, data):
         url = '%s%s' % (self.target_endpoint, self.entity_uri)
-        return self._post(url, data)
+        return self._post(url, data=data)
+
+    def _upload_bits(self, resource_id, filename):
+        url = '%s%s/%s/upload' % (self.target_endpoint, self.entity_uri, resource_id)
+        files = {'bits': (filename, open(filename, 'rb'))}
+        return self._post(url, files=files)
 
     def _update(self, resource_id, data):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
-        return self._put(data, url)
+        return self._patch(data, url)
 
     def _remove(self, resource_id):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)

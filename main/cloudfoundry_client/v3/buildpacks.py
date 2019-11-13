@@ -7,8 +7,6 @@ class BuildpackManager(EntityManager):
 
     def create(self, name, position=0, enabled=True, locked=False, stack=None,
                meta_labels=None, meta_annotations=None):
-        # XXX typecheck? P3.7 => no problem, else it may be a little more code
-
         data = {
             'name': name,
             'position': position,
@@ -25,3 +23,20 @@ class BuildpackManager(EntityManager):
     def remove(self, buildpack_guid):
         super(BuildpackManager, self)._remove(buildpack_guid)
 
+    def update(self, buildpack_guid, name, position=0, enabled=True,
+               locked=False, stack=None, meta_labels=None, meta_annotations=None):
+        data = {
+            'name': name,
+            'position': position,
+            'enabled': enabled,
+            'locked': locked,
+            'stack': stack,
+            'metadata': {
+                'labels': meta_labels,
+                'annotations': meta_annotations
+            }
+        }
+        return super(BuildpackManager, self)._update(buildpack_guid, data)
+
+    def upload(self, buildpack_guid, buildpack_zip):
+        return super(BuildpackManager, self)._upload_bits(buildpack_guid, buildpack_zip)

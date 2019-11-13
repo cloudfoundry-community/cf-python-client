@@ -191,6 +191,7 @@ Another example:
 Available managers on API V3 are:
 
 - ``apps``
+- ``buildpacks``
 - ``organizations``
 - ``service_instances``
 - ``spaces``

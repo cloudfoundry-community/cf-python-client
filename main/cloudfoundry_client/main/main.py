@@ -185,13 +185,13 @@ def main():
         CommandDomain(display_name='Service Broker', entity_name='service_broker',
                       filter_list_parameters=['name', 'space_guid'],
                       allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True),
-        # exception, the name is not only 'strip trailing "s" from domain name'
         CommandDomain(display_name='Service Plan Visibilities', entity_name='service_plan_visibility',
                       filter_list_parameters=['organization_guid', 'service_plan_guid'], name_property=None,
                       allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True),
         CommandDomain(display_name='Buildpacks', entity_name='buildpack',
-                      filter_list_parameters=[], allow_retrieve_by_name=False,
-                      allow_creation=False, allow_deletion=False),
+                      api_version='v3',
+                      filter_list_parameters=[], allow_retrieve_by_name=True,
+                      allow_creation=True, allow_deletion=True),
         CommandDomain(display_name='Routes', entity_name='route', name_property='host', filter_list_parameters=[]),
         TaskCommandDomain()
     ]

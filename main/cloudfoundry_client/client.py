@@ -7,7 +7,7 @@ from cloudfoundry_client.doppler.client import DopplerClient
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.imported import UNAUTHORIZED
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
-from cloudfoundry_client.v2.buildpacks import BuildpackManagerV2
+from cloudfoundry_client.v2.buildpacks import BuildpackManager as BuildpackManagerV2
 from cloudfoundry_client.v2.events import EventManager
 from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
 from cloudfoundry_client.v2.jobs import JobManager
