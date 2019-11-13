@@ -83,9 +83,9 @@ class CommandDomain(object):
         return re.match(r'[\d|a-z]{8}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{12}', s.lower()) is not None
 
     def id(self, entity):
-        if self.api_version == 2:
+        if self.api_version == 'v2':
             return entity['metadata']['guid']
-        elif self.api_version == 3:
+        elif self.api_version == 'v3':
             return entity['guid']
 
     def resolve_id(self, argument, get_by_name):
@@ -94,9 +94,9 @@ class CommandDomain(object):
         elif self.allow_retrieve_by_name:
             result = get_by_name(argument)
             if result is not None:
-                if self.api_version == 2:
+                if self.api_version == 'v2':
                     return result['metadata']['guid']
-                elif self.api_version == 3:
+                elif self.api_version == 'v3':
                     return result['guid']
             else:
                 raise InvalidStatusCode(NOT_FOUND, '%s with name %s' % (self.client_domain, argument))
@@ -104,9 +104,9 @@ class CommandDomain(object):
             raise ValueError('id: %s: does not allow search by name' % self.client_domain)
 
     def name(self, entity):
-        if self.api_version == 2:
+        if self.api_version == 'v2':
             return entity['entity'][self.name_property]
-        elif self.api_version == 3:
+        elif self.api_version == 'v3':
             return entity[self.name_property]
 
     def find_by_name(self, client, name):
