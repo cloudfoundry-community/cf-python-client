@@ -43,8 +43,8 @@ class EntityManager(object):
         self.entity_uri = entity_uri
         self.client = client
 
-    def _post(self, url, data=None):
-        response = self.client.post(url, json=data)
+    def _post(self, url, data=None, files=None):
+        response = self.client.post(url, json=data, files=files)
         _logger.debug('POST - %s - %s', url, response.text)
         return self._read_response(response)
 
@@ -89,7 +89,7 @@ class EntityManager(object):
 
     def _create(self, data):
         url = '%s%s' % (self.target_endpoint, self.entity_uri)
-        return self._post(url, data)
+        return self._post(url, data=data)
 
     def _update(self, resource_id, data):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
