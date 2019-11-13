@@ -91,6 +91,11 @@ class EntityManager(object):
         url = '%s%s' % (self.target_endpoint, self.entity_uri)
         return self._post(url, data=data)
 
+    def _upload_bits(self, resource_id, filename):
+        url = '%s%s/%s/upload' % (self.target_endpoint, self.entity_uri, resource_id)
+        files = {'bits': (filename, open(filename, 'rb'))}
+        return self._post(url, files=files)
+
     def _update(self, resource_id, data):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
         return self._patch(data, url)
