@@ -46,8 +46,8 @@ class TestTasks(unittest.TestCase, AbstractTestCase):
             'v3', 'tasks', 'POST_response.json')
         task = self.client.v3.tasks.create('app_guid', command='rake db:migrate')
         self.client.post.assert_called_with(self.client.post.return_value.url,
-                                            json=dict(command='rake db:migrate')
-                                            )
+                                            files=None,
+                                            json=dict(command='rake db:migrate'))
         self.assertIsNotNone(task)
 
     def test_cancel(self):
@@ -57,7 +57,7 @@ class TestTasks(unittest.TestCase, AbstractTestCase):
             None,
             'v3', 'tasks', 'POST_{id}_actions_cancel_response.json')
         task = self.client.v3.tasks.cancel('task_guid')
-        self.client.post.assert_called_with(self.client.post.return_value.url, json=None)
+        self.client.post.assert_called_with(self.client.post.return_value.url, files=None, json=None)
         self.assertIsNotNone(task)
 
     @patch.object(sys, 'argv', ['main', 'list_tasks', '-names', 'task_name'])
@@ -81,6 +81,7 @@ class TestTasks(unittest.TestCase, AbstractTestCase):
                                                           'v3', 'tasks', 'POST_response.json')
             main.main()
             self.client.post.assert_called_with(self.client.post.return_value.url,
+                                                files=None,
                                                 json=dict(command='rake db:migrate', name='example'))
 
     @patch.object(sys, 'argv', ['main', 'cancel_task', 'task_id'])
@@ -92,4 +93,4 @@ class TestTasks(unittest.TestCase, AbstractTestCase):
                                                           None,
                                                           'v3', 'tasks', 'POST_{id}_actions_cancel_response.json')
             main.main()
-            self.client.post.assert_called_with(self.client.post.return_value.url, json=None)
+            self.client.post.assert_called_with(self.client.post.return_value.url, files=None, json=None)

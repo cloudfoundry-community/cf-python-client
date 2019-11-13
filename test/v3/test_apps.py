@@ -58,7 +58,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
 
         app = self.client.v3.apps.get('app_id').start()
         self.client.get.assert_called_with(self.client.get.return_value.url)
-        self.client.post.assert_called_with(self.client.post.return_value.url, json=None)
+        self.client.post.assert_called_with(self.client.post.return_value.url, files=None, json=None)
         self.assertEqual("my_app", app['name'])
         self.assertIsInstance(app, Entity)
 
