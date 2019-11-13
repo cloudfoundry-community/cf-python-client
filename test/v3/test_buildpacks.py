@@ -3,7 +3,7 @@ import unittest
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.imported import OK, reduce
+from cloudfoundry_client.imported import OK
 from cloudfoundry_client.v3.entities import Entity
 from fake_requests import mock_response
 from imported import CREATED, patch
@@ -49,7 +49,6 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
                                                   enabled=True,
                                                   position=42,
                                                   stack='windows64')
-        print(result)
         self.client.patch.assert_called_with(self.client.patch.return_value.url,
                                              json={'locked': False,
                                                    'name': 'ruby_buildpack',
