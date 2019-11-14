@@ -21,6 +21,7 @@ from cloudfoundry_client.v2.service_plan_visibilities import ServicePlanVisibili
 from cloudfoundry_client.v2.service_plans import ServicePlanManager
 from cloudfoundry_client.v3.apps import AppManager as AppManagerV3
 from cloudfoundry_client.v3.buildpacks import BuildpackManager as BuildpackManagerV3
+from cloudfoundry_client.v3.domains import DomainManager
 from cloudfoundry_client.v3.entities import EntityManager as EntityManagerV3
 from cloudfoundry_client.v3.tasks import TaskManager
 
@@ -68,6 +69,7 @@ class V3(object):
     def __init__(self, target_endpoint, credential_manager):
         self.apps = AppManagerV3(target_endpoint, credential_manager)
         self.buildpacks = BuildpackManagerV3(target_endpoint, credential_manager)
+        self.domains = DomainManager(target_endpoint, credential_manager)
         self.spaces = EntityManagerV3(target_endpoint, credential_manager, '/v3/spaces')
         self.organizations = EntityManagerV3(target_endpoint, credential_manager, '/v3/organizations')
         self.service_instances = EntityManagerV3(target_endpoint, credential_manager, '/v3/service_instances')
