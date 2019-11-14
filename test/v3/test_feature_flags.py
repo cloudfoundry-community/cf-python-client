@@ -32,3 +32,17 @@ class TestFeatureFlags(unittest.TestCase, AbstractTestCase):
         feature_flag = self.client.v3.feature_flags.get('feature_flag_name')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual("my_feature_flag", feature_flag['name'])
+
+    def test_update(self):
+        self.client.patch.return_value = mock_response(
+            '/v3/feature_flags/feature_flag_name',
+            HTTPStatus.OK,
+            None,
+            'v3', 'feature_flags', 'PATCH_{id}_response.json')
+        result = self.client.v3.feature_flags.update('feature_flag_name')
+        self.client.patch.assert_called_with(self.client.patch.return_value.url,
+                                             json={'enabled': True,
+                                                   'custom_error_message': None
+                                                   }
+                                             )
+        self.assertIsNotNone(result)
