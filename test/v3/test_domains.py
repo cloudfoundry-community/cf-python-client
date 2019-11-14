@@ -117,3 +117,24 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
         self.client.v3.domains.unshare_domain('domain_id', 'org_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
+    @patch.object(sys, 'argv', ['main', 'list_domains'])
+    def test_main_list_domains(self):
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
+                   new=lambda: self.client):
+            self.client.get.return_value = mock_response('/v3/domains',
+                                                         HTTPStatus.OK,
+                                                         None,
+                                                         'v3', 'domains', 'GET_response.json')
+            main.main()
+            self.client.get.assert_called_with(self.client.get.return_value.url)
+
+    @patch.object(sys, 'argv', ['main', 'get_domain', '3a5d3d89-3f89-4f05-8188-8a2b298c79d5'])
+    def test_main_get_domain(self):
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
+                        new=lambda: self.client):
+            self.client.get.return_value = mock_response('/v3/domains/3a5d3d89-3f89-4f05-8188-8a2b298c79d5',
+                                                         HTTPStatus.OK,
+                                                         None,
+                                                         'v3', 'domains', 'GET_{id}_response.json')
+            main.main()
+            self.client.get.assert_called_with(self.client.get.return_value.url)

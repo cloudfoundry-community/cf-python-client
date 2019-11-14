@@ -192,6 +192,10 @@ def main():
                       api_version='v3',
                       filter_list_parameters=[], allow_retrieve_by_name=True,
                       allow_creation=True, allow_deletion=True),
+        CommandDomain(display_name='Domains', entity_name='domain',
+                      api_version='v3',
+                      filter_list_parameters=[], allow_retrieve_by_name=True,
+                      allow_creation=True, allow_deletion=True),
         CommandDomain(display_name='Routes', entity_name='route', name_property='host', filter_list_parameters=[]),
         TaskCommandDomain()
     ]
