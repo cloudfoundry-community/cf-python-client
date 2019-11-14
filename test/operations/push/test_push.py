@@ -1,11 +1,11 @@
 import sys
 from unittest import TestCase
+from unittest.mock import patch, MagicMock
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.operations.push.push import PushOperation
 from fake_requests import get_fixtures_path
-from imported import patch, MagicMock
 
 
 class TestPushOperation(TestCase, AbstractTestCase):
@@ -50,6 +50,7 @@ class TestPushOperation(TestCase, AbstractTestCase):
         class FakeOperation(object):
             def __init__(self):
                 self.push = MagicMock()
+
         client = object()
         push_operation = FakeOperation()
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',

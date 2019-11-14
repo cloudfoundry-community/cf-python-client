@@ -1,15 +1,15 @@
 import logging
+from http import HTTPStatus
 
 import requests
 from oauth2_client.credentials_manager import CredentialManager, ServiceInformation
 
 from cloudfoundry_client.doppler.client import DopplerClient
 from cloudfoundry_client.errors import InvalidStatusCode
-from cloudfoundry_client.imported import UNAUTHORIZED
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
 from cloudfoundry_client.v2.buildpacks import BuildpackManager as BuildpackManagerV2
-from cloudfoundry_client.v2.events import EventManager
 from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
+from cloudfoundry_client.v2.events import EventManager
 from cloudfoundry_client.v2.jobs import JobManager
 from cloudfoundry_client.v2.resources import ResourceManager
 from cloudfoundry_client.v2.routes import RouteManager
@@ -133,7 +133,7 @@ class CloudFoundryClient(CredentialManager):
 
     @staticmethod
     def _is_token_expired(response):
-        if response.status_code == UNAUTHORIZED:
+        if response.status_code == HTTPStatus.UNAUTHORIZED.value:
             try:
                 json_data = response.json()
                 result = json_data.get('code', 0) == 1000 and json_data.get('error_code', '') == 'CF-InvalidAuthToken'

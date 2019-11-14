@@ -1,8 +1,8 @@
-import logging
 import functools
+import logging
+from urllib.parse import quote
 
 from cloudfoundry_client.errors import InvalidEntity
-from cloudfoundry_client.imported import quote, reduce
 from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.request_object import Request
 
@@ -152,6 +152,6 @@ class EntityManager(object):
 
         if len(kwargs) > 0:
             return '%s?%s' % (url,
-                              "&".join(reduce(_append_encoded_parameter, sorted(list(kwargs.items())), [])))
+                              "&".join(functools.reduce(_append_encoded_parameter, sorted(list(kwargs.items())), [])))
         else:
             return url

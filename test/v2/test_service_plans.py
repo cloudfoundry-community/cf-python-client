@@ -1,11 +1,12 @@
 import sys
 import unittest
+from functools import reduce
+from http import HTTPStatus
+from unittest.mock import call, patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
-from imported import patch, call
 
 
 class TestServicePlans(unittest.TestCase, AbstractTestCase):
@@ -19,7 +20,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
     def test_list(self):
         self.client.get.return_value = mock_response(
             '/v2/service_plans?q=service_guid%3Aservice_id',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_plans', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, self.client.v2.service_plans.list(service_guid='service_id'), 0)
@@ -29,7 +30,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
     def test_get(self):
         self.client.get.return_value = mock_response(
             '/v2/service_plans/plan_id',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_plans', 'GET_{id}_response.json')
         result = self.client.v2.service_plans.get('plan_id')
@@ -39,7 +40,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
     def test_list_instances(self):
         self.client.get.return_value = mock_response(
             '/v2/service_plans/plan_id/service_instances?q=space_guid%3Aspace_id',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'apps', 'GET_{id}_routes_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
@@ -51,18 +52,18 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
         self.client.get.side_effect = [
             mock_response(
                 '/v2/service_plans/plan_id',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'service_plans', 'GET_{id}_response.json'),
             mock_response(
                 '/v2/services/6a4abae6-93e0-438b-aaa2-5ae67f3a069d',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'services', 'GET_{id}_response.json')
             ,
             mock_response(
                 '/v2/service_plans/5d8f3b0f-6b5b-487f-8fed-4c2d9b812a72/service_instances',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'service_instances', 'GET_response.json')
         ]
@@ -79,7 +80,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_plans',
-                                                         OK,
+                                                         HTTPStatus.OK,
                                                          None,
                                                          'v2', 'service_plans', 'GET_response.json')
             main.main()
@@ -90,7 +91,7 @@ class TestServicePlans(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_plans/5d8f3b0f-6b5b-487f-8fed-4c2d9b812a72',
-                                                         OK,
+                                                         HTTPStatus.OK,
                                                          None,
                                                          'v2', 'service_plans', 'GET_{id}_response.json')
             main.main()

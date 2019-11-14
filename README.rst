@@ -11,6 +11,13 @@ The cf-python-client repo contains a Python client library for Cloud Foundry.
 Installing
 ----------
 
+Supported versions
+~~~~~~~~~~~~~~~~~~
+
+:warning: Starting version `1.11.0`, versions older that python `3.6.0` will not be supported anymore. This late version was released by the end 2016.
+
+For those that are still using python 2.7, it won't be supported by the end of 2020 and all library shall stop supporting it.
+
 From pip
 ~~~~~~~~
 

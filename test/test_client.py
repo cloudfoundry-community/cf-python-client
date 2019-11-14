@@ -1,20 +1,19 @@
 import json
 import unittest
+from http import HTTPStatus
+from unittest.mock import patch
+from urllib.parse import quote
 
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.client import CloudFoundryClient
-from cloudfoundry_client.imported import OK
-from cloudfoundry_client.imported import quote
 from fake_requests import MockResponse, MockSession, FakeRequests
 from fake_requests import TARGET_ENDPOINT
-from imported import patch
 
 
-class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase,):
+class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
     @classmethod
     def setUpClass(cls):
         cls.mock_client_class()
-
 
     def test_grant_password_request_with_token_format_opaque(self):
         requests = FakeRequests()
@@ -23,11 +22,11 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase,):
              patch('cloudfoundry_client.client.requests', new=requests):
             requests.Session.return_value = session
             requests.get.return_value = MockResponse('%s/v2/info' % TARGET_ENDPOINT,
-                                                     status_code=OK,
+                                                     status_code=HTTPStatus.OK,
                                                      text=json.dumps(dict(api_version='2.1',
                                                                           authorization_endpoint=TARGET_ENDPOINT)))
             requests.post.return_value = MockResponse('%s/oauth/token' % TARGET_ENDPOINT,
-                                                      status_code=OK,
+                                                      status_code=HTTPStatus.OK,
                                                       text=json.dumps(dict(access_token='access-token',
                                                                            refresh_token='refresh-token')))
             client = CloudFoundryClient(TARGET_ENDPOINT, token_format='opaque')
@@ -50,11 +49,11 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase,):
              patch('cloudfoundry_client.client.requests', new=requests):
             requests.Session.return_value = session
             requests.get.return_value = MockResponse('%s/v2/info' % TARGET_ENDPOINT,
-                                                     status_code=OK,
+                                                     status_code=HTTPStatus.OK,
                                                      text=json.dumps(dict(api_version='2.1',
                                                                           authorization_endpoint=TARGET_ENDPOINT)))
             requests.post.return_value = MockResponse('%s/oauth/token' % TARGET_ENDPOINT,
-                                                      status_code=OK,
+                                                      status_code=HTTPStatus.OK,
                                                       text=json.dumps(dict(access_token='access-token',
                                                                            refresh_token='refresh-token')))
             client = CloudFoundryClient(TARGET_ENDPOINT, token_format='opaque')
@@ -76,11 +75,11 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase,):
              patch('cloudfoundry_client.client.requests', new=requests):
             requests.Session.return_value = session
             requests.get.return_value = MockResponse('%s/v2/info' % TARGET_ENDPOINT,
-                                                     status_code=OK,
+                                                     status_code=HTTPStatus.OK,
                                                      text=json.dumps(dict(api_version='2.1',
                                                                           authorization_endpoint=TARGET_ENDPOINT)))
             requests.post.return_value = MockResponse('%s/oauth/token' % TARGET_ENDPOINT,
-                                                      status_code=OK,
+                                                      status_code=HTTPStatus.OK,
                                                       text=json.dumps(dict(access_token='access-token',
                                                                            refresh_token='refresh-token')))
             client = CloudFoundryClient(TARGET_ENDPOINT, login_hint=quote(json.dumps(dict(origin='uaa'),

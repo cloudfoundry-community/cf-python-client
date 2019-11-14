@@ -1,10 +1,11 @@
 import json
+from http import HTTPStatus
+from unittest.mock import MagicMock, patch
 
 from oauth2_client.credentials_manager import CredentialManager
 
 from cloudfoundry_client.client import CloudFoundryClient
 from fake_requests import TARGET_ENDPOINT, mock_response
-from imported import MagicMock, patch
 
 
 def mock_cloudfoundry_client_class():
@@ -28,7 +29,7 @@ class AbstractTestCase(object):
 
     def build_client(self):
         with patch('cloudfoundry_client.client.requests') as fake_requests:
-            fake_info_response = mock_response('/v2/info', 200, None)
+            fake_info_response = mock_response('/v2/info', HTTPStatus.OK, None)
             fake_info_response.text = json.dumps(dict(api_version='2.X',
                                                       authorization_endpoint=TARGET_ENDPOINT))
             fake_requests.get.return_value = fake_info_response

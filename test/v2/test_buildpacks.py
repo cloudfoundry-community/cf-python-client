@@ -1,9 +1,9 @@
 import unittest
+from functools import reduce
+from http import HTTPStatus
 
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
-from imported import CREATED, patch
 
 
 class TestBuildpacks(unittest.TestCase, AbstractTestCase):
@@ -16,7 +16,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response('/v2/buildpacks',
-                                                     OK,
+                                                     HTTPStatus.OK,
                                                      None,
                                                      'v2', 'buildpacks', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, self.client.v2.buildpacks.list(), 0)
@@ -26,7 +26,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
     def test_get(self):
         self.client.get.return_value = mock_response(
             '/v2/buildpacks/buildpack_id',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'buildpacks', 'GET_{id}_response.json')
         result = self.client.v2.buildpacks.get('buildpack_id')
@@ -36,7 +36,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
     def test_update(self):
         self.client.put.return_value = mock_response(
             '/v2/buildpacks/build_pack_id',
-            CREATED,
+            HTTPStatus.CREATED,
             None,
             'v2', 'apps', 'PUT_{id}_response.json')
         result = self.client.v2.buildpacks.update('build_pack_id', dict(enabled=False))

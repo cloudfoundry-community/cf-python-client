@@ -1,7 +1,12 @@
 import os
+from http import HTTPStatus
 from json import loads
+from unittest.mock import MagicMock
 
-from imported import SEE_OTHER, iterate_text, MagicMock
+
+def iterate_text(text):
+    for character in text:
+        yield bytes([character])
 
 
 class MockSession(object):
@@ -13,12 +18,12 @@ class MockSession(object):
 
 
 class MockResponse(object):
-    def __init__(self, url, status_code, text, headers=None):
-        self.status_code = status_code
+    def __init__(self, url: str, status_code: HTTPStatus, text: str, headers: dict = None):
+        self.status_code = status_code.value
         self.url = url
         self.text = text
         self.headers = dict()
-        self.is_redirect = status_code == SEE_OTHER
+        self.is_redirect = status_code == HTTPStatus.SEE_OTHER
         if headers is not None:
             self.headers.update(headers)
 
@@ -39,7 +44,7 @@ def get_fixtures_path(*paths):
     return os.path.join(os.path.dirname(__file__), 'fixtures', *paths)
 
 
-def mock_response(uri, status_code, headers, *path_parts):
+def mock_response(uri: str, status_code: HTTPStatus, headers: dict, *path_parts: str):
     global TARGET_ENDPOINT
     if len(path_parts) > 0:
         file_name = path_parts[len(path_parts) - 1]

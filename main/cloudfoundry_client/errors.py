@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 
 class InvalidLogResponseException(Exception):
@@ -6,17 +7,17 @@ class InvalidLogResponseException(Exception):
 
 
 class InvalidStatusCode(Exception):
-    def __init__(self, status_code, body):
+    def __init__(self, status_code: HTTPStatus, body):
         self.status_code = status_code
         self.body = body
 
     def __str__(self):
         if self.body is None:
-            return '%d' % self.status_code
+            return '%d' % self.status_code.value
         elif type(self.body) == str:
-            return '%d : %s' % (self.status_code, self.body)
+            return '%d : %s' % (self.status_code.value, self.body)
         else:
-            return '%d : %s' % (self.status_code, json.dumps(self.body))
+            return '%d : %s' % (self.status_code.value, json.dumps(self.body))
 
 
 class InvalidEntity(Exception):

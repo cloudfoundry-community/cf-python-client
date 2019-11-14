@@ -1,7 +1,8 @@
 import logging
 import os
+from configparser import ConfigParser, NoSectionError, NoOptionError
+from http.client import HTTPConnection
 
-from imported import ConfigParser, NoSectionError, NoOptionError, HTTPConnection
 from cloudfoundry_client.client import CloudFoundryClient
 
 _client = None

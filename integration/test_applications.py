@@ -1,10 +1,11 @@
-from config_test import build_client_from_configuration
-import unittest
-import logging
 import json
+import logging
+import unittest
+from http import HTTPStatus
+
+from config_test import build_client_from_configuration
 
 from cloudfoundry_client.errors import InvalidStatusCode
-from cloudfoundry_client.imported import NOT_FOUND, BAD_REQUEST
 
 _logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ class TestApps(unittest.TestCase):
                     client.v2.apps.get('%s-0' % application['metadata']['guid'])
                     self.fail('Should not have been found')
                 except InvalidStatusCode as e:
-                    self.assertEquals(e.status_code, NOT_FOUND)
+                    self.assertEquals(e.status_code, HTTPStatus.NOT_FOUND)
                 try:
                     instances = client.v2.apps.get_instances(application['metadata']['guid'])
                     self.assertIsNotNone(instances)
@@ -32,7 +33,7 @@ class TestApps(unittest.TestCase):
                     _logger.debug('instances = %s', json.dumps(instances))
                 except InvalidStatusCode as e:
                     #instance is stopped
-                    self.assertEquals(e.status_code, BAD_REQUEST)
+                    self.assertEquals(e.status_code, HTTPStatus.BAD_REQUEST)
                     self.assertIsInstance(e.body, dict)
                     self.assertEqual(e.body.get('error_code'), 'CF-InstancesError')
                 try:
@@ -43,7 +44,7 @@ class TestApps(unittest.TestCase):
                     _logger.debug('stats = %s', json.dumps(stats))
                 except InvalidStatusCode as e:
                     # instance is stopped
-                    self.assertEquals(e.status_code, BAD_REQUEST)
+                    self.assertEquals(e.status_code, HTTPStatus.BAD_REQUEST)
                     self.assertIsInstance(e.body, dict)
                     self.assertEqual(e.body.get('error_code'), 'CF-AppStoppedStatsError')
                 env = client.v2.apps.get_env(application['metadata']['guid'])
