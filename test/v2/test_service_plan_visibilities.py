@@ -1,12 +1,13 @@
 import json
 import sys
 import unittest
+from functools import reduce
+from http import HTTPStatus
+from unittest.mock import patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
-from imported import patch, CREATED, NO_CONTENT
 
 
 class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
@@ -20,7 +21,7 @@ class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
     def test_list(self):
         self.client.get.return_value = mock_response(
             '/v2/service_plan_visibilities?q=space_guid%3Aspace_guid',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_plan_visibilities', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
@@ -31,7 +32,7 @@ class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
     def test_get(self):
         self.client.get.return_value = mock_response(
             '/v2/service_plan_visibilities/guid',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_plan_visibilities', 'GET_{id}_response.json')
         result = self.client.v2.service_plan_visibilities.get('guid')
@@ -41,7 +42,7 @@ class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
     def test_create(self):
         self.client.post.return_value = mock_response(
             '/v2/service_plan_visibilities',
-            CREATED,
+            HTTPStatus.CREATED,
             None,
             'v2', 'service_plan_visibilities', 'POST_response.json')
         service_plan_visibilities = self.client.v2.service_plan_visibilities.create('service_plan_guid',
@@ -54,7 +55,7 @@ class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
     def test_update(self):
         self.client.put.return_value = mock_response(
             '/v2/service_plan_visibilities/guid',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_plan_visibilities', 'PUT_{id}_response.json')
         service_plan_visibilities = \
@@ -69,7 +70,7 @@ class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
     def test_delete(self):
         self.client.delete.return_value = mock_response(
             '/v2/service_plan_visibilities/guid',
-            NO_CONTENT,
+            HTTPStatus.NO_CONTENT,
             None)
         self.client.v2.service_plan_visibilities.remove('guid')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
@@ -82,7 +83,7 @@ class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
                    new=lambda: self.client):
             self.client.post.return_value = mock_response(
                 '/v2/service_plan_visibilities',
-                CREATED,
+                HTTPStatus.CREATED,
                 None,
                 'v2', 'service_plan_visibilities', 'POST_response.json')
             main.main()
@@ -96,7 +97,7 @@ class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_plan_visibilities',
-                                                         OK,
+                                                         HTTPStatus.OK,
                                                          None,
                                                          'v2', 'service_plan_visibilities', 'GET_response.json')
             main.main()
@@ -108,7 +109,7 @@ class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
                    new=lambda: self.client):
             self.client.get.return_value = mock_response(
                 '/v2/service_plan_visibilities/a353104b-1290-418c-bc03-0e647afd0853',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'service_plan_visibilities', 'GET_{id}_response.json')
             main.main()
@@ -119,7 +120,7 @@ class TestServicePlanVisibilities(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.delete.return_value = mock_response('/v2/service_plan_visibilities/906775ea-622e-4bc7-af5d-9aab3b652f81',
-                                                            NO_CONTENT,
+                                                            HTTPStatus.NO_CONTENT,
                                                             None)
             main.main()
             self.client.delete.assert_called_with(self.client.delete.return_value.url)

@@ -5,13 +5,13 @@ import logging
 import os
 import re
 import sys
+from http import HTTPStatus
 
 from requests.exceptions import ConnectionError
 
 from cloudfoundry_client import __version__
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.errors import InvalidStatusCode
-from cloudfoundry_client.imported import NOT_FOUND
 from cloudfoundry_client.main.apps_command_domain import AppCommandDomain
 from cloudfoundry_client.main.command_domain import CommandDomain, Command
 from cloudfoundry_client.main.operation_commands import generate_push_command
@@ -122,7 +122,7 @@ def resolve_id(argument, get_by_name, domain_name, allow_search_by_name):
         if result is not None:
             return result['metadata']['guid']
         else:
-            raise InvalidStatusCode(NOT_FOUND, '%s with name %s' % (domain_name, argument))
+            raise InvalidStatusCode(HTTPStatus.NOT_FOUND, '%s with name %s' % (domain_name, argument))
     else:
         raise ValueError('id: %s: does not allow search by name' % domain_name)
 

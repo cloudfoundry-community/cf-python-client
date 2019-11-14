@@ -1,8 +1,8 @@
-import functools
 import logging
+from functools import partial, reduce
+from urllib.parse import quote
 
 from cloudfoundry_client.errors import InvalidEntity
-from cloudfoundry_client.imported import quote, reduce
 from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.request_object import Request
 
@@ -32,9 +32,9 @@ class Entity(JsonObject):
                             client,
                             '')
                     if domain_name.endswith('s'):
-                        new_method = functools.partial(other_manager._list, value)
+                        new_method = partial(other_manager._list, value)
                     else:
-                        new_method = functools.partial(other_manager._get, value)
+                        new_method = partial(other_manager._get, value)
                     new_method.__name__ = domain_name
                     setattr(self, domain_name, new_method)
         except KeyError:

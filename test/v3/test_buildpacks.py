@@ -1,13 +1,12 @@
 import sys
 import unittest
+from http import HTTPStatus
+from unittest.mock import patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.imported import OK
 from cloudfoundry_client.v3.entities import Entity
 from fake_requests import mock_response
-from imported import CREATED, patch
-from imported import call, NO_CONTENT
 
 
 class TestBuildpacks(unittest.TestCase, AbstractTestCase):
@@ -20,7 +19,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response('/v3/buildpacks',
-                                                     OK,
+                                                     HTTPStatus.OK,
                                                      None,
                                                      'v3', 'buildpacks', 'GET_response.json')
         all_buildpacks = [buildpack for buildpack in self.client.v3.buildpacks.list()]
@@ -32,7 +31,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
     def test_get(self):
         self.client.get.return_value = mock_response(
             '/v3/buildpacks/buildpack_id',
-            OK,
+            HTTPStatus.OK,
             None,
             'v3', 'buildpacks', 'GET_{id}_response.json')
         result = self.client.v3.buildpacks.get('buildpack_id')
@@ -42,7 +41,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
     def test_update(self):
         self.client.patch.return_value = mock_response(
             '/v3/buildpacks/buildpack_id',
-            OK,
+            HTTPStatus.OK,
             None,
             'v3', 'buildpacks', 'PATCH_{id}_response.json')
         result = self.client.v3.buildpacks.update('buildpack_id', 'ruby_buildpack',
@@ -65,7 +64,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
     def test_remove(self):
         self.client.delete.return_value = mock_response(
             '/v3/buildpacks/buildpack_id',
-            NO_CONTENT,
+            HTTPStatus.NO_CONTENT,
             None)
         self.client.v3.buildpacks.remove('buildpack_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
@@ -75,7 +74,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v3/buildpacks',
-                                                         OK,
+                                                         HTTPStatus.OK,
                                                          None,
                                                          'v3', 'buildpacks', 'GET_response.json')
             main.main()
@@ -86,7 +85,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                         new=lambda: self.client):
             self.client.get.return_value = mock_response('/v3/buildpacks/6e72c33b-dff0-4020-8603-bcd8a4eb05e4',
-                                                         OK,
+                                                         HTTPStatus.OK,
                                                          None,
                                                          'v3', 'buildpacks', 'GET_{id}_response.json')
             main.main()

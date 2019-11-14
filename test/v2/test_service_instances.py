@@ -1,11 +1,12 @@
 import sys
 import unittest
+from functools import reduce
+from http import HTTPStatus
+from unittest.mock import call, patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
-from imported import patch, call, CREATED, NO_CONTENT
 
 
 class TestServiceInstances(unittest.TestCase, AbstractTestCase):
@@ -19,7 +20,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
     def test_list(self):
         self.client.get.return_value = mock_response(
             '/v2/service_instances?q=service_plan_guid%3Aplan_id&q=space_guid%3Aspace_guid',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_instances', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
@@ -30,7 +31,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
     def test_get(self):
         self.client.get.return_value = mock_response(
             '/v2/service_instances/instance_id',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_instances', 'GET_{id}_response.json')
         result = self.client.v2.service_instances.get('instance_id')
@@ -40,7 +41,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
     def test_create(self):
         self.client.post.return_value = mock_response(
             '/v2/service_instances',
-            CREATED,
+            HTTPStatus.CREATED,
             None,
             'v2', 'service_instances', 'POST_response.json')
         service_instance = self.client.v2.service_instances.create('space_guid', 'name', 'plan_id',
@@ -62,7 +63,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
     def test_update(self):
         self.client.put.return_value = mock_response(
             '/v2/service_instances/instance_id',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_instances', 'PUT_{id}_response.json')
         service_instance = self.client.v2.service_instances.update('instance_id', instance_name='new-name',
@@ -75,7 +76,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
     def test_update(self):
         self.client.put.return_value = mock_response(
             '/v2/service_instances/instance_id',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_instances', 'PUT_{id}_response.json')
         service_instance = self.client.v2.service_instances.update('instance_id', instance_name='new-name',
@@ -88,86 +89,86 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
     def test_delete_accepts_incomplete(self):
         self.client.delete.return_value = mock_response(
             '/v2/service_instances/instance_id',
-            NO_CONTENT,
+            HTTPStatus.NO_CONTENT,
             None)
         self.client.v2.service_instances.remove('instance_id', accepts_incomplete=True)
         self.client.delete.assert_called_with(self.client.delete.return_value.url,
-                                            params=dict(accepts_incomplete="true"))
+                                              params=dict(accepts_incomplete="true"))
 
         self.client.delete.return_value = mock_response(
-          '/v2/service_instances/instance_id',
-          NO_CONTENT,
-          None)
+            '/v2/service_instances/instance_id',
+            HTTPStatus.NO_CONTENT,
+            None)
         self.client.v2.service_instances.remove('instance_id', accepts_incomplete="true")
         self.client.delete.assert_called_with(self.client.delete.return_value.url,
-                                            params=dict(accepts_incomplete="true"))
+                                              params=dict(accepts_incomplete="true"))
 
     def test_delete_purge(self):
         self.client.delete.return_value = mock_response(
             '/v2/service_instances/instance_id',
-            NO_CONTENT,
+            HTTPStatus.NO_CONTENT,
             None)
         self.client.v2.service_instances.remove('instance_id', accepts_incomplete=True, purge=True)
         self.client.delete.assert_called_with(self.client.delete.return_value.url,
-                                            params=dict(accepts_incomplete='true', purge="true"))
+                                              params=dict(accepts_incomplete='true', purge="true"))
 
         self.client.delete.return_value = mock_response(
-          '/v2/service_instances/instance_id',
-          NO_CONTENT,
-          None)
+            '/v2/service_instances/instance_id',
+            HTTPStatus.NO_CONTENT,
+            None)
         self.client.v2.service_instances.remove('instance_id', purge="true")
         self.client.delete.assert_called_with(self.client.delete.return_value.url,
-                                            params=dict(purge="true"))
+                                              params=dict(purge="true"))
 
         self.client.delete.return_value = mock_response(
-          '/v2/service_instances/instance_id',
-          NO_CONTENT,
-          None)
+            '/v2/service_instances/instance_id',
+            HTTPStatus.NO_CONTENT,
+            None)
         self.client.v2.service_instances.remove('instance_id', purge="true")
         self.client.delete.assert_called_with(self.client.delete.return_value.url,
-                                            params=dict(purge="true"))
+                                              params=dict(purge="true"))
 
     def test_delete(self):
         self.client.delete.return_value = mock_response(
             '/v2/service_instances/instance_id',
-            NO_CONTENT,
+            HTTPStatus.NO_CONTENT,
             None)
         self.client.v2.service_instances.remove('instance_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url,
-                                            params={})
+                                              params={})
 
     def test_entity(self):
         self.client.get.side_effect = [
             mock_response(
                 '/v2/service_instances/instance_id',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'service_instances', 'GET_{id}_response.json'),
             mock_response(
                 '/v2/spaces/e3138257-8035-4c03-8aba-ab5d35eec0f9',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'spaces', 'GET_{id}_response.json')
             ,
             mock_response(
                 '/v2/service_instances/df52420f-d5b9-4b86-a7d3-6d7005d1ce96/service_bindings',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'service_bindings', 'GET_response.json'),
             mock_response(
                 '/v2/service_plans/65740f84-214a-46cf-b8e3-2233d580f293',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'service_plans', 'GET_{id}_response.json'),
             mock_response(
                 '/v2/service_instances/df52420f-d5b9-4b86-a7d3-6d7005d1ce96/routes',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'routes', 'GET_response.json'
             ),
             mock_response(
                 '/v2/service_instances/df52420f-d5b9-4b86-a7d3-6d7005d1ce96/service_keys',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'service_keys', 'GET_response.json'
             )
@@ -190,7 +191,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_instances',
-                                                         OK,
+                                                         HTTPStatus.OK,
                                                          None,
                                                          'v2', 'service_instances', 'GET_response.json')
             main.main()
@@ -201,7 +202,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_instances/df52420f-d5b9-4b86-a7d3-6d7005d1ce96',
-                                                         OK,
+                                                         HTTPStatus.OK,
                                                          None,
                                                          'v2', 'service_instances', 'GET_{id}_response.json')
             main.main()

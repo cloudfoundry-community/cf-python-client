@@ -1,12 +1,13 @@
 import json
 import sys
 import unittest
+from functools import reduce
+from http import HTTPStatus
+from unittest.mock import patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
-from imported import patch, CREATED, NO_CONTENT
 
 
 class TestServiceKeys(unittest.TestCase, AbstractTestCase):
@@ -20,7 +21,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
     def test_list(self):
         self.client.get.return_value = mock_response(
             '/v2/service_keys?q=service_instance_guid%3Ainstance_guid',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_keys', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
@@ -31,7 +32,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
     def test_get(self):
         self.client.get.return_value = mock_response(
             '/v2/service_keys/key_id',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_keys', 'GET_{id}_response.json')
         result = self.client.v2.service_keys.get('key_id')
@@ -41,7 +42,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
     def test_create(self):
         self.client.post.return_value = mock_response(
             '/v2/service_keys',
-            CREATED,
+            HTTPStatus.CREATED,
             None,
             'v2', 'service_keys', 'POST_response.json')
         service_key = self.client.v2.service_keys.create('service_instance_id', 'name-127')
@@ -54,7 +55,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
     def test_delete(self):
         self.client.delete.return_value = mock_response(
             '/v2/service_keys/key_id',
-            NO_CONTENT,
+            HTTPStatus.NO_CONTENT,
             None)
         self.client.v2.service_keys.remove('key_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
@@ -64,7 +65,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_keys',
-                                                         OK,
+                                                         HTTPStatus.OK,
                                                          None,
                                                          'v2', 'service_keys', 'GET_response.json')
             main.main()
@@ -75,7 +76,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_keys/67755c27-28ed-4087-9688-c07d92f3bcc9',
-                                                         OK,
+                                                         HTTPStatus.OK,
                                                          None,
                                                          'v2', 'service_keys', 'GET_{id}_response.json')
             main.main()
@@ -89,7 +90,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
                    new=lambda: self.client):
             self.client.post.return_value = mock_response(
                 '/v2/service_keys',
-                CREATED,
+                HTTPStatus.CREATED,
                 None,
                 'v2', 'service_keys', 'POST_response.json')
             main.main()
@@ -104,7 +105,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
                    new=lambda: self.client):
             self.client.delete.return_value = mock_response(
                 '/v2/service_keys/67755c27-28ed-4087-9688-c07d92f3bcc9',
-                NO_CONTENT,
+                HTTPStatus.NO_CONTENT,
                 None)
             main.main()
             self.client.delete.assert_called_with(self.client.delete.return_value.url)

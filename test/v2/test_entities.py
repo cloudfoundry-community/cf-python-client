@@ -1,9 +1,10 @@
 import unittest
+from functools import reduce
+from http import HTTPStatus
+from unittest.mock import MagicMock, call
 
 from cloudfoundry_client.v2.entities import EntityManager
-from cloudfoundry_client.imported import OK, reduce
 from fake_requests import TARGET_ENDPOINT, mock_response
-from imported import MagicMock, call
 
 
 class TestEntities(unittest.TestCase):
@@ -41,11 +42,11 @@ class TestEntities(unittest.TestCase):
 
         first_response = mock_response(
             '/fake/first?order-direction=asc&page=1&results-per-page=20&q=space_guid%3Asome-id',
-            OK,
+            HTTPStatus.OK,
             None,
             'fake', 'GET_multi_page_0_response.json')
         second_response = mock_response('/fake/next?order-direction=asc&page=2&results-per-page=50',
-                                        OK,
+                                        HTTPStatus.OK,
                                         None,
                                         'fake', 'GET_multi_page_1_response.json')
 
@@ -65,7 +66,7 @@ class TestEntities(unittest.TestCase):
 
         client.get.return_value = mock_response(
             '/fake/something',
-            OK,
+            HTTPStatus.OK,
             None,
             'fake', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, entity_manager, 0)
@@ -79,7 +80,7 @@ class TestEntities(unittest.TestCase):
 
         client.get.return_value = mock_response(
             '/fake/something/with-id',
-            OK,
+            HTTPStatus.OK,
             None,
             'fake', 'GET_{id}_response.json')
         entity = entity_manager['with-id']

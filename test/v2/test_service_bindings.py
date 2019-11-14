@@ -1,11 +1,12 @@
 import sys
 import unittest
+from functools import reduce
+from http import HTTPStatus
+from unittest.mock import call, patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response
-from imported import patch, call, CREATED, NO_CONTENT
 
 
 class TestServiceBindings(unittest.TestCase, AbstractTestCase):
@@ -19,7 +20,7 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
     def test_list(self):
         self.client.get.return_value = mock_response(
             '/v2/service_bindings?q=service_instance_guid%3Ainstance_guid',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_bindings', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1,
@@ -30,7 +31,7 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
     def test_get(self):
         self.client.get.return_value = mock_response(
             '/v2/service_bindings/service_binding_id',
-            OK,
+            HTTPStatus.OK,
             None,
             'v2', 'service_bindings', 'GET_{id}_response.json')
         result = self.client.v2.service_bindings.get('service_binding_id')
@@ -40,7 +41,7 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
     def test_create(self):
         self.client.post.return_value = mock_response(
             '/v2/service_bindings',
-            CREATED,
+            HTTPStatus.CREATED,
             None,
             'v2', 'service_bindings', 'POST_response.json')
         service_binding = self.client.v2.service_bindings.create('app_guid', 'instance_guid',
@@ -57,7 +58,7 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
     def test_delete(self):
         self.client.delete.return_value = mock_response(
             '/v2/service_bindings/binding_id',
-            NO_CONTENT,
+            HTTPStatus.NO_CONTENT,
             None)
         self.client.v2.service_bindings.remove('binding_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
@@ -66,17 +67,17 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
         self.client.get.side_effect = [
             mock_response(
                 '/v2/service_bindings/service_binding_id',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'service_bindings', 'GET_{id}_response.json'),
             mock_response(
                 '/v2/service_instances/ef0bf611-82c6-4603-99fc-3a1a893109d0',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'service_instances', 'GET_{id}_response.json'),
             mock_response(
                 '/v2/apps/c77953c8-6c35-46c7-816e-cf0c42ac2f52',
-                OK,
+                HTTPStatus.OK,
                 None,
                 'v2', 'apps', 'GET_{id}_response.json')
         ]
@@ -91,7 +92,7 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_bindings',
-                                                         OK,
+                                                         HTTPStatus.OK,
                                                          None,
                                                          'v2', 'service_bindings', 'GET_response.json')
             main.main()
@@ -102,7 +103,7 @@ class TestServiceBindings(unittest.TestCase, AbstractTestCase):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
             self.client.get.return_value = mock_response('/v2/service_bindings/eaabd042-8f5c-44a2-9580-1e114c36bdcb',
-                                                         OK,
+                                                         HTTPStatus.OK,
                                                          None,
                                                          'v2', 'service_bindings', 'GET_{id}_response.json')
             main.main()

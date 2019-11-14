@@ -3,9 +3,9 @@ import json
 import os
 import re
 from collections import OrderedDict
+from http import HTTPStatus
 
 from cloudfoundry_client.errors import InvalidStatusCode
-from cloudfoundry_client.imported import NOT_FOUND
 
 
 class Command(object):
@@ -99,7 +99,7 @@ class CommandDomain(object):
                 elif self.api_version == 'v3':
                     return result['guid']
             else:
-                raise InvalidStatusCode(NOT_FOUND, '%s with name %s' % (self.client_domain, argument))
+                raise InvalidStatusCode(HTTPStatus.NOT_FOUND, '%s with name %s' % (self.client_domain, argument))
         else:
             raise ValueError('id: %s: does not allow search by name' % self.client_domain)
 
@@ -147,7 +147,7 @@ class CommandDomain(object):
             elif self.allow_retrieve_by_name:
                 entity = self.find_by_name(client, arguments.id[0])
                 if entity is None:
-                    raise InvalidStatusCode(NOT_FOUND, '%s with name %s' % (self.client_domain, arguments.id[0]))
+                    raise InvalidStatusCode(HTTPStatus.NOT_FOUND, '%s with name %s' % (self.client_domain, arguments.id[0]))
                 else:
                     self._get_client_domain(client)._remove(self.id(entity))
             else:

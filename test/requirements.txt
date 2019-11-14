@@ -1,2 +1,0 @@
-# only on python 2
-mock==2.0.0

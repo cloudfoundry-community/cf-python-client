@@ -1,8 +1,7 @@
 import logging
 import re
-from cloudfoundry_client.imported import urlparse
+from urllib.parse import urlparse
 
-from cloudfoundry_client.imported import bufferize_string
 from cloudfoundry_client.doppler.websocket_envelope_reader import WebsocketFrameReader
 from cloudfoundry_client.dropsonde.envelope_pb2 import Envelope
 from cloudfoundry_client.errors import InvalidLogResponseException
@@ -66,8 +65,8 @@ class DopplerClient(object):
     @staticmethod
     def _read_multi_part_response(iterable, boundary):
         remaining = ''
-        boundary_header = bufferize_string('--%s' % boundary)
-        end_of_line = bufferize_string('\r\n')
+        boundary_header = bytes('--%s' % boundary, 'UTF-8')
+        end_of_line = bytes('\r\n', 'UTF-8')
         cpt_read = 0
         for chunk_data in iterable:
             # _logger.debug('reading %d bytes' % size)

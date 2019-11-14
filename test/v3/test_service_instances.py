@@ -1,7 +1,7 @@
 import unittest
+from http import HTTPStatus
 
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.imported import OK
 from cloudfoundry_client.v3.entities import Entity
 from fake_requests import mock_response
 
@@ -16,7 +16,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response('/v3/service_instances',
-                                                     OK,
+                                                     HTTPStatus.OK,
                                                      None,
                                                      'v3', 'service_instances', 'GET_response.json')
         all_service_instances = [service_instance for service_instance in self.client.v3.service_instances.list()]
@@ -27,7 +27,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
 
     def test_get(self):
         self.client.get.return_value = mock_response('/v3/service_instances/service_instance_id',
-                                                     OK,
+                                                     HTTPStatus.OK,
                                                      None,
                                                      'v3', 'service_instances', 'GET_{id}_response.json')
         service_instance = self.client.v3.service_instances.get('service_instance_id')

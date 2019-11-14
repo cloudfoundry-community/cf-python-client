@@ -1,10 +1,10 @@
 import unittest
+from http import HTTPStatus
+from unittest.mock import call
 
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.imported import OK
 from cloudfoundry_client.v3.entities import Entity
 from fake_requests import mock_response
-from imported import call, NO_CONTENT
 
 
 class TestSpaces(unittest.TestCase, AbstractTestCase):
@@ -17,7 +17,7 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
 
     def test_list(self):
         self.client.get.return_value = mock_response('/v3/spaces',
-                                                     OK,
+                                                     HTTPStatus.OK,
                                                      None,
                                                      'v3', 'spaces', 'GET_response.json')
         all_spaces = [space for space in self.client.v3.spaces.list()]
@@ -28,7 +28,7 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
 
     def test_get(self):
         self.client.get.return_value = mock_response('/v3/spaces/space_id',
-                                                     OK,
+                                                     HTTPStatus.OK,
                                                      None,
                                                      'v3', 'spaces', 'GET_{id}_response.json')
         space = self.client.v3.spaces.get('space_id')
@@ -37,9 +37,9 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(space, Entity)
 
     def test_get_then_space(self):
-        get_space = mock_response('/v3/spaces/space_id', OK, None,
+        get_space = mock_response('/v3/spaces/space_id', HTTPStatus.OK, None,
                                   'v3', 'spaces', 'GET_{id}_response.json')
-        get_organization = mock_response('/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133', OK, None,
+        get_organization = mock_response('/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133', HTTPStatus.OK, None,
                                          'v3', 'organizations', 'GET_{id}_response.json')
         self.client.get.side_effect = [
             get_space,

@@ -1,9 +1,10 @@
 import re
 import unittest
+from functools import reduce
+from http import HTTPStatus
 
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.doppler.client import DopplerClient
-from cloudfoundry_client.imported import OK, reduce
 from fake_requests import mock_response, TARGET_ENDPOINT
 
 
@@ -23,7 +24,7 @@ class TestLoggregator(unittest.TestCase, AbstractTestCase):
         boundary = 'd661b2c1426a3abcf1c0524d7fdbc774c42a767bdd6702141702d16047bc'
         app_guid = 'app_id'
         self.client.get.return_value = mock_response('/apps/%s/recentlogs' % app_guid,
-                                                     OK,
+                                                     HTTPStatus.OK,
                                                      {'content-type':
                                                           'multipart/x-protobuf; boundary=%s' % boundary},
                                                      'recents', 'GET_response.bin')

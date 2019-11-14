@@ -1,10 +1,10 @@
 import json
 import logging
 import os
+from http import HTTPStatus
 from time import sleep
 
 from cloudfoundry_client.errors import InvalidStatusCode
-from cloudfoundry_client.imported import BAD_REQUEST
 from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.v2.entities import Entity, EntityManager
 
@@ -150,7 +150,7 @@ class AppManager(EntityManager):
         try:
             return self.get_instances(application_guid)
         except InvalidStatusCode as ex:
-            if ex.status_code == BAD_REQUEST and type(ex.body) == dict:
+            if ex.status_code == HTTPStatus.BAD_REQUEST and type(ex.body) == dict:
                 code = ex.body.get('code', -1)
                 # 170002: staging not finished
                 # 220001: instances error
