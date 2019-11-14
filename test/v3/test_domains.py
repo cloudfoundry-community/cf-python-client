@@ -86,3 +86,34 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
         self.client.v3.domains.remove('domain_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
+    def test_list_domains_for_org(self):
+        self.client.get.return_value = mock_response('/v3/organizations/org_id/domains',
+                                                     HTTPStatus.OK,
+                                                     None,
+                                                     'v3', 'domains', 'GET_response.json')
+        all_domains = [domain for domain in self.client.v3.domains.list_domains_for_org('org_id')]
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+        self.assertEqual(1, len(all_domains))
+        self.assertEqual(all_domains[0]['name'], "test-domain.com")
+        self.assertIsInstance(all_domains[0], Entity)
+
+    def test_share_domain(self):
+        self.client.post.return_value = mock_response(
+            '/v3/domains/domain_id/relationships/shared_organizations',
+            HTTPStatus.CREATED,
+            None,
+            'v3', 'domains', 'POST_{id}_relationships_shared_organizations_response.json')
+        result = self.client.v3.domains.share_domain('domain_id', 'org_id')
+        self.client.post.assert_called_with(self.client.post.return_value.url,
+                                            files=None,
+                                            json=[{'guid': 'org_id'}])
+        self.assertIsNotNone(result)
+
+    def test_unshare_domain(self):
+        self.client.delete.return_value = mock_response(
+            '/v3/domains/domain_id/relationships/shared_organizations/org_id',
+            HTTPStatus.NO_CONTENT,
+            None)
+        self.client.v3.domains.unshare_domain('domain_id', 'org_id')
+        self.client.delete.assert_called_with(self.client.delete.return_value.url)
+
