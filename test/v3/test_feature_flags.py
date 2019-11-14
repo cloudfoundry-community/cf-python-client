@@ -25,10 +25,10 @@ class TestFeatureFlags(unittest.TestCase, AbstractTestCase):
         self.assertEqual(all_feature_flags[1]['name'], "my_second_feature_flag")
 
     def test_get(self):
-        self.client.get.return_value = mock_response('/v3/feature_flags/feature_flag_id',
+        self.client.get.return_value = mock_response('/v3/feature_flags/feature_flag_name',
                                                      HTTPStatus.OK,
                                                      None,
                                                      'v3', 'feature_flags', 'GET_{id}_response.json')
-        feature_flag = self.client.v3.feature_flags.get('feature_flag_id')
+        feature_flag = self.client.v3.feature_flags.get('feature_flag_name')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual("my_feature_flag", feature_flag['name'])
