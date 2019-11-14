@@ -8,9 +8,7 @@
     "last": {
       "href": "https://api.example.org/v3/domains?page=2&per_page=2"
     },
-    "next": {
-      "href": "https://api.example.org/v3/domains?page=2&per_page=2"
-    },
+    "next": null,
     "previous": null
   },
   "resources": [
