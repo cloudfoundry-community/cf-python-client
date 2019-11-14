@@ -61,6 +61,30 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
                                              })
         self.assertIsNotNone(result)
 
+    def test_create(self):
+        self.client.post.return_value = mock_response(
+            '/v3/buildpacks',
+            HTTPStatus.OK,
+            None,
+            'v3', 'buildpacks', 'POST_response.json')
+        result = self.client.v3.buildpacks.create('ruby_buildpack',
+                                                  enabled=True,
+                                                  position=42,
+                                                  stack='windows64')
+        self.client.post.assert_called_with(self.client.post.return_value.url,
+                                            files=None,
+                                            json={'locked': False,
+                                                  'name': 'ruby_buildpack',
+                                                  'enabled': True,
+                                                  'position': 42,
+                                                  'stack': 'windows64',
+                                                  'metadata': {
+                                                      'labels': None,
+                                                      'annotations': None
+                                                  }
+                                            })
+        self.assertIsNotNone(result)
+
     def test_remove(self):
         self.client.delete.return_value = mock_response(
             '/v3/buildpacks/buildpack_id',
