@@ -199,6 +199,7 @@ Available managers on API V3 are:
 
 - ``apps``
 - ``buildpacks``
+- ``domains``
 - ``organizations``
 - ``service_instances``
 - ``spaces``
