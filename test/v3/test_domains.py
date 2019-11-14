@@ -37,3 +37,52 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
         result = self.client.v3.domains.get('domain_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
+
+    def test_update(self):
+        self.client.patch.return_value = mock_response(
+            '/v3/domains/domain_id',
+            HTTPStatus.OK,
+            None,
+            'v3', 'domains', 'PATCH_{id}_response.json')
+        result = self.client.v3.domains.update('domain_id')
+        self.client.patch.assert_called_with(self.client.patch.return_value.url,
+                                             json={'metadata': {
+                                                       'labels': None,
+                                                       'annotations': None
+                                                   }
+                                             })
+        self.assertIsNotNone(result)
+
+    def test_create(self):
+        self.client.post.return_value = mock_response(
+            '/v3/domains',
+            HTTPStatus.OK,
+            None,
+            'v3', 'domains', 'POST_response.json')
+        result = self.client.v3.domains.create('domain_id',
+                                               internal=False,
+                                               organization=None,
+                                               shared_organizations=None,
+                                               meta_labels=None,
+                                               meta_annotations=None)
+        self.client.post.assert_called_with(self.client.post.return_value.url,
+                                            files=None,
+                                            json={'name': 'domain_id',
+                                                  'internal': False,
+                                                  'organization': None,
+                                                  'shared_organizations': None,
+                                                  'metadata': {
+                                                      'labels': None,
+                                                      'annotations': None
+                                                  }
+                                            })
+        self.assertIsNotNone(result)
+
+    def test_remove(self):
+        self.client.delete.return_value = mock_response(
+            '/v3/domains/domain_id',
+            HTTPStatus.NO_CONTENT,
+            None)
+        self.client.v3.domains.remove('domain_id')
+        self.client.delete.assert_called_with(self.client.delete.return_value.url)
+
