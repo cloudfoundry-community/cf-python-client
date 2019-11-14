@@ -20,8 +20,7 @@ class DomainManager(EntityManager):
         return super(DomainManager, self)._create(data)
 
     def list_domains_for_org(self, org_guid, **kwargs):
-        uri = '{entity}/{guid}/domains'.format(entity=self.entity_uri,
-                                               guid=org_guid)
+        uri = '/v3/organizations/{guid}/domains'.format(guid=org_guid)
         return self._list(uri, **kwargs)
 
     def update(self, domain_guid, meta_labels=None, meta_annotations=None):
