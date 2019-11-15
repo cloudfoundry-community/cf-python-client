@@ -2,6 +2,9 @@ import logging
 import re
 from urllib.parse import urlparse
 
+from oauth2_client.credentials_manager import CredentialManager
+from requests import Response
+
 from cloudfoundry_client.doppler.websocket_envelope_reader import WebsocketFrameReader
 from cloudfoundry_client.dropsonde.envelope_pb2 import Envelope
 from cloudfoundry_client.errors import InvalidLogResponseException
@@ -10,7 +13,7 @@ _logger = logging.getLogger(__name__)
 
 
 class DopplerClient(object):
-    def __init__(self, doppler_endpoint, proxy, verify_ssl, credentials_manager):
+    def __init__(self, doppler_endpoint: str, proxy: dict, verify_ssl: bool, credentials_manager: CredentialManager):
         self.proxy_host = None
         self.proxy_port = None
         self.ws_doppler_endpoint = doppler_endpoint
@@ -24,7 +27,7 @@ class DopplerClient(object):
                 self.proxy_host = proxy_domain[:idx]
                 self.proxy_port = int(proxy_domain[idx + 1:])
 
-    def recent_logs(self, app_guid):
+    def recent_logs(self, app_guid: str):
         url = '%s/apps/%s/recentlogs' % (self.http_doppler_endpoint, app_guid)
         response = self.credentials_manager.get(url, stream=True)
         boundary = DopplerClient._extract_boundary(response)
@@ -32,7 +35,7 @@ class DopplerClient(object):
         for part in DopplerClient._read_multi_part_response(response, boundary):
             yield DopplerClient._parse_envelope(part)
 
-    def stream_logs(self, app_guid):
+    def stream_logs(self, app_guid: str):
         url = '%s/apps/%s/stream' % (self.ws_doppler_endpoint, app_guid)
         with WebsocketFrameReader(url,
                                   lambda: self.credentials_manager._access_token,
@@ -42,13 +45,13 @@ class DopplerClient(object):
                 yield DopplerClient._parse_envelope(message)
 
     @staticmethod
-    def _parse_envelope(raw):
+    def _parse_envelope(raw) -> Envelope:
         envelope = Envelope()
         envelope.ParseFromString(raw)
         return envelope
 
     @staticmethod
-    def _extract_boundary(response):
+    def _extract_boundary(response: Response) -> str:
         content_type = response.headers['content-type']
         _logger.debug('content-type=%s' % content_type)
         boundary_field = 'boundary='

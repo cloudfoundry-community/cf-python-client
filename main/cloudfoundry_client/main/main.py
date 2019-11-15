@@ -6,12 +6,14 @@ import os
 import re
 import sys
 from http import HTTPStatus
+from typing import Tuple, Callable, Any
 
 from requests.exceptions import ConnectionError
 
 from cloudfoundry_client import __version__
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.errors import InvalidStatusCode
+from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.main.apps_command_domain import AppCommandDomain
 from cloudfoundry_client.main.command_domain import CommandDomain, Command
 from cloudfoundry_client.main.operation_commands import generate_push_command
@@ -22,7 +24,8 @@ __all__ = ['main', 'build_client_from_configuration']
 _logger = logging.getLogger(__name__)
 
 
-def _read_value_from_user(prompt, error_message=None, validator=None, default=''):
+def _read_value_from_user(prompt: str, error_message: str = None, validator: Callable[[str], bool] = None,
+                          default: str = '') -> str:
     while True:
         sys.stdout.write('%s [%s]: ' % (prompt, default))
         sys.stdout.flush()
@@ -38,7 +41,7 @@ def _read_value_from_user(prompt, error_message=None, validator=None, default=''
                 sys.stderr.write('\"%s\": %s\n' % (answer_value, error_message))
 
 
-def get_user_directory():
+def get_user_directory() -> str:
     dir_conf = os.path.join(os.path.expanduser('~'))
     if not os.path.isdir(dir_conf):
         if os.path.exists(dir_conf):
@@ -47,7 +50,7 @@ def get_user_directory():
     return dir_conf
 
 
-def get_config_file():
+def get_config_file() -> str:
     return os.path.join(get_user_directory(), '.cf_client_python.json')
 
 
@@ -69,7 +72,7 @@ def import_from_clf_cli():
                                     refresh_token=cf_cli_data['RefreshToken']), indent=2))
 
 
-def build_client_from_configuration(previous_configuration=None):
+def build_client_from_configuration(previous_configuration: dict = None) -> CloudFoundryClient:
     config_file = get_config_file()
     if not os.path.isfile(config_file):
         target_endpoint = _read_value_from_user('Please enter a target endpoint',
@@ -110,11 +113,12 @@ def build_client_from_configuration(previous_configuration=None):
                 return build_client_from_configuration(configuration)
 
 
-def is_guid(s):
+def is_guid(s: str) -> bool:
     return re.match(r'[\d|a-z]{8}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{4}-[\d|a-z]{12}', s.lower()) is not None
 
 
-def resolve_id(argument, get_by_name, domain_name, allow_search_by_name):
+def resolve_id(argument: str, get_by_name: Callable[[str], JsonObject], domain_name: str,
+               allow_search_by_name: bool) -> str:
     if is_guid(argument):
         return argument
     elif allow_search_by_name:
@@ -127,12 +131,12 @@ def resolve_id(argument, get_by_name, domain_name, allow_search_by_name):
         raise ValueError('id: %s: does not allow search by name' % domain_name)
 
 
-def log_recent(client, application_guid):
+def log_recent(client: CloudFoundryClient, application_guid: str):
     for envelope in client.doppler.recent_logs(application_guid):
         _logger.info(envelope)
 
 
-def stream_logs(client, application_guid):
+def stream_logs(client: CloudFoundryClient, application_guid: str):
     try:
         for envelope in client.doppler.stream_logs(application_guid):
             _logger.info(envelope)
@@ -140,17 +144,17 @@ def stream_logs(client, application_guid):
         pass
 
 
-def _get_v2_client_domain(client, domain):
+def _get_v2_client_domain(client: CloudFoundryClient, domain: str) -> Any:
     return getattr(client.v2, '%ss' % domain)
 
 
-def generate_oauth_token_command():
+def generate_oauth_token_command() -> Tuple[Command, str]:
     entry = 'oauth-token'
 
-    def generate_parser(parser):
+    def generate_parser(parser: argparse._SubParsersAction):
         parser.add_parser(entry)
 
-    def execute(client, arguments):
+    def execute(client: CloudFoundryClient, arguments: argparse.Namespace):
         token = client._access_token
         print(token if token is not None else 'No token')
 

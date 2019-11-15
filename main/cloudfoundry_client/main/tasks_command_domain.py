@@ -1,6 +1,9 @@
 import json
 import os
+from argparse import Namespace, _SubParsersAction
 
+from cloudfoundry_client.client import CloudFoundryClient
+from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.main.command_domain import CommandDomain, Command
 
 
@@ -12,20 +15,19 @@ class TaskCommandDomain(CommandDomain):
                                                 api_version='v3', allow_creation=True, allow_deletion=False,
                                                 extra_methods=[(self.cancel(), 'Cancel Task',)])
 
-    @staticmethod
-    def id(entity):
+    def id(self, entity: JsonObject) -> str:
         return entity['guid']
 
-    def name(self, entity):
+    def name(self, entity: JsonObject) -> str:
         return entity[self.name_property]
 
-    def find_by_name(self, client, name):
+    def find_by_name(self, client: CloudFoundryClient, name: str):
         return self._get_client_domain(client).get_first(**{'%ss' % self.name_property: name})
 
-    def create(self):
+    def create(self) -> Command:
         entry = self._create_entry()
 
-        def execute(client, arguments):
+        def execute(client: CloudFoundryClient, arguments: Namespace):
             data = None
             if os.path.isfile(arguments.entity[0]):
                 with open(arguments.entity[0], 'r') as f:
@@ -40,7 +42,7 @@ class TaskCommandDomain(CommandDomain):
                     raise ValueError('entity: must be either a valid json file path or a json object')
             print(self._get_client_domain(client).create(arguments.app_id[0], **data).json())
 
-        def generate_parser(parser):
+        def generate_parser(parser: _SubParsersAction):
             create_parser = parser.add_parser(entry)
             create_parser.add_argument('app_id', metavar='ids', type=str, nargs=1,
                                        help='The application UUID.')
@@ -50,13 +52,13 @@ class TaskCommandDomain(CommandDomain):
 
         return Command(entry, generate_parser, execute)
 
-    def cancel(self):
+    def cancel(self) -> Command:
         entry = 'cancel_task'
 
-        def execute(client, arguments):
+        def execute(client: CloudFoundryClient, arguments: Namespace):
             print(self._get_client_domain(client).cancel(arguments.id[0]).json(indent=1))
 
-        def generate_parser(parser):
+        def generate_parser(parser: _SubParsersAction):
             command_parser = parser.add_parser(entry)
             command_parser.add_argument('id', metavar='ids', type=str, nargs=1,
                                         help='The task UUID')

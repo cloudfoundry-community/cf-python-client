@@ -5,10 +5,13 @@ import re
 import shutil
 import tempfile
 import time
+from typing import Tuple, List, Dict, Optional
 
+from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.operations.push.cf_ignore import CfIgnore
 from cloudfoundry_client.operations.push.file_helper import FileHelper
 from cloudfoundry_client.operations.push.validation.manifest import ManifestReader
+from cloudfoundry_client.v2.entities import Entity
 
 _logger = logging.getLogger(__name__)
 
@@ -18,10 +21,10 @@ class PushOperation(object):
 
     SPLIT_ROUTE_PATTERN = re.compile('(?P<protocol>[a-z]+://)?(?P<domain>[^:/]+)(?P<port>:\d+)?(?P<path>/.*)?')
 
-    def __init__(self, client):
+    def __init__(self, client: CloudFoundryClient):
         self.client = client
 
-    def push(self, space_id, manifest_path, restart=True):
+    def push(self, space_id: str, manifest_path: str, restart: bool = True):
         app_manifests = ManifestReader.load_application_manifests(manifest_path)
         organization, space = self._retrieve_space_and_organization(space_id)
 
@@ -29,12 +32,12 @@ class PushOperation(object):
             if 'path' in app_manifest or 'docker' in app_manifest:
                 self._push_application(organization, space, app_manifest, restart)
 
-    def _retrieve_space_and_organization(self, space_id):
+    def _retrieve_space_and_organization(self, space_id: str) -> Tuple[Entity, Entity]:
         space = self.client.v2.spaces.get(space_id)
         organization = space.organization()
         return organization, space
 
-    def _push_application(self, organization, space, app_manifest, restart):
+    def _push_application(self, organization: Entity, space: Entity, app_manifest: dict, restart: bool):
         app = self._init_application(space, app_manifest)
         self._route_application(organization, space, app, app_manifest.get('no-route', False),
                                 app_manifest.get('routes', []), app_manifest.get('random-route', False))
@@ -44,12 +47,12 @@ class PushOperation(object):
         if restart:
             PushOperation._restart_application(app)
 
-    def _init_application(self, space, app_manifest):
+    def _init_application(self, space: Entity, app_manifest: dict) -> Entity:
         app = self.client.v2.apps.get_first(name=app_manifest['name'], space_guid=space['metadata']['guid'])
         return self._update_application(app, app_manifest) if app is not None \
             else self._create_application(space, app_manifest)
 
-    def _create_application(self, space, app_manifest):
+    def _create_application(self, space: Entity, app_manifest: dict) -> Entity:
         _logger.debug("Creating application %s", app_manifest['name'])
         request = self._build_request_from_manifest(app_manifest)
         request['environment_json'] = PushOperation._merge_environment(None, app_manifest)
@@ -58,7 +61,7 @@ class PushOperation(object):
             request['health-check-http-endpoint'] = '/'
         return self.client.v2.apps.create(**request)
 
-    def _update_application(self, app, app_manifest):
+    def _update_application(self, app: Entity, app_manifest: dict) -> Entity:
         _logger.debug("Uploading application %s", app['entity']['name'])
         request = self._build_request_from_manifest(app_manifest)
         request['environment_json'] = PushOperation._merge_environment(app, app_manifest)
@@ -67,7 +70,7 @@ class PushOperation(object):
             request['health-check-http-endpoint'] = '/'
         return self.client.v2.apps.update(app['metadata']['guid'], **request)
 
-    def _build_request_from_manifest(self, app_manifest):
+    def _build_request_from_manifest(self, app_manifest: dict) -> dict:
         request = dict()
         request.update(app_manifest)
         stack = self.client.v2.stacks.get_first(name=app_manifest['stack']) if 'stack' in app_manifest else None
@@ -85,7 +88,7 @@ class PushOperation(object):
         return request
 
     @staticmethod
-    def _merge_environment(app, app_manifest):
+    def _merge_environment(app: Optional[Entity], app_manifest: dict) -> dict:
         environment = dict()
         if app is not None and 'environment_json' in app['entity']:
             environment.update(app['entity']['environment_json'])
@@ -93,7 +96,8 @@ class PushOperation(object):
             environment.update(app_manifest['env'])
         return environment
 
-    def _route_application(self, organization, space, app, no_route, routes, random_route):
+    def _route_application(self, organization: Entity, space: Entity, app: Entity, no_route: bool, routes: List[str],
+                           random_route: bool):
         existing_routes = [route for route in app.routes()]
         if no_route:
             self._remove_all_routes(app, existing_routes)
@@ -102,11 +106,11 @@ class PushOperation(object):
         else:
             self._build_new_requested_routes(organization, space, app, existing_routes, routes)
 
-    def _remove_all_routes(self, app, routes):
+    def _remove_all_routes(self, app: Entity, routes: List[Entity]):
         for route in routes:
             self.client.v2.apps.remove_route(app['metadata']['guid'], route['metadata']['guid'])
 
-    def _build_default_route(self, space, app, random_route):
+    def _build_default_route(self, space: Entity, app: Entity, random_route: bool):
         shared_domain = None
         for domain in self.client.v2.shared_domains.list():
             if not domain['entity'].get('internal', False):
@@ -128,7 +132,8 @@ class PushOperation(object):
                                                             self._to_host(app['entity']['name']))
         self.client.v2.apps.associate_route(app['metadata']['guid'], route['metadata']['guid'])
 
-    def _build_new_requested_routes(self, organization, space, app, existing_routes, requested_routes):
+    def _build_new_requested_routes(self, organization: Entity, space: Entity, app: Entity,
+                                    existing_routes: List[Entity], requested_routes: List[str]):
         private_domains = {domain['entity']['name']: domain for domain in organization.private_domains()}
         shared_domains = {domain['entity']['name']: domain for domain in self.client.v2.shared_domains.list()}
         for requested_route in requested_routes:
@@ -161,7 +166,7 @@ class PushOperation(object):
                 _logger.debug('Associating route %s to application %s', requested_route, app['entity']['name'])
                 self.client.v2.apps.associate_route(app['metadata']['guid'], route_to_map['metadata']['guid'])
 
-    def _resolve_new_host_route(self, space, domain, host, path):
+    def _resolve_new_host_route(self, space: Entity, domain: Entity, host: str, path: str) -> Entity:
         existing_route = self.client.v2.routes.get_first(domain_guid=domain['metadata']['guid'], host=host, path=path)
         if existing_route is None:
             _logger.debug('Creating host route %s on domain %s and path %s', host, domain['entity']['name'], path)
@@ -177,7 +182,7 @@ class PushOperation(object):
                           existing_route['metadata']['guid'])
         return existing_route
 
-    def _resolve_new_tcp_route(self, space, domain, port):
+    def _resolve_new_tcp_route(self, space: Entity, domain: Entity, port: int) -> Entity:
         existing_route = self.client.v2.routes.get_first(domain_guid=domain['metadata']['guid'], port=port)
         if existing_route is None:
             _logger.debug('Creating tcp route %d on domain %s', port, domain['entity']['name'])
@@ -192,7 +197,7 @@ class PushOperation(object):
         return existing_route
 
     @staticmethod
-    def _split_route(requested_route):
+    def _split_route(requested_route: str) -> Tuple[str, int, str]:
         route_splitted = PushOperation.SPLIT_ROUTE_PATTERN.match(requested_route['route'])
         if route_splitted is None:
             raise AssertionError('Invalid route: %s' % requested_route['route'])
@@ -202,7 +207,8 @@ class PushOperation(object):
         return domain, int(port[1:]) if port is not None else None, '' if path is None or path == '/' else path
 
     @staticmethod
-    def _resolve_domain(route, private_domains, shared_domains):
+    def _resolve_domain(route: str, private_domains: Dict[str, Entity], shared_domains: Dict[str, Entity]) -> Tuple[
+        str, str, Entity]:
         for domains in [private_domains, shared_domains]:
             if route in domains:
                 return '', route, domains[route]
@@ -215,7 +221,7 @@ class PushOperation(object):
                         return host, domain, domains[domain]
         raise AssertionError('Cannot find domain for route %s' % route)
 
-    def _upload_application(self, app, application_path):
+    def _upload_application(self, app: Entity, application_path: str) -> Entity:
         _logger.debug('Uploading application %s', app['entity']['name'])
         if os.path.isfile(application_path):
             self._upload_application_zip(app, application_path)
@@ -224,7 +230,7 @@ class PushOperation(object):
         else:
             raise AssertionError('Path %s is neither a directory nor a file' % application_path)
 
-    def _upload_application_zip(self, app, path):
+    def _upload_application_zip(self, app: Entity, path: str):
         _logger.debug('Unzipping file %s', path)
         tmp_dir = tempfile.mkdtemp()
         try:
@@ -233,13 +239,13 @@ class PushOperation(object):
         finally:
             shutil.rmtree(tmp_dir)
 
-    def _upload_application_directory(self, app, application_path):
+    def _upload_application_directory(self, app: Entity, application_path: str):
         _logger.debug('Uploading application from directory %s', application_path)
         _, temp_file = tempfile.mkstemp()
         try:
             resource_descriptions_by_path = PushOperation._load_all_resources(application_path)
 
-            def generate_key(item):
+            def generate_key(item: dict):
                 return '%s-%d' % (item["sha1"], item["size"])
 
             already_uploaded_entries = [generate_key(item) for item in
@@ -251,7 +257,8 @@ class PushOperation(object):
 
             FileHelper.zip(temp_file, application_path,
                            lambda item: item in resource_descriptions_by_path
-                                        and generate_key(resource_descriptions_by_path[item]) not in already_uploaded_entries)
+                                        and generate_key(
+                               resource_descriptions_by_path[item]) not in already_uploaded_entries)
             _logger.debug('Diff zip file built: %s', temp_file)
             resources = [
                 dict(fn=resource_path,
@@ -271,7 +278,7 @@ class PushOperation(object):
             _logger.debug('Skipping remove of zip file')
 
     @staticmethod
-    def _load_all_resources(top_directory):
+    def _load_all_resources(top_directory: str) -> dict:
         application_items = {}
         cf_ignore = CfIgnore(top_directory)
         for directory, file_names in FileHelper.walk(top_directory):
@@ -285,7 +292,7 @@ class PushOperation(object):
                         mode=FileHelper.mode(absolute_file_location))
         return application_items
 
-    def _bind_services(self, space, app, services):
+    def _bind_services(self, space: Entity, app: Entity, services: List[str]):
         service_instances = [service_instance for service_instance in space.service_instances(
             return_user_provided_service_instances="true")]
         service_name_to_instance_guid = {service_instance["entity"]["name"]: service_instance["metadata"]["guid"]
@@ -302,7 +309,7 @@ class PushOperation(object):
                 _logger.debug('Binding %s to %s', app["entity"]["name"], service_name)
                 self.client.v2.service_bindings.create(app['metadata']['guid'], service_instance_guid)
 
-    def _poll_job(self, job):
+    def _poll_job(self, job: Entity):
         def job_not_ended(j):
             return j['entity']['status'] in ['queued', 'running']
 
@@ -325,17 +332,17 @@ class PushOperation(object):
             _logger.debug('Job ended with status %s', job['entity']['status'])
 
     @staticmethod
-    def _restart_application(app):
+    def _restart_application(app: Entity):
         _logger.debug("Restarting application")
         app.stop()
         app.start()
 
     @staticmethod
-    def _to_host(host):
-        def no_space(h):
+    def _to_host(host: str) -> str:
+        def no_space(h: str) -> str:
             return re.sub('[\s_]+', "-", h)
 
-        def only_alphabetical_and_hyphen(h):
+        def only_alphabetical_and_hyphen(h: str) -> str:
             return re.sub("[^a-z0-9-]", "", h)
 
         return only_alphabetical_and_hyphen(no_space(host))
