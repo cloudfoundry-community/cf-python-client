@@ -2,11 +2,12 @@ import hashlib
 import os
 import stat
 import zipfile
+from typing import Callable, Optional, Generator, Tuple, List
 
 
 class FileHelper(object):
     @staticmethod
-    def zip(file_location, directory_path, accept=None):
+    def zip(file_location: str, directory_path: str, accept: Optional[Callable[[str], bool]] = None):
         with zipfile.ZipFile(file_location, 'w', zipfile.ZIP_DEFLATED) as archive_out:
             for dir_path, file_names in FileHelper.walk(directory_path):
                 dir_full_location = os.path.join(directory_path, dir_path)
@@ -19,7 +20,7 @@ class FileHelper(object):
                                           zipfile.ZIP_DEFLATED)
 
     @staticmethod
-    def unzip(path, tmp_dir):
+    def unzip(path: str, tmp_dir: str):
         with zipfile.ZipFile(path, 'r') as zip_ref:
             for entry in zip_ref.namelist():
                 filename = os.path.basename(entry)
@@ -30,12 +31,12 @@ class FileHelper(object):
                     zip_ref.extract(entry, tmp_dir)
 
     @staticmethod
-    def walk(path):
+    def walk(path: str) -> Generator[Tuple[str, List[str]], None, None]:
         for dir_path, _, files in os.walk(path, topdown=True):
             yield dir_path[len(path):].lstrip('/'), files
 
     @staticmethod
-    def sha1(file_location):
+    def sha1(file_location: str) -> str:
         sha1 = hashlib.sha1()
         with open(file_location, 'rb') as f:
             while True:
@@ -46,10 +47,10 @@ class FileHelper(object):
         return sha1.hexdigest()
 
     @staticmethod
-    def size(path):
+    def size(path: str) -> int:
         return os.path.getsize(path)
 
     @staticmethod
-    def mode(file_location):
+    def mode(file_location: str) -> str:
         mode = str(oct(stat.S_IMODE(os.lstat(file_location).st_mode)))
         return mode[len(mode) - 3:]

@@ -1,6 +1,9 @@
 import functools
 import logging
+from typing import Any, Generator, Optional, List, Tuple
 from urllib.parse import quote
+
+from requests import Response
 
 from cloudfoundry_client.errors import InvalidEntity
 from cloudfoundry_client.json_object import JsonObject
@@ -10,7 +13,7 @@ _logger = logging.getLogger(__name__)
 
 
 class Entity(JsonObject):
-    def __init__(self, entity_manager, *args, **kwargs):
+    def __init__(self, entity_manager: 'EntityManager', *args, **kwargs):
         super(Entity, self).__init__(*args, **kwargs)
         try:
             def default_method(m, u):
@@ -21,7 +24,7 @@ class Entity(JsonObject):
                     link_method = link.get('method', 'GET').lower()
                     ref = link['href']
                     if link_method == 'get':
-                        new_method = functools.partial(entity_manager._paginate, ref) if link_name.endswith('s')\
+                        new_method = functools.partial(entity_manager._paginate, ref) if link_name.endswith('s') \
                             else functools.partial(entity_manager._get, ref)
                     elif link_method == 'post':
                         new_method = functools.partial(entity_manager._post, ref)
@@ -38,41 +41,41 @@ class Entity(JsonObject):
 
 
 class EntityManager(object):
-    def __init__(self, target_endpoint, client, entity_uri):
+    def __init__(self, target_endpoint: str, client: 'CloudFoundryClient', entity_uri: str):
         self.target_endpoint = target_endpoint
         self.entity_uri = entity_uri
         self.client = client
 
-    def _post(self, url, data=None, files=None):
+    def _post(self, url: str, data: dict = None, files: Any = None) -> Entity:
         response = self.client.post(url, json=data, files=files)
         _logger.debug('POST - %s - %s', url, response.text)
         return self._read_response(response)
 
-    def _get(self, url):
+    def _get(self, url: str) -> Entity:
         response = self.client.get(url)
         _logger.debug('GET - %s - %s', url, response.text)
         return self._read_response(response)
 
-    def _put(self, data, url):
+    def _put(self, url: str, data: dict) -> Entity:
         response = self.client.put(url, json=data)
         _logger.debug('PUT - %s - %s', url, response.text)
         return self._read_response(response)
 
-    def _patch(self, data, url):
+    def _patch(self, url: str, data: dict) -> Entity:
         response = self.client.patch(url, json=data)
         _logger.debug('PATCH - %s - %s', url, response.text)
         return self._read_response(response)
 
-    def _delete(self, url):
+    def _delete(self, url: str):
         response = self.client.delete(url)
         _logger.debug('DELETE - %s - %s', url, response.text)
 
-    def _list(self, requested_path, **kwargs):
+    def _list(self, requested_path: str, **kwargs) -> Generator[Entity, None, None]:
         url_requested = EntityManager._get_url_filtered('%s%s' % (self.target_endpoint, requested_path), **kwargs)
         for element in self._paginate(url_requested):
             yield element
 
-    def _paginate(self, url_requested):
+    def _paginate(self, url_requested: str) -> Generator[Entity, None, None]:
         response = self.client.get(url_requested)
         while True:
             _logger.debug('GET - %s - %s', url_requested, response.text)
@@ -87,62 +90,62 @@ class EntityManager(object):
                 url_requested = response_json['pagination']['next']['href']
                 response = self.client.get(url_requested)
 
-    def _create(self, data):
+    def _create(self, data: dict) -> Entity:
         url = '%s%s' % (self.target_endpoint, self.entity_uri)
         return self._post(url, data=data)
 
-    def _upload_bits(self, resource_id, filename):
+    def _upload_bits(self, resource_id: str, filename: str) -> Entity:
         url = '%s%s/%s/upload' % (self.target_endpoint, self.entity_uri, resource_id)
         files = {'bits': (filename, open(filename, 'rb'))}
         return self._post(url, files=files)
 
-    def _update(self, resource_id, data):
+    def _update(self, resource_id: str, data: dict) -> Entity:
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
-        return self._patch(data, url)
+        return self._patch(url, data)
 
-    def _remove(self, resource_id):
+    def _remove(self, resource_id: str):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
         self._delete(url)
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[Entity, None, None]:
         return self.list()
 
-    def __getitem__(self, entity_guid):
+    def __getitem__(self, entity_guid) -> Entity:
         return self.get(entity_guid)
 
-    def list(self, **kwargs):
+    def list(self, **kwargs) -> Generator[Entity, None, None]:
         return self._list(self.entity_uri, **kwargs)
 
-    def get_first(self, **kwargs):
+    def get_first(self, **kwargs) -> Optional[Entity]:
         kwargs.setdefault('per_page', 1)
         for entity in self._list(self.entity_uri, **kwargs):
             return entity
         return None
 
-    def get(self, entity_id, *extra_paths):
+    def get(self, entity_id: str, *extra_paths) -> Entity:
         if len(extra_paths) == 0:
             requested_path = '%s%s/%s' % (self.target_endpoint, self.entity_uri, entity_id)
         else:
             requested_path = '%s%s/%s/%s' % (self.target_endpoint, self.entity_uri, entity_id, '/'.join(extra_paths))
         return self._get(requested_path)
 
-    def _read_response(self, response):
+    def _read_response(self, response: Response) -> Entity:
         result = response.json(object_pairs_hook=JsonObject)
         return self._entity(result)
 
     @staticmethod
-    def _request(**mandatory_parameters):
+    def _request(**mandatory_parameters) -> Request:
         return Request(**mandatory_parameters)
 
-    def _entity(self, result):
+    def _entity(self, result: dict):
         if 'guid' in result:
             return Entity(self, **result)
         else:
             return result
 
     @staticmethod
-    def _get_url_filtered(url, **kwargs):
-        def _append_encoded_parameter(parameters, args):
+    def _get_url_filtered(url: str, **kwargs) -> str:
+        def _append_encoded_parameter(parameters: List[str], args: Tuple[str, Any]) -> List[str]:
             parameter_name, parameter_value = args[0], args[1]
             if isinstance(parameter_value, (list, tuple)):
                 parameters.append('%s=%s' % (parameter_name, quote(','.join(parameter_value))))
