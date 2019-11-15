@@ -1,6 +1,9 @@
 import logging
 from functools import partial, reduce
+from typing import Callable, List, Tuple, Any, Optional, Generator
 from urllib.parse import quote
+
+from requests import Response
 
 from cloudfoundry_client.errors import InvalidEntity
 from cloudfoundry_client.json_object import JsonObject
@@ -10,7 +13,7 @@ _logger = logging.getLogger(__name__)
 
 
 class Entity(JsonObject):
-    def __init__(self, target_endpoint, client, *args, **kwargs):
+    def __init__(self, target_endpoint: str, client: 'CloudFoundryClient', *args, **kwargs):
         super(Entity, self).__init__(*args, **kwargs)
         self.target_endpoint = target_endpoint
         self.client = client
@@ -41,25 +44,30 @@ class Entity(JsonObject):
             raise InvalidEntity(**self)
 
 
+EntityBuilder = Callable[[List[Tuple[str, Any]]], Entity]
+
+
 class EntityManager(object):
     list_query_parameters = ['page', 'results-per-page', 'order-direction']
 
     list_multi_parameters = ['order-by']
 
-    def __init__(self, target_endpoint, client, entity_uri, entity_builder=None):
+    def __init__(self, target_endpoint: str, client: 'CloudFoundryClient', entity_uri: str,
+                 entity_builder: Optional[EntityBuilder] = None):
         self.target_endpoint = target_endpoint
         self.entity_uri = entity_uri
         self.client = client
         self.entity_builder = entity_builder if entity_builder is not None else lambda pairs: Entity(target_endpoint,
                                                                                                      client, pairs)
 
-    def _get(self, requested_path, entity_builder=None):
+    def _get(self, requested_path: str, entity_builder: Optional[EntityBuilder] = None) -> Entity:
         url = '%s%s' % (self.target_endpoint, requested_path)
         response = self.client.get(url)
         _logger.debug('GET - %s - %s', requested_path, response.text)
         return self._read_response(response, entity_builder)
 
-    def _list(self, requested_path, entity_builder=None, **kwargs):
+    def _list(self, requested_path: str, entity_builder: Optional[EntityBuilder] = None, **kwargs) \
+            -> Generator[Entity, None, None]:
         url_requested = self._get_url_filtered('%s%s' % (self.target_endpoint, requested_path), **kwargs)
         response = self.client.get(url_requested)
         entity_builder = self._get_entity_builder(entity_builder)
@@ -74,72 +82,72 @@ class EntityManager(object):
                 url_requested = '%s%s' % (self.target_endpoint, response_json['next_url'])
                 response = self.client.get(url_requested)
 
-    def _create(self, data, **kwargs):
+    def _create(self, data: dict, **kwargs) -> Entity:
         url = '%s%s' % (self.target_endpoint, self.entity_uri)
         return self._post(url, data, **kwargs)
 
-    def _update(self, resource_id, data, **kwargs):
+    def _update(self, resource_id: str, data: dict, **kwargs):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
         return self._put(url, data, **kwargs)
 
-    def _remove(self, resource_id, **kwargs):
+    def _remove(self, resource_id: str, **kwargs):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
         self._delete(url, **kwargs)
 
-    def _post(self, url, data=None, **kwargs):
+    def _post(self, url: str, data: Optional[dict] = None, **kwargs):
         response = self.client.post(url, json=data, **kwargs)
         _logger.debug('POST - %s - %s', url, response.text)
         return self._read_response(response)
 
-    def _put(self, url, data=None, **kwargs):
+    def _put(self, url: str, data: Optional[dict] = None, **kwargs):
         response = self.client.put(url, json=data, **kwargs)
         _logger.debug('PUT - %s - %s', url, response.text)
         return self._read_response(response)
 
-    def _delete(self, url, **kwargs):
+    def _delete(self, url: str, **kwargs):
         response = self.client.delete(url, **kwargs)
         _logger.debug('DELETE - %s - %s', url, response.text)
 
-    def __iter__(self):
+    def __iter__(self) -> Generator[Entity, None, None]:
         return self.list()
 
-    def __getitem__(self, entity_guid):
+    def __getitem__(self, entity_guid) -> Entity:
         return self.get(entity_guid)
 
-    def list(self, **kwargs):
+    def list(self, **kwargs) -> Generator[Entity, None, None]:
         return self._list(self.entity_uri, **kwargs)
 
-    def get_first(self, **kwargs):
+    def get_first(self, **kwargs) -> Optional[Entity]:
         kwargs.setdefault('results-per-page', 1)
         for entity in self._list(self.entity_uri, **kwargs):
             return entity
         return None
 
-    def get(self, entity_id, *extra_paths):
+    def get(self, entity_id: str, *extra_paths) -> Entity:
         if len(extra_paths) == 0:
             requested_path = '%s/%s' % (self.entity_uri, entity_id)
         else:
             requested_path = '%s/%s/%s' % (self.entity_uri, entity_id, '/'.join(extra_paths))
         return self._get(requested_path)
 
-    def _read_response(self, response, other_entity_builder=None):
+    def _read_response(self, response: Response, other_entity_builder: Optional[EntityBuilder] = None):
         entity_builder = self._get_entity_builder(other_entity_builder)
         result = response.json(object_pairs_hook=JsonObject)
         return entity_builder(list(result.items()))
 
     @staticmethod
-    def _request(**mandatory_parameters):
+    def _request(**mandatory_parameters) -> Request:
         return Request(**mandatory_parameters)
 
-    def _get_entity_builder(self, entity_builder):
+    def _get_entity_builder(self, entity_builder: Optional[EntityBuilder]) -> EntityBuilder:
         if entity_builder is None:
             return self.entity_builder
         else:
             return entity_builder
 
-    def _get_url_filtered(self, url, **kwargs):
+    def _get_url_filtered(self, url: str, **kwargs) -> str:
 
-        def _append_encoded_parameter(parameters, args):
+        def _append_encoded_parameter(parameters: List[str], args: Tuple[str, Any]) -> List[str]:
             parameter_name, parameter_value = args[0], args[1]
             if parameter_name in self.list_query_parameters:
                 parameters.append('%s=%s' % (parameter_name, str(parameter_value)))
