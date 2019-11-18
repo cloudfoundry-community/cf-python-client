@@ -27,6 +27,14 @@ class Policy:
         else:
             raise ValueError('end port is out of range')
 
+    @classmethod
+    def from_dict(cls, policy):
+        return cls(src_id=policy['source']['id'],
+                   dst_id=policy['destination']['id'],
+                   proto=policy['destination']['protocol'],
+                   start_port=policy['destination']['ports']['start'],
+                   end_port=policy['destination']['ports']['end'])
+
     def dump(self):
         return self.__dict__
 
