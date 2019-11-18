@@ -46,6 +46,11 @@ class PolicyManager(EntityManager):
     def create(self, policies: list):
         """create a new network policy
 
+        Responses:
+        * 200 (successful)
+        * 400 (invalid request)
+        * 406 (unsupported API version)
+
         :param policies: the policies to create, a list of Policy objects
         """
         data = list()
@@ -55,5 +60,19 @@ class PolicyManager(EntityManager):
             data.append(policy.dump())
         return super(PolicyManager, self)._create({'policies': data})
 
-    def delete(self):
-        pass
+    def delete(self, policies):
+        """remove a new network policy
+
+        Responses:
+        * 200 (successful)
+        * 400 (invalid request)
+        * 406 (unsupported API version)
+
+        :param policies: the policies to create, a list of Policy objects
+        """
+        data = list()
+        for policy in policies:
+            if not isinstance(policy, Policy):
+                raise TypeError
+            data.append(policy.dump())
+        return super(PolicyManager, self)._delete({'policies': data})
