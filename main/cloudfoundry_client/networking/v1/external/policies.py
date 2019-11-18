@@ -1,5 +1,5 @@
 import logging
-from cloudfoundry_client.v3.entities import EntityManager
+from cloudfoundry_client.networking.entities import EntityManager
 
 _logger = logging.getLogger(__name__)
 
