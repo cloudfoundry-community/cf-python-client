@@ -40,13 +40,31 @@ class Entity(JsonObject):
             raise InvalidEntity(**self)
 
 
+PaginateEntities = Generator[Entity, None, None]
+
+
+class Relationship(JsonObject):
+    def __init__(self, guid: str):
+        super(Relationship, self).__init__(guid=guid)
+
+
+class ToOneRelationship(JsonObject):
+    def __init__(self, guid: str):
+        super(ToOneRelationship, self).__init__(data=Relationship(guid))
+
+
+class ToManyRelationship(JsonObject):
+    def __init__(self, *guids: str):
+        super(ToManyRelationship, self).__init__(data=[Relationship(guid) for guid in guids])
+
+
 class EntityManager(object):
     def __init__(self, target_endpoint: str, client: 'CloudFoundryClient', entity_uri: str):
         self.target_endpoint = target_endpoint
         self.entity_uri = entity_uri
         self.client = client
 
-    def _post(self, url: str, data: dict = None, files: Any = None) -> Entity:
+    def _post(self, url: str, data: Optional[dict] = None, files: Any = None) -> Entity:
         response = self.client.post(url, json=data, files=files)
         _logger.debug('POST - %s - %s', url, response.text)
         return self._read_response(response)
@@ -70,12 +88,12 @@ class EntityManager(object):
         response = self.client.delete(url)
         _logger.debug('DELETE - %s - %s', url, response.text)
 
-    def _list(self, requested_path: str, **kwargs) -> Generator[Entity, None, None]:
+    def _list(self, requested_path: str, **kwargs) -> PaginateEntities:
         url_requested = EntityManager._get_url_filtered('%s%s' % (self.target_endpoint, requested_path), **kwargs)
         for element in self._paginate(url_requested):
             yield element
 
-    def _paginate(self, url_requested: str) -> Generator[Entity, None, None]:
+    def _paginate(self, url_requested: str) -> PaginateEntities:
         response = self.client.get(url_requested)
         while True:
             _logger.debug('GET - %s - %s', url_requested, response.text)
@@ -107,13 +125,13 @@ class EntityManager(object):
         url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
         self._delete(url)
 
-    def __iter__(self) -> Generator[Entity, None, None]:
+    def __iter__(self) -> PaginateEntities:
         return self.list()
 
     def __getitem__(self, entity_guid) -> Entity:
         return self.get(entity_guid)
 
-    def list(self, **kwargs) -> Generator[Entity, None, None]:
+    def list(self, **kwargs) -> PaginateEntities:
         return self._list(self.entity_uri, **kwargs)
 
     def get_first(self, **kwargs) -> Optional[Entity]:

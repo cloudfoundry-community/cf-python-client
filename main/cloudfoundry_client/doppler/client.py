@@ -1,5 +1,6 @@
 import logging
 import re
+from typing import Generator
 from urllib.parse import urlparse
 
 from oauth2_client.credentials_manager import CredentialManager
@@ -10,6 +11,8 @@ from cloudfoundry_client.dropsonde.envelope_pb2 import Envelope
 from cloudfoundry_client.errors import InvalidLogResponseException
 
 _logger = logging.getLogger(__name__)
+
+EnvelopeStream = Generator[Envelope, None, None]
 
 
 class DopplerClient(object):
@@ -27,7 +30,7 @@ class DopplerClient(object):
                 self.proxy_host = proxy_domain[:idx]
                 self.proxy_port = int(proxy_domain[idx + 1:])
 
-    def recent_logs(self, app_guid: str):
+    def recent_logs(self, app_guid: str) -> EnvelopeStream:
         url = '%s/apps/%s/recentlogs' % (self.http_doppler_endpoint, app_guid)
         response = self.credentials_manager.get(url, stream=True)
         boundary = DopplerClient._extract_boundary(response)
@@ -35,7 +38,7 @@ class DopplerClient(object):
         for part in DopplerClient._read_multi_part_response(response, boundary):
             yield DopplerClient._parse_envelope(part)
 
-    def stream_logs(self, app_guid: str):
+    def stream_logs(self, app_guid: str) -> EnvelopeStream:
         url = '%s/apps/%s/stream' % (self.ws_doppler_endpoint, app_guid)
         with WebsocketFrameReader(url,
                                   lambda: self.credentials_manager._access_token,

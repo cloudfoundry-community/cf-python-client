@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.v3.entities import Entity
+from cloudfoundry_client.v3.entities import Entity, ToManyRelationship, ToOneRelationship
 from fake_requests import mock_response
 
 
@@ -47,9 +47,9 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
         result = self.client.v3.domains.update('domain_id')
         self.client.patch.assert_called_with(self.client.patch.return_value.url,
                                              json={'metadata': {
-                                                       'labels': None,
-                                                       'annotations': None
-                                                   }
+                                                 'labels': None,
+                                                 'annotations': None
+                                             }
                                              })
         self.assertIsNotNone(result)
 
@@ -61,7 +61,7 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
             'v3', 'domains', 'POST_response.json')
         result = self.client.v3.domains.create('domain_id',
                                                internal=False,
-                                               organization=None,
+                                               organization=ToOneRelationship('organization-guid'),
                                                shared_organizations=None,
                                                meta_labels=None,
                                                meta_annotations=None)
@@ -69,13 +69,17 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
                                             files=None,
                                             json={'name': 'domain_id',
                                                   'internal': False,
-                                                  'organization': None,
+                                                  'organization': {
+                                                      'data': {
+                                                          'guid': 'organization-guid'
+                                                      }
+                                                  },
                                                   'shared_organizations': None,
                                                   'metadata': {
                                                       'labels': None,
                                                       'annotations': None
                                                   }
-                                            })
+                                                  })
         self.assertIsNotNone(result)
 
     def test_remove(self):
@@ -103,10 +107,16 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
             HTTPStatus.CREATED,
             None,
             'v3', 'domains', 'POST_{id}_relationships_shared_organizations_response.json')
-        result = self.client.v3.domains.share_domain('domain_id', 'org_id')
+        result = self.client.v3.domains.share_domain('domain_id',
+                                                     ToManyRelationship('organization-guid-1', 'organization-guid-2'))
         self.client.post.assert_called_with(self.client.post.return_value.url,
                                             files=None,
-                                            json=[{'guid': 'org_id'}])
+                                            json={
+                                                'data': [
+                                                    {'guid': 'organization-guid-1'},
+                                                    {'guid': 'organization-guid-2'}
+                                                ]
+                                            })
         self.assertIsNotNone(result)
 
     def test_unshare_domain(self):
@@ -131,7 +141,7 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
     @patch.object(sys, 'argv', ['main', 'get_domain', '3a5d3d89-3f89-4f05-8188-8a2b298c79d5'])
     def test_main_get_domain(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
-                        new=lambda: self.client):
+                   new=lambda: self.client):
             self.client.get.return_value = mock_response('/v3/domains/3a5d3d89-3f89-4f05-8188-8a2b298c79d5',
                                                          HTTPStatus.OK,
                                                          None,
