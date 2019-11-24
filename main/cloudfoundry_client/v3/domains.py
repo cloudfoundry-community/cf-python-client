@@ -4,9 +4,20 @@ from cloudfoundry_client.v3.entities import EntityManager, ToOneRelationship, To
     Entity
 
 
+class Domain(Entity):
+    def __init__(self, target_endpoint: str, entity_manager: 'EntityManager', **kwargs):
+        super(Domain, self).__init__(target_endpoint, entity_manager, **kwargs)
+        relationships = self['relationships']
+        if 'organization' in relationships:
+            self['relationships']['organization'] = ToOneRelationship.from_json_object(relationships['organization'].get('data'))
+        if 'shared_organizations' in relationships:
+            self['relationships']['shared_organizations'] \
+                = ToManyRelationship.from_json_object(relationships['shared_organizations'])
+
+
 class DomainManager(EntityManager):
     def __init__(self, target_endpoint: str, client: 'CloudfoundryClient'):
-        super(DomainManager, self).__init__(target_endpoint, client, '/v3/domains')
+        super(DomainManager, self).__init__(target_endpoint, client, '/v3/domains', Domain)
 
     def create(self, name: str, internal: Optional[bool] = False,
                organization: Optional[ToOneRelationship] = None,
@@ -49,7 +60,7 @@ class DomainManager(EntityManager):
 
     def share_domain(self, domain_guid: str, organization_guids: ToManyRelationship):
         url = self.__create_shared_domain_url(domain_guid)
-        return super(DomainManager, self)._post(url, data=organization_guids)
+        return ToManyRelationship.from_json_object(super(DomainManager, self)._post(url, data=organization_guids))
 
     def unshare_domain(self, domain_guid: str, org_guid: str):
         url = '{uri}/{org}'.format(uri=self.__create_shared_domain_url(domain_guid),

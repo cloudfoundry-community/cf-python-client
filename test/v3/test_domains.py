@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
+from cloudfoundry_client.v3.domains import Domain
 from cloudfoundry_client.v3.entities import Entity, ToManyRelationship, ToOneRelationship
 from fake_requests import mock_response
 
@@ -27,6 +28,8 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
         self.assertEqual(1, len(all_domains))
         self.assertEqual(all_domains[0]['name'], "test-domain.com")
         self.assertIsInstance(all_domains[0], Entity)
+        for domain in all_domains:
+            self.assertIsInstance(domain, Domain)
 
     def test_get(self):
         self.client.get.return_value = mock_response(
@@ -37,6 +40,7 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
         result = self.client.v3.domains.get('domain_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
+        self.assertIsInstance(result, Domain)
 
     def test_update(self):
         self.client.patch.return_value = mock_response(
@@ -52,6 +56,7 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
                                              }
                                              })
         self.assertIsNotNone(result)
+        self.assertIsInstance(result, Domain)
 
     def test_create(self):
         self.client.post.return_value = mock_response(
@@ -81,6 +86,7 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
                                                   }
                                                   })
         self.assertIsNotNone(result)
+        self.assertIsInstance(result, Domain)
 
     def test_remove(self):
         self.client.delete.return_value = mock_response(
@@ -99,7 +105,8 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(1, len(all_domains))
         self.assertEqual(all_domains[0]['name'], "test-domain.com")
-        self.assertIsInstance(all_domains[0], Entity)
+        for domain in all_domains:
+            self.assertIsInstance(domain, Domain)
 
     def test_share_domain(self):
         self.client.post.return_value = mock_response(
@@ -118,6 +125,9 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
                                                 ]
                                             })
         self.assertIsNotNone(result)
+        self.assertIsInstance(result, ToManyRelationship)
+        result.guids[0] = 'organization-guid-1'
+        result.guids[1] = 'organization-guid-1'
 
     def test_unshare_domain(self):
         self.client.delete.return_value = mock_response(
