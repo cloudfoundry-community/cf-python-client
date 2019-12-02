@@ -7,6 +7,7 @@ from oauth2_client.credentials_manager import CredentialManager, ServiceInformat
 from requests import Response
 
 from cloudfoundry_client.doppler.client import DopplerClient
+from cloudfoundry_client.networking.v1.external.policies import PolicyManager
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
 from cloudfoundry_client.v2.buildpacks import BuildpackManager as BuildpackManagerV2
@@ -37,6 +38,11 @@ class Info:
         self.authorization_endpoint = authorization_endpoint
         self.api_endpoint = api_endpoint
         self.doppler_endpoint = doppler_endpoint
+
+
+class NetworkingV1External(object):
+    def __init__(self, target_endpoint: str, credential_manager: 'CloudFoundryClient'):
+        self.policies = PolicyManager(target_endpoint, credential_manager)
 
 
 class V2(object):
@@ -115,6 +121,7 @@ class CloudFoundryClient(CredentialManager):
                                           'http' if info.doppler_endpoint.startswith('ws://') else 'https'],
                                       self.service_information.verify,
                                       self) if info.doppler_endpoint is not None else None
+        self.networking_v1_external = NetworkingV1External(target_endpoint, self)
         self.info = info
 
     @property
