@@ -18,28 +18,13 @@ class Entity(JsonObject):
         self.target_endpoint = target_endpoint
         self.client = client
         try:
-            if 'entity' not in self:
-                raise InvalidEntity(**self)
-
-            for attribute, value in list(self['entity'].items()):
-                domain_name, suffix = attribute.rpartition('_')[::2]
-                if suffix == 'url':
-                    manager_name = domain_name if domain_name.endswith('s') else '%ss' % domain_name
-                    try:
-                        other_manager = getattr(client.networking, manager_name)
-                    except AttributeError:
-                        # generic manager
-
-                        other_manager = EntityManager(
-                            target_endpoint,
-                            client,
-                            '')
-                    if domain_name.endswith('s'):
-                        new_method = partial(other_manager._list, value)
-                    else:
-                        new_method = partial(other_manager._get, value)
-                    new_method.__name__ = domain_name
-                    setattr(self, domain_name, new_method)
+            src = self['source']
+            dst = self['destination']
+            src['id']
+            dst['id']
+            dst['protocol']
+            dst['ports']['start']
+            dst['ports']['end']
         except KeyError:
             raise InvalidEntity(**self)
 
@@ -65,16 +50,10 @@ class EntityManager(object):
         url_requested = self._get_url_filtered('%s%s' % (self.target_endpoint, requested_path), **kwargs)
         response = self.client.get(url_requested)
         entity_builder = self._get_entity_builder(entity_builder)
-        while True:
-            _logger.debug('GET - %s - %s', url_requested, response.text)
-            response_json = self._read_response(response, JsonObject)
-            for resource in response_json['policies']:
-                yield entity_builder(list(resource.items()))
-            if response_json['next_url'] is None:
-                break
-            else:
-                url_requested = '%s%s' % (self.target_endpoint, response_json['next_url'])
-                response = self.client.get(url_requested)
+        _logger.debug('GET - %s - %s', url_requested, response.text)
+        response_json = self._read_response(response, JsonObject)
+        for resource in response_json['policies']:
+            yield entity_builder(list(resource.items()))
 
     def _create(self, data: dict, **kwargs) -> Entity:
         url = '%s%s' % (self.target_endpoint, self.entity_uri)
