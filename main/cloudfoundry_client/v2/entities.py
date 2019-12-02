@@ -46,6 +46,7 @@ class Entity(JsonObject):
 
 EntityBuilder = Callable[[List[Tuple[str, Any]]], Entity]
 
+PaginateEntities = Generator[Entity, None, None]
 
 class EntityManager(object):
     list_query_parameters = ['page', 'results-per-page', 'order-direction']
@@ -67,7 +68,7 @@ class EntityManager(object):
         return self._read_response(response, entity_builder)
 
     def _list(self, requested_path: str, entity_builder: Optional[EntityBuilder] = None, **kwargs) \
-            -> Generator[Entity, None, None]:
+            -> PaginateEntities:
         url_requested = self._get_url_filtered('%s%s' % (self.target_endpoint, requested_path), **kwargs)
         response = self.client.get(url_requested)
         entity_builder = self._get_entity_builder(entity_builder)
@@ -108,13 +109,13 @@ class EntityManager(object):
         response = self.client.delete(url, **kwargs)
         _logger.debug('DELETE - %s - %s', url, response.text)
 
-    def __iter__(self) -> Generator[Entity, None, None]:
+    def __iter__(self) -> PaginateEntities:
         return self.list()
 
     def __getitem__(self, entity_guid) -> Entity:
         return self.get(entity_guid)
 
-    def list(self, **kwargs) -> Generator[Entity, None, None]:
+    def list(self, **kwargs) -> PaginateEntities:
         return self._list(self.entity_uri, **kwargs)
 
     def get_first(self, **kwargs) -> Optional[Entity]:

@@ -1,13 +1,13 @@
-from cloudfoundry_client.v2.entities import EntityManager
+from cloudfoundry_client.v2.entities import EntityManager, Entity, PaginateEntities
 
 
 class ServicePlanManager(EntityManager):
-    def __init__(self, target_endpoint, client):
+    def __init__(self, target_endpoint: str, client: 'CloudFoundryClient'):
         super(ServicePlanManager, self).__init__(target_endpoint, client, '/v2/service_plans')
 
-    def create_from_resource_file(self, path):
+    def create_from_resource_file(self, path: str) -> Entity:
         raise NotImplementedError('No creation allowed')
 
-    def list_instances(self, service_plan_guid, **kwargs):
+    def list_instances(self, service_plan_guid: str, **kwargs) -> PaginateEntities:
         return self.client.v2.service_instances._list('%s/%s/service_instances' % (self.entity_uri, service_plan_guid),
                                                       **kwargs)

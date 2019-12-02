@@ -2,9 +2,9 @@ from cloudfoundry_client.json_object import JsonObject
 
 
 class JobManager(object):
-    def __init__(self, target_endpoint, client):
+    def __init__(self, target_endpoint: str, client: 'CloudFoundryClient'):
         self.target_endpoint = target_endpoint
         self.client = client
 
-    def get(self, job_guid):
+    def get(self, job_guid: str) -> JsonObject:
         return self.client.get('%s/v2/jobs/%s' % (self.target_endpoint, job_guid)).json(object_pairs_hook=JsonObject)

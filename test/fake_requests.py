@@ -1,6 +1,7 @@
 import os
 from http import HTTPStatus
 from json import loads
+from typing import Optional
 from unittest.mock import MagicMock
 
 
@@ -44,7 +45,7 @@ def get_fixtures_path(*paths):
     return os.path.join(os.path.dirname(__file__), 'fixtures', *paths)
 
 
-def mock_response(uri: str, status_code: HTTPStatus, headers: dict, *path_parts: str):
+def mock_response(uri: str, status_code: HTTPStatus, headers: Optional[dict], *path_parts: str):
     global TARGET_ENDPOINT
     if len(path_parts) > 0:
         file_name = path_parts[len(path_parts) - 1]
