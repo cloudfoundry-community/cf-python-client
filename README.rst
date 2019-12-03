@@ -208,6 +208,34 @@ Available managers on API V3 are:
 
 The managers provide the same methods as the V2 managers.
 
+Networking
+------
+
+policy server
+~~~~~~~~
+
+At the moment we have only the network policies implemented
+
+.. code-block:: python
+
+  for policy in client.network.v1.external.policies.list():
+    print('destination protocol = {}'.format(policy['destination']['protocol']))
+    print('destination from port = {}'.format(policy['destination']['ports']['start']))
+    print('destination to port = {}'.format(policy['destination']['ports']['end']))
+
+
+Available managers on API V3 are:
+
+- ``policy``
+
+This manager provides:
+
+- ``list(**kwargs)``: return an *iterator* on entities, according to the given filtered parameters
+- ``__iter__``: iteration on the manager itself. Alias for a no-filter list
+- ``_create``: the create operation. Since it is a generic operation (only takes a *dict* object), this operation is protected
+- ``_remove``: the delete operation. This operation is maintained protected.
+
+
 Application logs
 ----------------
 
