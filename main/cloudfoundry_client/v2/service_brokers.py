@@ -1,17 +1,21 @@
-from cloudfoundry_client.v2.entities import EntityManager
+from typing import Optional
+
+from cloudfoundry_client.v2.entities import EntityManager, Entity
 
 
 class ServiceBrokerManager(EntityManager):
-    def __init__(self, target_endpoint, client):
+    def __init__(self, target_endpoint: str, client: 'CloudFoundryClient'):
         super(ServiceBrokerManager, self).__init__(target_endpoint, client, '/v2/service_brokers')
 
-    def create(self, broker_url, broker_name, auth_username, auth_password, space_guid=None):
+    def create(self, broker_url: str, broker_name: str, auth_username: str, auth_password: str,
+               space_guid: Optional[str] = None) -> Entity:
         request = self._request(broker_url=broker_url, name=broker_name,
                                 auth_username=auth_username, auth_password=auth_password)
         request['space_guid'] = space_guid
         return super(ServiceBrokerManager, self)._create(request)
 
-    def update(self, broker_guid, broker_url=None, broker_name=None, auth_username=None, auth_password=None):
+    def update(self, broker_guid: str, broker_url: Optional[str] = None, broker_name: Optional[str] = None,
+               auth_username: Optional[str] = None, auth_password: Optional[str] = None) -> Entity:
         request = self._request()
         request['broker_url'] = broker_url
         request['name'] = broker_name
