@@ -85,4 +85,24 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
         self.client.v3.organizations.remove('organization_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
+    @patch.object(sys, 'argv', ['main', 'list_organizations'])
+    def test_main_list_organizations(self):
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
+                   new=lambda: self.client):
+            self.client.get.return_value = mock_response('/v3/organizations',
+                                                         HTTPStatus.OK,
+                                                         None,
+                                                         'v3', 'organizations', 'GET_response.json')
+            main.main()
+            self.client.get.assert_called_with(self.client.get.return_value.url)
 
+    @patch.object(sys, 'argv', ['main', 'get_organization', '24637893-3b77-489d-bb79-8466f0d88b52'])
+    def test_main_get_organizations(self):
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
+                        new=lambda: self.client):
+            self.client.get.return_value = mock_response('/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52',
+                                                         HTTPStatus.OK,
+                                                         None,
+                                                         'v3', 'organizations', 'GET_{id}_response.json')
+            main.main()
+            self.client.get.assert_called_with(self.client.get.return_value.url)
