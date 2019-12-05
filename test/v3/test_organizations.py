@@ -83,6 +83,47 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
         self.client.v3.organizations.remove('organization_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
+    def test_assign_default_isolation_segment(self):
+        self.client.patch.return_value = mock_response(
+            '/v3/organizations/organization_id/relationships/default_isolation_segment',
+            HTTPStatus.OK,
+            None,
+            'v3', 'organizations', 'PATCH_{id}_assign_default_isolation_segment_response.json')
+        result = self.client.v3.organizations.assign_default_isolation_segment(
+            'organization_id', 'iso_seg_guid')
+        self.client.patch.assert_called_with(self.client.patch.return_value.url,
+                                             json={'data': {
+                                                       'guid': 'iso_seg_guid'
+                                                   }
+                                             })
+        self.assertIsNotNone(result)
+
+    def test_get_default_isolation_segment(self):
+        self.client.get.return_value = mock_response('/v3/organizations/organization_id/relationships/default_isolation_segment',
+                                                     HTTPStatus.OK,
+                                                     None,
+                                                     'v3', 'organizations', 'GET_{id}_default_isolation_segment_response.json')
+        self.client.v3.organizations.get_default_isolation_segment('organization_id')
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+
+    def test_get_default_domain(self):
+        self.client.get.return_value = mock_response('/v3/organizations/organization_id/domains/default',
+                                                     HTTPStatus.OK,
+                                                     None,
+                                                     'v3', 'organizations', 'GET_{id}_default_domain_response.json')
+        default_domain = self.client.v3.organizations.get_default_domain('organization_id')
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+        self.assertEqual("test-domain.com", default_domain['name'])
+        self.assertIsInstance(default_domain, Entity)
+
+    def test_get_usage_summary(self):
+        self.client.get.return_value = mock_response('/v3/organizations/organization_id/usage_summary',
+                                                     HTTPStatus.OK,
+                                                     None,
+                                                     'v3', 'organizations', 'GET_{id}_usage_summary_response.json')
+        self.client.v3.organizations.get_usage_summary('organization_id')
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+
     @patch.object(sys, 'argv', ['main', 'list_organizations'])
     def test_main_list_organizations(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
