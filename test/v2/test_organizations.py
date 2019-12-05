@@ -1,10 +1,8 @@
-import sys
 import unittest
 from functools import reduce
 from http import HTTPStatus
 from unittest.mock import call, patch
 
-import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
 from fake_requests import mock_response
 

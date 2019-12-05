@@ -9,8 +9,6 @@ from cloudfoundry_client.v3.entities import Entity
 from fake_requests import mock_response
 
 
-
-
 class TestOrganizations(unittest.TestCase, AbstractTestCase):
     @classmethod
     def setUpClass(cls):
