@@ -6,7 +6,7 @@ from cloudfoundry_client.networking.v1.external.policies import Policy
 from fake_requests import mock_response
 
 
-class TestApps(unittest.TestCase, AbstractTestCase):
+class TestPolicies(unittest.TestCase, AbstractTestCase):
     @classmethod
     def setUpClass(cls):
         cls.mock_client_class()

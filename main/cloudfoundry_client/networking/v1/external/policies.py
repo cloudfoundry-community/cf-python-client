@@ -1,5 +1,6 @@
 import logging
 from cloudfoundry_client.networking.entities import EntityManager
+from typing import List
 
 _logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ class Policy:
             raise ValueError('end port is out of range')
 
     @classmethod
-    def from_dict(cls, policy):
+    def from_dict(cls, policy: dict):
         return cls(src_id=policy['source']['id'],
                    dst_id=policy['destination']['id'],
                    proto=policy['destination']['protocol'],
@@ -43,7 +44,7 @@ class PolicyManager(EntityManager):
     def __init__(self, target_endpoint, client):
         super(PolicyManager, self).__init__(target_endpoint, client, '/networking/v1/external/policies')
 
-    def create(self, policies: list):
+    def create(self, policies: List[Policy]):
         """create a new network policy
 
         Responses:
@@ -60,7 +61,7 @@ class PolicyManager(EntityManager):
             data.append(policy.dump())
         return super(PolicyManager, self)._create({'policies': data})
 
-    def delete(self, policies):
+    def delete(self, policies: List[Policy]):
         """remove a new network policy
 
         Responses:
