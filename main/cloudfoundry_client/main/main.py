@@ -170,7 +170,7 @@ def main():
     commands = [
         CommandDomain(display_name='Organizations', entity_name='organization',
                       api_version='v3',
-                      filter_list_parameters=[], allow_retrieve_by_name=True,
+                      filter_list_parameters=['names', 'guids'], allow_retrieve_by_name=True,
                       allow_creation=True, allow_deletion=True),
         CommandDomain(display_name='Spaces', entity_name='space', filter_list_parameters=['organization_guid'],
                       allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True),
@@ -196,7 +196,7 @@ def main():
                       allow_retrieve_by_name=False, allow_creation=True, allow_deletion=True),
         CommandDomain(display_name='Buildpacks', entity_name='buildpack',
                       api_version='v3',
-                      filter_list_parameters=[], allow_retrieve_by_name=True,
+                      filter_list_parameters=['names', 'stacks'], allow_retrieve_by_name=True,
                       allow_creation=True, allow_deletion=True),
         CommandDomain(display_name='Domains', entity_name='domain',
                       api_version='v3',
