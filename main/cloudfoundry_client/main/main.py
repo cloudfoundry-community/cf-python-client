@@ -168,8 +168,10 @@ def main():
     logging.getLogger("urllib3").setLevel(logging.WARNING)
 
     commands = [
-        CommandDomain(display_name='Organizations', entity_name='organization', filter_list_parameters=[],
-                      allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True),
+        CommandDomain(display_name='Organizations', entity_name='organization',
+                      api_version='v3',
+                      filter_list_parameters=[], allow_retrieve_by_name=True,
+                      allow_creation=True, allow_deletion=True),
         CommandDomain(display_name='Spaces', entity_name='space', filter_list_parameters=['organization_guid'],
                       allow_retrieve_by_name=True, allow_creation=True, allow_deletion=True),
         AppCommandDomain(),

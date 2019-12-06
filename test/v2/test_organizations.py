@@ -1,10 +1,8 @@
-import sys
 import unittest
 from functools import reduce
 from http import HTTPStatus
 from unittest.mock import call, patch
 
-import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
 from fake_requests import mock_response
 
@@ -55,24 +53,3 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
         self.client.get.assert_has_calls([call(side_effect.url) for side_effect in self.client.get.side_effect],
                                          any_order=False)
 
-    @patch.object(sys, 'argv', ['main', 'list_organizations'])
-    def test_main_list_organizations(self):
-        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
-                   new=lambda: self.client):
-            self.client.get.return_value = mock_response('/v2/organizations',
-                                                         HTTPStatus.OK,
-                                                         None,
-                                                         'v2', 'organizations', 'GET_response.json')
-            main.main()
-            self.client.get.assert_called_with(self.client.get.return_value.url)
-
-    @patch.object(sys, 'argv', ['main', 'get_organization', 'fe79371b-39b8-4f0d-8331-cff423a06aca'])
-    def test_main_get_organization(self):
-        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
-                   new=lambda: self.client):
-            self.client.get.return_value = mock_response('/v2/organizations/fe79371b-39b8-4f0d-8331-cff423a06aca',
-                                                         HTTPStatus.OK,
-                                                         None,
-                                                         'v2', 'organizations', 'GET_{id}_response.json')
-            main.main()
-            self.client.get.assert_called_with(self.client.get.return_value.url)

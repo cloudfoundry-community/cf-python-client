@@ -75,8 +75,5 @@ setup(name=package_name,
       cmdclass=dict(generate=GenerateCommand),
       package_dir={package_directory: '%s/%s' % (src_dir, package_directory)},
       install_requires=[requirement.rstrip(' \r\n') for requirement in open('requirements.txt')],
-      tests_require=[
-          'mock==2.0.0',
-      ],
       test_suite='test',
       )
