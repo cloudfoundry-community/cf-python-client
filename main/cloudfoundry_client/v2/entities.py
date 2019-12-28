@@ -18,7 +18,7 @@ class Entity(JsonObject):
         self.target_endpoint = target_endpoint
         self.client = client
         try:
-            if 'entity' not in self:
+            if not (isinstance(self.get('entity'), dict)):
                 raise InvalidEntity(**self)
 
             for attribute, value in list(self['entity'].items()):
@@ -47,6 +47,7 @@ class Entity(JsonObject):
 EntityBuilder = Callable[[List[Tuple[str, Any]]], Entity]
 
 PaginateEntities = Generator[Entity, None, None]
+
 
 class EntityManager(object):
     list_query_parameters = ['page', 'results-per-page', 'order-direction']
