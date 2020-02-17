@@ -109,20 +109,21 @@ class CloudFoundryClient(CredentialManager):
         verify = kwargs.get('verify', True)
         self.token_format = kwargs.get('token_format')
         self.login_hint = kwargs.get('login_hint')
-        info = self._get_info(target_endpoint, proxy, verify=verify)
+        target_endpoint_trimmed = target_endpoint.rstrip('/')
+        info = self._get_info(target_endpoint_trimmed, proxy, verify=verify)
         if not info.api_version.startswith('2.'):
             raise AssertionError('Only version 2 is supported for now. Found %s' % info.api_version)
         service_information = ServiceInformation(None, '%s/oauth/token' % info.authorization_endpoint,
                                                  client_id, client_secret, [], verify)
         super(CloudFoundryClient, self).__init__(service_information, proxies=proxy)
-        self.v2 = V2(target_endpoint, self)
-        self.v3 = V3(target_endpoint, self)
+        self.v2 = V2(target_endpoint_trimmed, self)
+        self.v3 = V3(target_endpoint_trimmed, self)
         self._doppler = DopplerClient(info.doppler_endpoint,
                                       self.proxies[
                                           'http' if info.doppler_endpoint.startswith('ws://') else 'https'],
                                       self.service_information.verify,
                                       self) if info.doppler_endpoint is not None else None
-        self.networking_v1_external = NetworkingV1External(target_endpoint, self)
+        self.networking_v1_external = NetworkingV1External(target_endpoint_trimmed, self)
         self.info = info
 
     @property
