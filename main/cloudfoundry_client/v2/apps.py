@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 
 
 class Application(Entity):
-    def instances(self) -> Dict[str, dict]:
+    def instances(self) -> Dict[str, JsonObject]:
         return self.client.v2.apps.get_instances(self['metadata']['guid'])
 
     def start(self) -> 'Application':
@@ -22,6 +22,9 @@ class Application(Entity):
 
     def stop(self) -> 'Application':
         return self.client.v2.apps.stop(self['metadata']['guid'])
+
+    def restart_instance(self, instance_id: int):
+        return self.client.v2.apps.restart_instance(self['metadata']['guid'], instance_id)
 
     def stats(self) -> Dict[str, JsonObject]:
         return self.client.v2.apps.get_stats(self['metadata']['guid'])
@@ -96,6 +99,9 @@ class AppManager(EntityManager):
         else:
             self._wait_for_instances_in_state(application_guid, 0, 'STOPPED', check_time, timeout)
             return result
+
+    def restart_instance(self, application_guid: str, instance_id: int):
+        self._delete("%s%s/%s/instances/%s" % (self.target_endpoint, self.entity_uri, application_guid, instance_id))
 
     def restage(self, application_guid: str) -> Application:
         return self._post("%s%s/%s/restage" % (self.target_endpoint, self.entity_uri, application_guid))

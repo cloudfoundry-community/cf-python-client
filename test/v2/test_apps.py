@@ -172,6 +172,13 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.client.get.assert_called_with('%s/v2/apps/app_id/instances' % TARGET_ENDPOINT)
         self.assertIsNotNone(application)
 
+    def test_restart_instance(self):
+        self.client.delete.return_value = mock_response(
+            '/v2/apps/app_id/instances/666',
+            HTTPStatus.NO_CONTENT, None)
+        self.client.v2.apps.restart_instance('app_id', 666)
+        self.client.delete.assert_called_with(self.client.delete.return_value.url)
+
     def test_create(self):
         self.client.post.return_value = mock_response(
             '/v2/apps',
@@ -287,3 +294,14 @@ class TestApps(unittest.TestCase, AbstractTestCase):
                                                           'v2', 'apps', 'POST_{id}_restage_response.json')
             main.main()
             self.client.post.assert_called_with(self.client.post.return_value.url, json=None)
+
+    @patch.object(sys, 'argv', ['main', 'restart_instance', '906775ea-622e-4bc7-af5d-9aab3b652f81', '666'])
+    def test_main_restart_app_instance(self):
+        with patch('cloudfoundry_client.main.main.build_client_from_configuration',
+                   new=lambda: self.client):
+            self.client.delete.return_value = mock_response(
+                '/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81/instances/666',
+                HTTPStatus.NO_CONTENT,
+                None)
+            main.main()
+            self.client.delete.assert_called_with(self.client.delete.return_value.url)
