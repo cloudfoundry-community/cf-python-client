@@ -71,11 +71,12 @@ class ToOneRelationship(JsonObject):
 class ToManyRelationship(JsonObject):
     @staticmethod
     def from_json_object(to_many_relations: JsonObject):
-        return ToManyRelationship(
-            *[relation['guid'] for relation in to_many_relations['data']])
+        guids = [relation['guid'] for relation in to_many_relations['data']]
+        to_many_relations.pop('data')
+        return ToManyRelationship(*guids, **to_many_relations)
 
-    def __init__(self, *guids: str):
-        super(ToManyRelationship, self).__init__(data=[Relationship(guid) for guid in guids])
+    def __init__(self, *guids: str, **kwargs):
+        super(ToManyRelationship, self).__init__(data=[Relationship(guid) for guid in guids], **kwargs)
         self.guids = list(guids)
 
 

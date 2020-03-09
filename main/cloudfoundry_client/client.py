@@ -27,6 +27,7 @@ from cloudfoundry_client.v3.buildpacks import BuildpackManager as BuildpackManag
 from cloudfoundry_client.v3.domains import DomainManager
 from cloudfoundry_client.v3.entities import EntityManager as EntityManagerV3
 from cloudfoundry_client.v3.feature_flags import FeatureFlagManager
+from cloudfoundry_client.v3.isolation_segments import IsolationSegmentManager
 from cloudfoundry_client.v3.organizations import OrganizationManager
 from cloudfoundry_client.v3.tasks import TaskManager
 
@@ -81,6 +82,7 @@ class V3(object):
         self.buildpacks = BuildpackManagerV3(target_endpoint, credential_manager)
         self.domains = DomainManager(target_endpoint, credential_manager)
         self.feature_flags = FeatureFlagManager(target_endpoint, credential_manager)
+        self.isolation_segments = IsolationSegmentManager(target_endpoint, credential_manager)
         self.spaces = EntityManagerV3(target_endpoint, credential_manager, '/v3/spaces')
         self.organizations = OrganizationManager(target_endpoint, credential_manager)
         self.service_instances = EntityManagerV3(target_endpoint, credential_manager, '/v3/service_instances')
