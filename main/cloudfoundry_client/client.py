@@ -29,6 +29,7 @@ from cloudfoundry_client.v3.entities import EntityManager as EntityManagerV3
 from cloudfoundry_client.v3.feature_flags import FeatureFlagManager
 from cloudfoundry_client.v3.isolation_segments import IsolationSegmentManager
 from cloudfoundry_client.v3.organizations import OrganizationManager
+from cloudfoundry_client.v3.spaces import SpaceManager
 from cloudfoundry_client.v3.tasks import TaskManager
 
 _logger = logging.getLogger(__name__)
@@ -83,7 +84,7 @@ class V3(object):
         self.domains = DomainManager(target_endpoint, credential_manager)
         self.feature_flags = FeatureFlagManager(target_endpoint, credential_manager)
         self.isolation_segments = IsolationSegmentManager(target_endpoint, credential_manager)
-        self.spaces = EntityManagerV3(target_endpoint, credential_manager, '/v3/spaces')
+        self.spaces = SpaceManager(target_endpoint, credential_manager)
         self.organizations = OrganizationManager(target_endpoint, credential_manager)
         self.service_instances = EntityManagerV3(target_endpoint, credential_manager, '/v3/service_instances')
         self.tasks = TaskManager(target_endpoint, credential_manager)

@@ -9,7 +9,7 @@ class Domain(Entity):
         super(Domain, self).__init__(target_endpoint, entity_manager, **kwargs)
         relationships = self['relationships']
         if 'organization' in relationships:
-            self['relationships']['organization'] = ToOneRelationship.from_json_object(relationships['organization'].get('data'))
+            self['relationships']['organization'] = ToOneRelationship.from_json_object(relationships['organization'])
         if 'shared_organizations' in relationships:
             self['relationships']['shared_organizations'] \
                 = ToManyRelationship.from_json_object(relationships['shared_organizations'])
@@ -22,7 +22,7 @@ class DomainManager(EntityManager):
     def create(self, name: str, internal: Optional[bool] = False,
                organization: Optional[ToOneRelationship] = None,
                shared_organizations: Optional[ToManyRelationship] = None,
-               meta_labels: Optional[dict] = None, meta_annotations: Optional[dict] = None):
+               meta_labels: Optional[dict] = None, meta_annotations: Optional[dict] = None) -> Domain:
         data = {
             'name': name,
             'internal': internal,
@@ -40,7 +40,7 @@ class DomainManager(EntityManager):
         return self._list(uri, **kwargs)
 
     def update(self, domain_guid: str,
-               meta_labels: Optional[dict] = None, meta_annotations: Optional[dict] = None) -> Entity:
+               meta_labels: Optional[dict] = None, meta_annotations: Optional[dict] = None) -> Domain:
         data = {
             'metadata': {
                 'labels': meta_labels,
@@ -58,7 +58,7 @@ class DomainManager(EntityManager):
                ''.format(endpoint=self.target_endpoint, entity=self.entity_uri,
                          domain=domain_guid)
 
-    def share_domain(self, domain_guid: str, organization_guids: ToManyRelationship):
+    def share_domain(self, domain_guid: str, organization_guids: ToManyRelationship) -> ToManyRelationship:
         url = self.__create_shared_domain_url(domain_guid)
         return ToManyRelationship.from_json_object(super(DomainManager, self)._post(url, data=organization_guids))
 
