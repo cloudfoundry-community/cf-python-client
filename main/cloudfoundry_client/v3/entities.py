@@ -60,8 +60,12 @@ class Relationship(JsonObject):
 class ToOneRelationship(JsonObject):
     @staticmethod
     def from_json_object(to_one_relationship: JsonObject):
-        return ToOneRelationship(None) if to_one_relationship is None \
-            else ToOneRelationship(to_one_relationship['guid'])
+        if to_one_relationship is None:
+            return ToOneRelationship(None)
+        data = to_one_relationship.pop('data', None)
+        result = ToOneRelationship(None if data is None else data['guid'])
+        result.update(to_one_relationship)
+        return result
 
     def __init__(self, guid: Optional[str]):
         super(ToOneRelationship, self).__init__(data=Relationship(guid))
@@ -71,12 +75,12 @@ class ToOneRelationship(JsonObject):
 class ToManyRelationship(JsonObject):
     @staticmethod
     def from_json_object(to_many_relations: JsonObject):
-        guids = [relation['guid'] for relation in to_many_relations['data']]
-        to_many_relations.pop('data')
-        return ToManyRelationship(*guids, **to_many_relations)
+        result = ToManyRelationship(*[relation['guid'] for relation in to_many_relations.pop('data')])
+        result.update(to_many_relations)
+        return result
 
-    def __init__(self, *guids: str, **kwargs):
-        super(ToManyRelationship, self).__init__(data=[Relationship(guid) for guid in guids], **kwargs)
+    def __init__(self, *guids: str):
+        super(ToManyRelationship, self).__init__(data=[Relationship(guid) for guid in guids])
         self.guids = list(guids)
 
 
