@@ -14,7 +14,7 @@ Installing
 Supported versions
 ~~~~~~~~~~~~~~~~~~
 
-:warning: Starting version `1.11.0`, versions older that python `3.6.0` will not be supported anymore. This late version was released by the end 2016.
+:warning: Starting version ``1.11.0``, versions older that python ``3.6.0`` will not be supported anymore. This late version was released by the end 2016.
 
 For those that are still using python 2.7, it won't be supported by the end of 2020 and all library shall stop supporting it.
 
@@ -209,10 +209,10 @@ Available managers on API V3 are:
 The managers provide the same methods as the V2 managers.
 
 Networking
-------
+----------
 
 policy server
-~~~~~~~~
+~~~~~~~~~~~~~
 
 At the moment we have only the network policies implemented
 
@@ -292,6 +292,3 @@ You can run tests by doing so. In the project directory:
     $ python -m unittest discover test
     # or even
     $ python setup.py test
-
-
-
