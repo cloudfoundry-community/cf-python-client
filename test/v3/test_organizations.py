@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.v3.entities import Entity
+from cloudfoundry_client.v3.entities import Entity, ToOneRelationship
 from fake_requests import mock_response
 
 
@@ -53,7 +53,7 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
                                                        'labels': None,
                                                        'annotations': None
                                                    }
-                                             })
+                                                   })
         self.assertIsNotNone(result)
 
     def test_create(self):
@@ -72,7 +72,7 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
                                                       'labels': None,
                                                       'annotations': None
                                                   }
-                                            })
+                                                  })
         self.assertIsNotNone(result)
 
     def test_remove(self):
@@ -88,23 +88,31 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
             '/v3/organizations/organization_id/relationships/default_isolation_segment',
             HTTPStatus.OK,
             None,
-            'v3', 'organizations', 'PATCH_{id}_assign_default_isolation_segment_response.json')
+            'v3', 'organizations', 'PATCH_{id}_relationships_default_isolation_segment_response.json')
         result = self.client.v3.organizations.assign_default_isolation_segment(
             'organization_id', 'iso_seg_guid')
         self.client.patch.assert_called_with(self.client.patch.return_value.url,
                                              json={'data': {
-                                                       'guid': 'iso_seg_guid'
-                                                   }
+                                                 'guid': 'iso_seg_guid'
+                                             }
                                              })
         self.assertIsNotNone(result)
+        self.assertIsInstance(result, ToOneRelationship)
+        self.assertEqual(result.guid, "9d8e007c-ce52-4ea7-8a57-f2825d2c6b39")
 
     def test_get_default_isolation_segment(self):
-        self.client.get.return_value = mock_response('/v3/organizations/organization_id/relationships/default_isolation_segment',
-                                                     HTTPStatus.OK,
-                                                     None,
-                                                     'v3', 'organizations', 'GET_{id}_default_isolation_segment_response.json')
-        self.client.v3.organizations.get_default_isolation_segment('organization_id')
+        self.client.get.return_value = mock_response(
+            '/v3/organizations/organization_id/relationships/default_isolation_segment',
+            HTTPStatus.OK,
+            None,
+            'v3', 'organizations',
+            'GET_{id}_relationships_default_isolation_segment_response.json')
+
+        result = self.client.v3.organizations.get_default_isolation_segment('organization_id')
+
         self.client.get.assert_called_with(self.client.get.return_value.url)
+        self.assertIsInstance(result, ToOneRelationship)
+        self.assertEqual(result.guid, "9d8e007c-ce52-4ea7-8a57-f2825d2c6b39")
 
     def test_get_default_domain(self):
         self.client.get.return_value = mock_response('/v3/organizations/organization_id/domains/default',
@@ -138,7 +146,7 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
     @patch.object(sys, 'argv', ['main', 'get_organization', '24637893-3b77-489d-bb79-8466f0d88b52'])
     def test_main_get_organizations(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
-                        new=lambda: self.client):
+                   new=lambda: self.client):
             self.client.get.return_value = mock_response('/v3/organizations/24637893-3b77-489d-bb79-8466f0d88b52',
                                                          HTTPStatus.OK,
                                                          None,

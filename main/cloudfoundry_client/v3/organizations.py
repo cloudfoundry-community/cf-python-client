@@ -1,6 +1,6 @@
 from typing import Optional
 
-from cloudfoundry_client.v3.entities import EntityManager, Entity
+from cloudfoundry_client.v3.entities import EntityManager, Entity, ToOneRelationship
 
 
 class OrganizationManager(EntityManager):
@@ -37,19 +37,14 @@ class OrganizationManager(EntityManager):
         super(OrganizationManager, self)._remove(guid)
 
     def assign_default_isolation_segment(self, org_guid: str, iso_seg_guid: str) -> Entity:
-        url = '{endpoint}{entity}/{guid}/relationships/default_isolation_segment' \
-              ''.format(endpoint=self.target_endpoint,
-                        entity=self.entity_uri,
-                        guid=org_guid)
-        data = {
-            "data": {
-                "guid": iso_seg_guid
-            }
-        }
-        return super(OrganizationManager, self)._patch(url, data)
+        return ToOneRelationship.from_json_object(
+            super(OrganizationManager, self)._patch(
+                '%s%s/%s/relationships/default_isolation_segment' % (self.target_endpoint, self.entity_uri, org_guid),
+                data=ToOneRelationship(iso_seg_guid)))
 
-    def get_default_isolation_segment(self, guid: str) -> Entity:
-        return super(OrganizationManager, self).get(guid, 'relationships', 'default_isolation_segment')
+    def get_default_isolation_segment(self, guid: str) -> ToOneRelationship:
+        return ToOneRelationship.from_json_object(
+            super(OrganizationManager, self).get(guid, 'relationships', 'default_isolation_segment'))
 
     def get_default_domain(self, guid: str) -> Entity:
         return super(OrganizationManager, self).get(guid, 'domains', 'default')
