@@ -7,6 +7,7 @@ from oauth2_client.credentials_manager import CredentialManager, ServiceInformat
 from requests import Response
 
 from cloudfoundry_client.doppler.client import DopplerClient
+from cloudfoundry_client.rlpgateway.client import RLPGatewayClient
 from cloudfoundry_client.networking.v1.external.policies import PolicyManager
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
@@ -41,6 +42,8 @@ class Info:
         self.authorization_endpoint = authorization_endpoint
         self.api_endpoint = api_endpoint
         self.doppler_endpoint = doppler_endpoint
+        domain = '.'.join(api_endpoint.split('.')[1:])
+        self.rlp_gateway_endpoint = f'https://log-stream.{domain}'
 
 
 class NetworkingV1External(object):
@@ -126,6 +129,12 @@ class CloudFoundryClient(CredentialManager):
                                           'http' if info.doppler_endpoint.startswith('ws://') else 'https'],
                                       self.service_information.verify,
                                       self) if info.doppler_endpoint is not None else None
+        self._rlpgateway = RLPGatewayClient(info.rlp_gateway_endpoint,
+                                            self.proxies[
+                                                'http' if info.rlp_gateway_endpoint.startswith('ws://') else 'https'],
+                                            self.service_information.verify,
+                                            self,
+                                            ) if info.rlp_gateway_endpoint is not None else None
         self.networking_v1_external = NetworkingV1External(target_endpoint_trimmed, self)
         self.info = info
 
@@ -136,6 +145,14 @@ class CloudFoundryClient(CredentialManager):
         else:
 
             return self._doppler
+
+    @property
+    def rlpgateway(self):
+        if self._rlpgateway is None:
+            raise NotImplementedError('No RLP gateway endpoint for this instance')
+        else:
+
+            return self._rlpgateway
 
     @staticmethod
     def _get_info(target_endpoint: str, proxy: Optional[dict] = None, verify: bool = True) -> Info:
