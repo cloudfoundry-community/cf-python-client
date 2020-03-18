@@ -23,20 +23,20 @@ class RLPGatewayClient(object):
 
         if proxy is not None and len(proxy) > 0:
             proxy_domain = urlparse(proxy).netloc
-            idx = proxy_domain.find(':')
+            idx = proxy_domain.find(":")
             if 0 < idx < len(proxy_domain) - 2:
                 self.proxy_host = proxy_domain[:idx]
-                self.proxy_port = int(proxy_domain[idx + 1:])
+                self.proxy_port = int(proxy_domain[idx + 1 :])
 
     async def stream_logs(self, app_guid):
-        url = '%s/v2/read?log&source_id=%s' % (self.rlp_gateway_endpoint, app_guid)
+        url = "%s/v2/read?log&source_id=%s" % (self.rlp_gateway_endpoint, app_guid)
         async with aiohttp.ClientSession() as session:
-            response = await session.get(
+            async with session.get(
                 url=url,
                 headers={"Authorization": self.credentials_manager._access_token},
-            )
-            if response.status == 204:
-                yield {}
-            else:
-                async for data in response.content.iter_any():
-                    yield data
+            ) as response:
+                if response.status == 204:
+                    yield {}
+                else:
+                    async for data in response.content.iter_any():
+                        yield data
