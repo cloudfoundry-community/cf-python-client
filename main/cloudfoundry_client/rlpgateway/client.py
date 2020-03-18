@@ -1,6 +1,6 @@
 import logging
 import aiohttp
-from cloudfoundry_client.imported import urlparse
+from urllib.parse import urlparse
 
 _logger = logging.getLogger(__name__)
 
