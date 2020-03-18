@@ -1,16 +1,19 @@
 import logging
+from http import HTTPStatus
+from typing import Optional
 
 import requests
 from oauth2_client.credentials_manager import CredentialManager, ServiceInformation
+from requests import Response
 
 from cloudfoundry_client.doppler.client import DopplerClient
 from cloudfoundry_client.rlpgateway.client import RLPGatewayClient
+from cloudfoundry_client.networking.v1.external.policies import PolicyManager
 from cloudfoundry_client.errors import InvalidStatusCode
-from cloudfoundry_client.imported import UNAUTHORIZED
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
-from cloudfoundry_client.v2.buildpacks import BuildpackManager
-from cloudfoundry_client.v2.events import EventManager
+from cloudfoundry_client.v2.buildpacks import BuildpackManager as BuildpackManagerV2
 from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
+from cloudfoundry_client.v2.events import EventManager
 from cloudfoundry_client.v2.jobs import JobManager
 from cloudfoundry_client.v2.resources import ResourceManager
 from cloudfoundry_client.v2.routes import RouteManager
@@ -21,26 +24,36 @@ from cloudfoundry_client.v2.service_keys import ServiceKeyManager
 from cloudfoundry_client.v2.service_plan_visibilities import ServicePlanVisibilityManager
 from cloudfoundry_client.v2.service_plans import ServicePlanManager
 from cloudfoundry_client.v3.apps import AppManager as AppManagerV3
+from cloudfoundry_client.v3.buildpacks import BuildpackManager as BuildpackManagerV3
+from cloudfoundry_client.v3.domains import DomainManager
 from cloudfoundry_client.v3.entities import EntityManager as EntityManagerV3
+from cloudfoundry_client.v3.feature_flags import FeatureFlagManager
+from cloudfoundry_client.v3.isolation_segments import IsolationSegmentManager
+from cloudfoundry_client.v3.organizations import OrganizationManager
+from cloudfoundry_client.v3.spaces import SpaceManager
 from cloudfoundry_client.v3.tasks import TaskManager
 
 _logger = logging.getLogger(__name__)
 
 
 class Info:
-    def __init__(self, api_version, authorization_endpoint, api_endpoint, doppler_endpoint):
+    def __init__(self, api_version: str, authorization_endpoint: str, api_endpoint: str, doppler_endpoint: str, log_stream_endpoint: str):
         self.api_version = api_version
         self.authorization_endpoint = authorization_endpoint
         self.api_endpoint = api_endpoint
         self.doppler_endpoint = doppler_endpoint
-        domain = '.'.join(api_endpoint.split('.')[1:])
-        self.rlp_gateway_endpoint = f'https://log-stream.{domain}'
+        self.log_stream_endpoint = log_stream_endpoint
+
+
+class NetworkingV1External(object):
+    def __init__(self, target_endpoint: str, credential_manager: 'CloudFoundryClient'):
+        self.policies = PolicyManager(target_endpoint, credential_manager)
 
 
 class V2(object):
-    def __init__(self, target_endpoint, credential_manager):
+    def __init__(self, target_endpoint: str, credential_manager: 'CloudFoundryClient'):
         self.apps = AppManagerV2(target_endpoint, credential_manager)
-        self.buildpacks = BuildpackManager(target_endpoint, credential_manager)
+        self.buildpacks = BuildpackManagerV2(target_endpoint, credential_manager)
         self.jobs = JobManager(target_endpoint, credential_manager)
         self.service_bindings = ServiceBindingManager(target_endpoint, credential_manager)
         self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
@@ -67,16 +80,20 @@ class V2(object):
 
 
 class V3(object):
-    def __init__(self, target_endpoint, credential_manager):
+    def __init__(self, target_endpoint: str, credential_manager: 'CloudFoundryClient'):
         self.apps = AppManagerV3(target_endpoint, credential_manager)
-        self.spaces = EntityManagerV3(target_endpoint, credential_manager, '/v3/spaces')
-        self.organizations = EntityManagerV3(target_endpoint, credential_manager, '/v3/organizations')
+        self.buildpacks = BuildpackManagerV3(target_endpoint, credential_manager)
+        self.domains = DomainManager(target_endpoint, credential_manager)
+        self.feature_flags = FeatureFlagManager(target_endpoint, credential_manager)
+        self.isolation_segments = IsolationSegmentManager(target_endpoint, credential_manager)
+        self.spaces = SpaceManager(target_endpoint, credential_manager)
+        self.organizations = OrganizationManager(target_endpoint, credential_manager)
         self.service_instances = EntityManagerV3(target_endpoint, credential_manager, '/v3/service_instances')
         self.tasks = TaskManager(target_endpoint, credential_manager)
 
 
 class CloudFoundryClient(CredentialManager):
-    def __init__(self, target_endpoint, client_id='cf', client_secret='', **kwargs):
+    def __init__(self, target_endpoint: str, client_id: str = 'cf', client_secret: str = '', **kwargs):
         """"
         :param target_endpoint :the target endpoint
         :param client_id: the client_id
@@ -97,29 +114,30 @@ class CloudFoundryClient(CredentialManager):
         verify = kwargs.get('verify', True)
         self.token_format = kwargs.get('token_format')
         self.login_hint = kwargs.get('login_hint')
-        info = self._get_info(target_endpoint, proxy, verify=verify)
+        target_endpoint_trimmed = target_endpoint.rstrip('/')
+        info = self._get_info(target_endpoint_trimmed, proxy, verify=verify)
         if not info.api_version.startswith('2.'):
             raise AssertionError('Only version 2 is supported for now. Found %s' % info.api_version)
         service_information = ServiceInformation(None, '%s/oauth/token' % info.authorization_endpoint,
                                                  client_id, client_secret, [], verify)
         super(CloudFoundryClient, self).__init__(service_information, proxies=proxy)
-        self.v2 = V2(target_endpoint, self)
-        self.v3 = V3(target_endpoint, self)
+        self.v2 = V2(target_endpoint_trimmed, self)
+        self.v3 = V3(target_endpoint_trimmed, self)
         self._doppler = DopplerClient(info.doppler_endpoint,
                                       self.proxies[
                                           'http' if info.doppler_endpoint.startswith('ws://') else 'https'],
                                       self.service_information.verify,
                                       self) if info.doppler_endpoint is not None else None
-        self._rlpgateway = RLPGatewayClient(info.rlp_gateway_endpoint,
-                                            self.proxies[
-                                                'http' if info.rlp_gateway_endpoint.startswith('ws://') else 'https'],
+        self._rlpgateway = RLPGatewayClient(info.log_stream_endpoint,
+                                            self.proxies['https'],
                                             self.service_information.verify,
                                             self,
-                                            ) if info.rlp_gateway_endpoint is not None else None
+                                            ) if info.log_stream_endpoint is not None else None
+        self.networking_v1_external = NetworkingV1External(target_endpoint_trimmed, self)
         self.info = info
 
     @property
-    def doppler(self):
+    def doppler(self) -> DopplerClient:
         if self._doppler is None:
             raise NotImplementedError('No droppler endpoint for this instance')
         else:
@@ -135,32 +153,38 @@ class CloudFoundryClient(CredentialManager):
             return self._rlpgateway
 
     @staticmethod
-    def _get_info(target_endpoint, proxy=None, verify=True):
+    def _get_info(target_endpoint: str, proxy: Optional[dict] = None, verify: bool = True) -> Info:
         info_response = CloudFoundryClient._check_response(requests.get('%s/v2/info' % target_endpoint,
                                                                         proxies=proxy if proxy is not None else dict(
                                                                             http='', https=''),
                                                                         verify=verify))
+        links_response = CloudFoundryClient._check_response(requests.get('%s/' % target_endpoint,
+                                                                        proxies=proxy if proxy is not None else dict(
+                                                                            http='', https=''),
+                                                                        verify=verify))
         info = info_response.json()
+        links = links_response.json()
         return Info(info['api_version'],
                     info['authorization_endpoint'],
                     target_endpoint,
-                    info.get('doppler_logging_endpoint'))
+                    info.get('doppler_logging_endpoint'),
+                    links['links'].get('log_stream').get('href'))
 
     @staticmethod
-    def _is_token_expired(response):
-        if response.status_code == UNAUTHORIZED:
+    def _is_token_expired(response: Response) -> bool:
+        if response.status_code == HTTPStatus.UNAUTHORIZED.value:
             try:
                 json_data = response.json()
                 result = json_data.get('code', 0) == 1000 and json_data.get('error_code', '') == 'CF-InvalidAuthToken'
                 _logger.info('_is_token_expired - %s' % str(result))
                 return result
-            except Exception as _:
+            except BaseException as _:
                 return False
         else:
             return False
 
     @staticmethod
-    def _token_request_headers(_):
+    def _token_request_headers(_) -> dict:
         return dict(Accept='application/json')
 
     def __getattr__(self, item):
@@ -170,7 +194,7 @@ class CloudFoundryClient(CredentialManager):
         else:
             raise AttributeError("type '%s' has no attribute '%s'" % (type(self).__name__, item))
 
-    def _grant_password_request(self, login, password):
+    def _grant_password_request(self, login: str, password: str) -> dict:
         request = super(CloudFoundryClient, self)._grant_password_request(login, password)
         if self.token_format is not None:
             request['token_format'] = self.token_format
@@ -178,34 +202,34 @@ class CloudFoundryClient(CredentialManager):
             request['login_hint'] = self.login_hint
         return request
 
-    def _grant_refresh_token_request(self, refresh_token):
+    def _grant_refresh_token_request(self, refresh_token: str) -> dict:
         request = super(CloudFoundryClient, self)._grant_refresh_token_request(refresh_token)
         if self.token_format is not None:
             request['token_format'] = self.token_format
         return request
 
-    def get(self, url, params=None, **kwargs):
+    def get(self, url: str, params: Optional[dict] = None, **kwargs) -> Response:
         response = super(CloudFoundryClient, self).get(url, params, **kwargs)
         return CloudFoundryClient._check_response(response)
 
-    def post(self, url, data=None, json=None, **kwargs):
+    def post(self, url: str, data=None, json=None, **kwargs) -> Response:
         response = super(CloudFoundryClient, self).post(url, data, json, **kwargs)
         return CloudFoundryClient._check_response(response)
 
-    def put(self, url, data=None, json=None, **kwargs):
+    def put(self, url: str, data=None, json=None, **kwargs) -> Response:
         response = super(CloudFoundryClient, self).put(url, data, json, **kwargs)
         return CloudFoundryClient._check_response(response)
 
-    def patch(self, url, data=None, json=None, **kwargs):
+    def patch(self, url: str, data=None, json=None, **kwargs) -> Response:
         response = super(CloudFoundryClient, self).patch(url, data, json, **kwargs)
         return CloudFoundryClient._check_response(response)
 
-    def delete(self, url, **kwargs):
+    def delete(self, url: str, **kwargs) -> Response:
         response = super(CloudFoundryClient, self).delete(url, **kwargs)
         return CloudFoundryClient._check_response(response)
 
     @staticmethod
-    def _check_response(response):
+    def _check_response(response: Response) -> Response:
         if int(response.status_code / 100) == 2:
             return response
         else:
