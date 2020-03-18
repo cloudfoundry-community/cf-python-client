@@ -3,7 +3,6 @@ from functools import reduce
 from http import HTTPStatus
 
 from abstract_test_case import AbstractTestCase
-from fake_requests import mock_response
 
 
 class TestBuildpacks(unittest.TestCase, AbstractTestCase):
@@ -15,16 +14,16 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_list(self):
-        self.client.get.return_value = mock_response('/v2/buildpacks',
-                                                     HTTPStatus.OK,
-                                                     None,
-                                                     'v2', 'buildpacks', 'GET_response.json')
+        self.client.get.return_value = self.mock_response('/v2/buildpacks',
+                                                          HTTPStatus.OK,
+                                                          None,
+                                                          'v2', 'buildpacks', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, self.client.v2.buildpacks.list(), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 3)
 
     def test_get(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/buildpacks/buildpack_id',
             HTTPStatus.OK,
             None,
@@ -34,7 +33,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(result)
 
     def test_update(self):
-        self.client.put.return_value = mock_response(
+        self.client.put.return_value = self.mock_response(
             '/v2/buildpacks/build_pack_id',
             HTTPStatus.CREATED,
             None,

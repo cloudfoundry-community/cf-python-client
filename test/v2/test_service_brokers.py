@@ -6,7 +6,6 @@ from unittest.mock import patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
-from fake_requests import mock_response
 
 
 class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
@@ -18,7 +17,7 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_list(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/service_brokers?q=space_guid%3Aspace_guid',
             HTTPStatus.OK,
             None,
@@ -29,7 +28,7 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
         self.assertEqual(cpt, 1)
 
     def test_get(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/service_brokers/broker_id',
             HTTPStatus.OK,
             None,
@@ -39,7 +38,7 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(result)
 
     def test_create(self):
-        self.client.post.return_value = mock_response(
+        self.client.post.return_value = self.mock_response(
             '/v2/service_brokers',
             HTTPStatus.CREATED,
             None,
@@ -53,15 +52,15 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(service_broker)
 
     def test_update(self):
-        self.client.put.return_value = mock_response(
+        self.client.put.return_value = self.mock_response(
             '/v2/service_brokers/broker_id',
             HTTPStatus.OK,
             None,
             'v2', 'service_brokers', 'PUT_{id}_response.json')
         service_broker = self.client.v2.service_brokers.update('broker_id',
-                                                            broker_url='new-url',
-                                                            auth_username='new-username',
-                                                            auth_password='P@sswd2')
+                                                               broker_url='new-url',
+                                                               auth_username='new-username',
+                                                               auth_password='P@sswd2')
         self.client.put.assert_called_with(self.client.put.return_value.url,
                                            json=dict(broker_url='new-url',
                                                      auth_username='new-username',
@@ -69,7 +68,7 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(service_broker)
 
     def test_delete(self):
-        self.client.delete.return_value = mock_response(
+        self.client.delete.return_value = self.mock_response(
             '/v2/service_brokers/broker_id',
             HTTPStatus.NO_CONTENT,
             None)
@@ -79,21 +78,22 @@ class TestServiceBrokers(unittest.TestCase, AbstractTestCase):
     @patch.object(sys, 'argv', ['main', 'list_service_brokers'])
     def test_main_list_service_brokers(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
-                        new=lambda: self.client):
-            self.client.get.return_value = mock_response('/v2/service_brokers',
-                                                         HTTPStatus.OK,
-                                                         None,
-                                                         'v2', 'service_brokers', 'GET_response.json')
+                   new=lambda: self.client):
+            self.client.get.return_value = self.mock_response('/v2/service_brokers',
+                                                              HTTPStatus.OK,
+                                                              None,
+                                                              'v2', 'service_brokers', 'GET_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
 
     @patch.object(sys, 'argv', ['main', 'get_service_broker', 'ade9730c-4ee5-4290-ad37-0b15cecd2ca6'])
     def test_main_get_service_broker(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
-                        new=lambda: self.client):
-            self.client.get.return_value = mock_response('/v2/service_brokers/ade9730c-4ee5-4290-ad37-0b15cecd2ca6',
-                                                         HTTPStatus.OK,
-                                                         None,
-                                                         'v2', 'service_brokers', 'GET_{id}_response.json')
+                   new=lambda: self.client):
+            self.client.get.return_value = self.mock_response(
+                '/v2/service_brokers/ade9730c-4ee5-4290-ad37-0b15cecd2ca6',
+                HTTPStatus.OK,
+                None,
+                'v2', 'service_brokers', 'GET_{id}_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)

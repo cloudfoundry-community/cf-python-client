@@ -3,7 +3,6 @@ from http import HTTPStatus
 
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.v3.entities import Entity, ToManyRelationship
-from fake_requests import mock_response
 
 
 class TestIsolationSegments(unittest.TestCase, AbstractTestCase):
@@ -15,10 +14,10 @@ class TestIsolationSegments(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_list(self):
-        self.client.get.return_value = mock_response('/v3/isolation_segments',
-                                                     HTTPStatus.OK,
-                                                     None,
-                                                     'v3', 'isolation_segments', 'GET_response.json')
+        self.client.get.return_value = self.mock_response('/v3/isolation_segments',
+                                                          HTTPStatus.OK,
+                                                          None,
+                                                          'v3', 'isolation_segments', 'GET_response.json')
         all_isolation_segments = [isolation_segment for isolation_segment in self.client.v3.isolation_segments.list()]
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(5, len(all_isolation_segments))
@@ -28,7 +27,7 @@ class TestIsolationSegments(unittest.TestCase, AbstractTestCase):
             self.assertIsInstance(isolation_segment, Entity)
 
     def test_get(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v3/isolation_segments/isolation_segment_id',
             HTTPStatus.OK,
             None,
@@ -39,7 +38,7 @@ class TestIsolationSegments(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(result, Entity)
 
     def test_update(self):
-        self.client.patch.return_value = mock_response(
+        self.client.patch.return_value = self.mock_response(
             '/v3/isolation_segments/isolation_segment_id',
             HTTPStatus.OK,
             None,
@@ -51,15 +50,15 @@ class TestIsolationSegments(unittest.TestCase, AbstractTestCase):
                                              json={
                                                  'name': 'new-name',
                                                  'metadata': {
-                                                 'labels': {'key': 'value'},
-                                                 'annotations': None
-                                             }
+                                                     'labels': {'key': 'value'},
+                                                     'annotations': None
+                                                 }
                                              })
         self.assertIsNotNone(result)
         self.assertIsInstance(result, Entity)
 
     def test_create(self):
-        self.client.post.return_value = mock_response(
+        self.client.post.return_value = self.mock_response(
             '/v3/isolation_segments',
             HTTPStatus.OK,
             None,
@@ -80,7 +79,7 @@ class TestIsolationSegments(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(result, Entity)
 
     def test_remove(self):
-        self.client.delete.return_value = mock_response(
+        self.client.delete.return_value = self.mock_response(
             '/v3/isolation_segments/isolation_segment_id',
             HTTPStatus.NO_CONTENT,
             None)
@@ -88,7 +87,7 @@ class TestIsolationSegments(unittest.TestCase, AbstractTestCase):
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
     def test_entitle_organizations(self):
-        self.client.post.return_value = mock_response(
+        self.client.post.return_value = self.mock_response(
             '/v3/isolation_segments/isolation_segment_id/relationships/organizations',
             HTTPStatus.OK,
             None,
@@ -107,7 +106,7 @@ class TestIsolationSegments(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(result['links'])
 
     def test_revoke_organization(self):
-        self.client.delete.return_value = mock_response(
+        self.client.delete.return_value = self.mock_response(
             '/v3/isolation_segments/isolation_segment_id/relationships/organizations/org_id',
             HTTPStatus.NO_CONTENT,
             None)
@@ -115,7 +114,7 @@ class TestIsolationSegments(unittest.TestCase, AbstractTestCase):
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
     def test_list_entitled_organizations(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v3/isolation_segments/isolation_segment_id/relationships/organizations',
             HTTPStatus.OK,
             None,
@@ -127,7 +126,7 @@ class TestIsolationSegments(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(result['links'])
 
     def test_list_entitled_spaces(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v3/isolation_segments/isolation_segment_id/relationships/spaces',
             HTTPStatus.OK,
             None,
@@ -137,4 +136,3 @@ class TestIsolationSegments(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(result, ToManyRelationship)
         self.assertEqual(2, len(result.guids))
         self.assertIsNotNone(result['links'])
-

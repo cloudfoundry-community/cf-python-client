@@ -7,7 +7,9 @@
   "lifecycle": {
     "type": "buildpack",
     "data": {
-      "buildpacks": ["java_buildpack"],
+      "buildpacks": [
+        "java_buildpack"
+      ],
       "stack": "cflinuxfs2"
     }
   },

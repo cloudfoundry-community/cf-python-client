@@ -10,7 +10,6 @@
   },
   "system_env_json": {
     "VCAP_SERVICES": {
-
     }
   },
   "application_env_json": {
@@ -24,14 +23,12 @@
       "application_version": "45919b1d-422d-4953-a0a3-91d7fd2899bf",
       "application_name": "name-243",
       "application_uris": [
-
       ],
       "version": "45919b1d-422d-4953-a0a3-91d7fd2899bf",
       "name": "name-243",
       "space_name": "name-244",
       "space_id": "885c392a-3502-4cff-a47d-49089b13b1b7",
       "uris": [
-
       ],
       "users": null
     }

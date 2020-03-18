@@ -10,16 +10,16 @@
   "enabled": true,
   "locked": false,
   "metadata": {
-    "labels": { },
-    "annotations": { }
+    "labels": {},
+    "annotations": {}
   },
   "links": {
     "self": {
       "href": "https://api.example.org/v3/buildpacks/fd35633f-5c5c-4e4e-a5a9-0722c970a9d2"
     },
     "upload": {
-        "href": "https://api.example.org/v3/buildpacks/fd35633f-5c5c-4e4e-a5a9-0722c970a9d2/upload",
-        "method": "POST"
+      "href": "https://api.example.org/v3/buildpacks/fd35633f-5c5c-4e4e-a5a9-0722c970a9d2/upload",
+      "method": "POST"
     }
   }
 }

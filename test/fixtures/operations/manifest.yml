@@ -1,8 +1,8 @@
 applications:
   - name: the-name
     routes:
-    - route: first-route
-    - route: second-route
+      - route: first-route
+      - route: second-route
     docker:
       username: the-user
       password: P@SsW0r$

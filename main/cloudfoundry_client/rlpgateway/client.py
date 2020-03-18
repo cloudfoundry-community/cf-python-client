@@ -1,8 +1,10 @@
 import logging
+from urllib.parse import urlparse
+
 import aiohttp
-from cloudfoundry_client.imported import urlparse
 
 _logger = logging.getLogger(__name__)
+
 
 class RLPGatewayClient(object):
     """
@@ -11,6 +13,7 @@ class RLPGatewayClient(object):
     The client is initialized with client id and client secret,
     and provides functionality for asynchronous HTTP requests to RLP gateway endpoint.
     """
+
     def __init__(self, rlp_gateway_endpoint, proxy, verify_ssl, credentials_manager):
         self.proxy_host = None
         self.proxy_port = None
@@ -29,9 +32,9 @@ class RLPGatewayClient(object):
         url = '%s/v2/read?log&source_id=%s' % (self.rlp_gateway_endpoint, app_guid)
         async with aiohttp.ClientSession() as session:
             response = await session.get(
-                    url=url,
-                    headers={"Authorization": self.credentials_manager._access_token},
-                )
+                url=url,
+                headers={"Authorization": self.credentials_manager._access_token},
+            )
             if response.status == 204:
                 yield {}
             else:

@@ -84,7 +84,9 @@
       "lifecycle": {
         "type": "buildpack",
         "data": {
-          "buildpacks": ["ruby_buildpack"],
+          "buildpacks": [
+            "ruby_buildpack"
+          ],
           "stack": "cflinuxfs2"
         }
       },

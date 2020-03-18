@@ -7,9 +7,9 @@ from oauth2_client.credentials_manager import CredentialManager, ServiceInformat
 from requests import Response
 
 from cloudfoundry_client.doppler.client import DopplerClient
-from cloudfoundry_client.rlpgateway.client import RLPGatewayClient
-from cloudfoundry_client.networking.v1.external.policies import PolicyManager
 from cloudfoundry_client.errors import InvalidStatusCode
+from cloudfoundry_client.networking.v1.external.policies import PolicyManager
+from cloudfoundry_client.rlpgateway.client import RLPGatewayClient
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
 from cloudfoundry_client.v2.buildpacks import BuildpackManager as BuildpackManagerV2
 from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
@@ -37,9 +37,15 @@ _logger = logging.getLogger(__name__)
 
 
 class Info:
-    def __init__(self, api_version: str, authorization_endpoint: str, api_endpoint: str, doppler_endpoint: str, log_stream_endpoint: str):
-        self.api_version = api_version
+    def __init__(self, api_v2_version: str,
+                 authorization_endpoint: str,
+                 token_endpoint: str,
+                 api_endpoint: str,
+                 doppler_endpoint: str,
+                 log_stream_endpoint: str):
+        self.api_v2_version = api_v2_version
         self.authorization_endpoint = authorization_endpoint
+        self.token_endpoint = token_endpoint
         self.api_endpoint = api_endpoint
         self.doppler_endpoint = doppler_endpoint
         self.log_stream_endpoint = log_stream_endpoint
@@ -116,9 +122,10 @@ class CloudFoundryClient(CredentialManager):
         self.login_hint = kwargs.get('login_hint')
         target_endpoint_trimmed = target_endpoint.rstrip('/')
         info = self._get_info(target_endpoint_trimmed, proxy, verify=verify)
-        if not info.api_version.startswith('2.'):
-            raise AssertionError('Only version 2 is supported for now. Found %s' % info.api_version)
-        service_information = ServiceInformation(None, '%s/oauth/token' % info.authorization_endpoint,
+        if not info.api_v2_version.startswith('2.'):
+            raise AssertionError('Only version 2 is supported for now. Found %s' % info.api_v2_version)
+        service_information = ServiceInformation('%s/oauth/authorize' % info.authorization_endpoint,
+                                                 '%s/oauth/token' % info.token_endpoint,
                                                  client_id, client_secret, [], verify)
         super(CloudFoundryClient, self).__init__(service_information, proxies=proxy)
         self.v2 = V2(target_endpoint_trimmed, self)
@@ -154,20 +161,21 @@ class CloudFoundryClient(CredentialManager):
 
     @staticmethod
     def _get_info(target_endpoint: str, proxy: Optional[dict] = None, verify: bool = True) -> Info:
-        info_response = CloudFoundryClient._check_response(requests.get('%s/v2/info' % target_endpoint,
-                                                                        proxies=proxy if proxy is not None else dict(
-                                                                            http='', https=''),
-                                                                        verify=verify))
-        links_response = CloudFoundryClient._check_response(requests.get('%s/' % target_endpoint,
+        info_response = CloudFoundryClient._check_response(requests.get('%s/info' % target_endpoint,
                                                                         proxies=proxy if proxy is not None else dict(
                                                                             http='', https=''),
                                                                         verify=verify))
         info = info_response.json()
+        links_response = CloudFoundryClient._check_response(requests.get('%s/' % target_endpoint,
+                                                                         proxies=proxy if proxy is not None else dict(
+                                                                             http='', https=''),
+                                                                         verify=verify))
         links = links_response.json()
-        return Info(info['api_version'],
+        return Info(links['links']['cloud_controller_v2']['meta']['version'],
                     info['authorization_endpoint'],
+                    info['token_endpoint'],
                     target_endpoint,
-                    info.get('doppler_logging_endpoint'),
+                    links['links'].get('logging').get('href'),
                     links['links'].get('log_stream').get('href'))
 
     @staticmethod

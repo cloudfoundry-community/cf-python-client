@@ -4,7 +4,6 @@ from unittest.mock import call
 
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.v3.entities import Entity, ToOneRelationship
-from fake_requests import mock_response
 
 
 class TestSpaces(unittest.TestCase, AbstractTestCase):
@@ -16,7 +15,7 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_create(self):
-        self.client.post.return_value = mock_response(
+        self.client.post.return_value = self.mock_response(
             '/v3/spaces',
             HTTPStatus.OK,
             None,
@@ -36,10 +35,10 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(result, Entity)
 
     def test_list(self):
-        self.client.get.return_value = mock_response('/v3/spaces',
-                                                     HTTPStatus.OK,
-                                                     None,
-                                                     'v3', 'spaces', 'GET_response.json')
+        self.client.get.return_value = self.mock_response('/v3/spaces',
+                                                          HTTPStatus.OK,
+                                                          None,
+                                                          'v3', 'spaces', 'GET_response.json')
         all_spaces = [space for space in self.client.v3.spaces.list()]
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(2, len(all_spaces))
@@ -47,20 +46,21 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(all_spaces[0], Entity)
 
     def test_get(self):
-        self.client.get.return_value = mock_response('/v3/spaces/space_id',
-                                                     HTTPStatus.OK,
-                                                     None,
-                                                     'v3', 'spaces', 'GET_{id}_response.json')
+        self.client.get.return_value = self.mock_response('/v3/spaces/space_id',
+                                                          HTTPStatus.OK,
+                                                          None,
+                                                          'v3', 'spaces', 'GET_{id}_response.json')
         space = self.client.v3.spaces.get('space_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual("my-space", space['name'])
         self.assertIsInstance(space, Entity)
 
     def test_get_then_organization(self):
-        get_space = mock_response('/v3/spaces/space_id', HTTPStatus.OK, None,
-                                  'v3', 'spaces', 'GET_{id}_response.json')
-        get_organization = mock_response('/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133', HTTPStatus.OK, None,
-                                         'v3', 'organizations', 'GET_{id}_response.json')
+        get_space = self.mock_response('/v3/spaces/space_id', HTTPStatus.OK, None,
+                                       'v3', 'spaces', 'GET_{id}_response.json')
+        get_organization = self.mock_response('/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133', HTTPStatus.OK,
+                                              None,
+                                              'v3', 'organizations', 'GET_{id}_response.json')
         self.client.get.side_effect = [
             get_space,
             get_organization
@@ -72,11 +72,11 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.assertEqual("my-organization", organization['name'])
 
     def test_get_assigned_isolation_segment(self):
-        self.client.get.return_value = mock_response('/v3/spaces/space_id/relationships/isolation_segment',
-                                                     HTTPStatus.OK,
-                                                     None,
-                                                     'v3', 'spaces',
-                                                     'GET_{id}_relationships_isolation_segment_response.json')
+        self.client.get.return_value = self.mock_response('/v3/spaces/space_id/relationships/isolation_segment',
+                                                          HTTPStatus.OK,
+                                                          None,
+                                                          'v3', 'spaces',
+                                                          'GET_{id}_relationships_isolation_segment_response.json')
 
         result = self.client.v3.spaces.get_assigned_isolation_segment('space_id')
 
@@ -84,11 +84,11 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.assertEqual('e4c91047-3b29-4fda-b7f9-04033e5a9c9f', result.guid)
 
     def test_assign_isolation_segment(self):
-        self.client.patch.return_value = mock_response('/v3/spaces/space_id/relationships/isolation_segment',
-                                                       HTTPStatus.OK,
-                                                       None,
-                                                       'v3', 'spaces',
-                                                       'POST_{id}_relationships_isolation_segment_response.json')
+        self.client.patch.return_value = self.mock_response('/v3/spaces/space_id/relationships/isolation_segment',
+                                                            HTTPStatus.OK,
+                                                            None,
+                                                            'v3', 'spaces',
+                                                            'POST_{id}_relationships_isolation_segment_response.json')
         result = self.client.v3.spaces.assign_isolation_segment('space_id', 'iso-seg-guid')
         self.client.patch.assert_called_with(self.client.patch.return_value.url,
                                              json={
@@ -100,7 +100,7 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.assertEqual('iso-seg-guid', result.guid)
 
     def test_remove(self):
-        self.client.delete.return_value = mock_response(
+        self.client.delete.return_value = self.mock_response(
             '/v3/spaces/space_id',
             HTTPStatus.NO_CONTENT,
             None)

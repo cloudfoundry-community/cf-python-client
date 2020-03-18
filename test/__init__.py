@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-import os
-import sys
 import unittest
+
 
 def get_suite():
     loader = unittest.TestLoader()

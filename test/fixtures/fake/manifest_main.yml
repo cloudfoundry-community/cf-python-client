@@ -1,16 +1,16 @@
 ---
 applications:
-- name: test_app
-  memory: 1024M
-  instances: 1
-  path: .
-  health-check-type: http
-  health-check-http-endpoint: /manage/health
-  services:
-  - service1
-  - service2
-  no-route: true
-  env:
-    VAR1: VALUE1
-    VAR2: VALUE2
+  - name: test_app
+    memory: 1024M
+    instances: 1
+    path: .
+    health-check-type: http
+    health-check-http-endpoint: /manage/health
+    services:
+      - service1
+      - service2
+    no-route: true
+    env:
+      VAR1: VALUE1
+      VAR2: VALUE2
 

@@ -3,18 +3,18 @@ from functools import reduce
 from http import HTTPStatus
 from unittest.mock import MagicMock, call
 
+from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.errors import InvalidEntity
 from cloudfoundry_client.v2.entities import EntityManager
-from fake_requests import TARGET_ENDPOINT, mock_response
 
 
-class TestEntities(unittest.TestCase):
+class TestEntities(unittest.TestCase, AbstractTestCase):
 
     def test_invalid_entity_without_entity_attribute(self):
         client = MagicMock()
-        entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/anyone')
+        entity_manager = EntityManager(self.TARGET_ENDPOINT, client, '/fake/anyone')
 
-        client.get.return_value = mock_response(
+        client.get.return_value = self.mock_response(
             '/fake/anyone/any-id',
             HTTPStatus.OK,
             None,
@@ -24,9 +24,9 @@ class TestEntities(unittest.TestCase):
 
     def test_invalid_entity_with_null_entity(self):
         client = MagicMock()
-        entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/anyone')
+        entity_manager = EntityManager(self.TARGET_ENDPOINT, client, '/fake/anyone')
 
-        client.get.return_value = mock_response(
+        client.get.return_value = self.mock_response(
             '/fake/anyone/any-id',
             HTTPStatus.OK,
             None,
@@ -36,9 +36,9 @@ class TestEntities(unittest.TestCase):
 
     def test_invalid_entity_with_invalid_entity_type(self):
         client = MagicMock()
-        entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/anyone')
+        entity_manager = EntityManager(self.TARGET_ENDPOINT, client, '/fake/anyone')
 
-        client.get.return_value = mock_response(
+        client.get.return_value = self.mock_response(
             '/fake/anyone/any-id',
             HTTPStatus.OK,
             None,
@@ -80,17 +80,17 @@ class TestEntities(unittest.TestCase):
 
     def test_list(self):
         client = MagicMock()
-        entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/first')
+        entity_manager = EntityManager(self.TARGET_ENDPOINT, client, '/fake/first')
 
-        first_response = mock_response(
+        first_response = self.mock_response(
             '/fake/first?order-direction=asc&page=1&results-per-page=20&q=space_guid%3Asome-id',
             HTTPStatus.OK,
             None,
             'fake', 'GET_multi_page_0_response.json')
-        second_response = mock_response('/fake/next?order-direction=asc&page=2&results-per-page=50',
-                                        HTTPStatus.OK,
-                                        None,
-                                        'fake', 'GET_multi_page_1_response.json')
+        second_response = self.mock_response('/fake/next?order-direction=asc&page=2&results-per-page=50',
+                                             HTTPStatus.OK,
+                                             None,
+                                             'fake', 'GET_multi_page_1_response.json')
 
         client.get.side_effect = [first_response, second_response]
         cpt = reduce(lambda increment, _: increment + 1, entity_manager.list(**{"results-per-page": 20,
@@ -104,9 +104,9 @@ class TestEntities(unittest.TestCase):
 
     def test_iter(self):
         client = MagicMock()
-        entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/something')
+        entity_manager = EntityManager(self.TARGET_ENDPOINT, client, '/fake/something')
 
-        client.get.return_value = mock_response(
+        client.get.return_value = self.mock_response(
             '/fake/something',
             HTTPStatus.OK,
             None,
@@ -118,9 +118,9 @@ class TestEntities(unittest.TestCase):
 
     def test_get_elem(self):
         client = MagicMock()
-        entity_manager = EntityManager(TARGET_ENDPOINT, client, '/fake/something')
+        entity_manager = EntityManager(self.TARGET_ENDPOINT, client, '/fake/something')
 
-        client.get.return_value = mock_response(
+        client.get.return_value = self.mock_response(
             '/fake/something/with-id',
             HTTPStatus.OK,
             None,

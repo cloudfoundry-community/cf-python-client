@@ -7,7 +7,6 @@ from unittest.mock import call, patch
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.errors import InvalidStatusCode
-from fake_requests import mock_response, TARGET_ENDPOINT
 
 
 class TestApps(unittest.TestCase, AbstractTestCase):
@@ -19,10 +18,10 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_list(self):
-        self.client.get.return_value = mock_response('/v2/apps',
-                                                     HTTPStatus.OK,
-                                                     None,
-                                                     'v2', 'apps', 'GET_response.json')
+        self.client.get.return_value = self.mock_response('/v2/apps',
+                                                          HTTPStatus.OK,
+                                                          None,
+                                                          'v2', 'apps', 'GET_response.json')
         all_applications = [application for application in self.client.v2.apps.list()]
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(len(all_applications), 3)
@@ -30,7 +29,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertEqual(all_applications[0]['entity']['name'], "name-423")
 
     def test_list_filtered(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/apps?q=name%3Aapplication_name&results-per-page=1&q=space_guid%3Aspace_guid',
             HTTPStatus.OK,
             None,
@@ -40,7 +39,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(application)
 
     def test_get_env(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/apps/app_id/env',
             HTTPStatus.OK,
             None,
@@ -50,7 +49,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(application)
 
     def test_get_instances(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/apps/app_id/instances',
             HTTPStatus.OK,
             None,
@@ -60,7 +59,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(application)
 
     def test_get_stats(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/apps/app_id/stats',
             HTTPStatus.OK,
             None,
@@ -70,13 +69,13 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(application)
 
     def test_associate_route(self):
-        self.client.put.return_value = mock_response('/v2/apps/app_id/routes/route_id', HTTPStatus.CREATED, None,
-                                                     'v2', 'apps', 'PUT_{id}_routes_{route_id}_response.json')
+        self.client.put.return_value = self.mock_response('/v2/apps/app_id/routes/route_id', HTTPStatus.CREATED, None,
+                                                          'v2', 'apps', 'PUT_{id}_routes_{route_id}_response.json')
         self.client.v2.apps.associate_route('app_id', 'route_id')
         self.client.put.assert_called_with(self.client.put.return_value.url, json=None)
 
     def test_list_routes(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/apps/app_id/routes?q=route_guid%3Aroute_id',
             HTTPStatus.OK,
             None,
@@ -89,12 +88,13 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertEqual(cpt, 1)
 
     def test_remove_route(self):
-        self.client.delete.return_value = mock_response('/v2/apps/app_id/routes/route_id', HTTPStatus.NO_CONTENT, None)
+        self.client.delete.return_value = self.mock_response('/v2/apps/app_id/routes/route_id', HTTPStatus.NO_CONTENT,
+                                                             None)
         self.client.v2.apps.remove_route('app_id', 'route_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
     def test_list_service_bindings(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/apps/app_id/service_bindings',
             HTTPStatus.OK,
             None,
@@ -105,7 +105,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertEqual(cpt, 1)
 
     def test_get_sumary(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/apps/app_id/summary',
             HTTPStatus.OK,
             None,
@@ -116,7 +116,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(application)
 
     def test_get(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/apps/app_id',
             HTTPStatus.OK,
             None,
@@ -126,22 +126,22 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(application)
 
     def test_start(self):
-        self.client.put.return_value = mock_response(
+        self.client.put.return_value = self.mock_response(
             '/v2/apps/app_id',
             HTTPStatus.CREATED,
             None,
             'v2', 'apps', 'PUT_{id}_response.json')
-        mock_summary = mock_response(
+        mock_summary = self.mock_response(
             '/v2/apps/app_id/summary',
             HTTPStatus.OK,
             None,
             'v2', 'apps', 'GET_{id}_summary_response.json')
-        mock_instances_stopped = mock_response(
+        mock_instances_stopped = self.mock_response(
             '/v2/apps/app_id/instances',
             HTTPStatus.BAD_REQUEST,
             None,
             'v2', 'apps', 'GET_{id}_instances_stopped_response.json')
-        mock_instances_started = mock_response(
+        mock_instances_started = self.mock_response(
             '/v2/apps/app_id/instances',
             HTTPStatus.OK,
             None,
@@ -160,7 +160,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(application)
 
     def test_stop(self):
-        self.client.put.return_value = mock_response(
+        self.client.put.return_value = self.mock_response(
             '/v2/apps/app_id',
             HTTPStatus.CREATED,
             None,
@@ -169,18 +169,18 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         application = self.client.v2.apps.stop('app_id')
         self.client.put.assert_called_with(self.client.put.return_value.url,
                                            json=dict(state='STOPPED'))
-        self.client.get.assert_called_with('%s/v2/apps/app_id/instances' % TARGET_ENDPOINT)
+        self.client.get.assert_called_with('%s/v2/apps/app_id/instances' % self.TARGET_ENDPOINT)
         self.assertIsNotNone(application)
 
     def test_restart_instance(self):
-        self.client.delete.return_value = mock_response(
+        self.client.delete.return_value = self.mock_response(
             '/v2/apps/app_id/instances/666',
             HTTPStatus.NO_CONTENT, None)
         self.client.v2.apps.restart_instance('app_id', 666)
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
     def test_create(self):
-        self.client.post.return_value = mock_response(
+        self.client.post.return_value = self.mock_response(
             '/v2/apps',
             HTTPStatus.CREATED,
             None,
@@ -196,7 +196,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(application)
 
     def test_update(self):
-        self.client.put.return_value = mock_response(
+        self.client.put.return_value = self.mock_response(
             '/v2/apps/app_id',
             HTTPStatus.CREATED,
             None,
@@ -210,14 +210,14 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(application)
 
     def test_remove(self):
-        self.client.delete.return_value = mock_response(
+        self.client.delete.return_value = self.mock_response(
             '/v2/apps/app_id',
             HTTPStatus.NO_CONTENT, None)
         self.client.v2.apps.remove('app_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
     def test_restage(self):
-        self.client.post.return_value = mock_response(
+        self.client.post.return_value = self.mock_response(
             '/v2/apps/app_id/restage',
             HTTPStatus.CREATED,
             None,
@@ -227,18 +227,18 @@ class TestApps(unittest.TestCase, AbstractTestCase):
 
     def test_entity(self):
         self.client.get.side_effect = [
-            mock_response(
+            self.mock_response(
                 '/v2/apps/app_id',
                 HTTPStatus.OK,
                 None,
                 'v2', 'apps', 'GET_{id}_response.json'),
-            mock_response(
+            self.mock_response(
                 '/v2/spaces/space_id',
                 HTTPStatus.OK,
                 None,
                 'v2', 'spaces', 'GET_{id}_response.json')
             ,
-            mock_response(
+            self.mock_response(
                 '/v2/routes',
                 HTTPStatus.OK,
                 None,
@@ -256,10 +256,10 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_main_list_apps(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.get.return_value = mock_response('/v2/apps',
-                                                         HTTPStatus.OK,
-                                                         None,
-                                                         'v2', 'apps', 'GET_response.json')
+            self.client.get.return_value = self.mock_response('/v2/apps',
+                                                              HTTPStatus.OK,
+                                                              None,
+                                                              'v2', 'apps', 'GET_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
 
@@ -267,9 +267,9 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_main_delete_apps(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.delete.return_value = mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81',
-                                                            HTTPStatus.NO_CONTENT,
-                                                            None)
+            self.client.delete.return_value = self.mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81',
+                                                                 HTTPStatus.NO_CONTENT,
+                                                                 None)
             main.main()
             self.client.delete.assert_called_with(self.client.delete.return_value.url)
 
@@ -277,10 +277,10 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_main_get_app(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.get.return_value = mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81',
-                                                         HTTPStatus.OK,
-                                                         None,
-                                                         'v2', 'apps', 'GET_{id}_response.json')
+            self.client.get.return_value = self.mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81',
+                                                              HTTPStatus.OK,
+                                                              None,
+                                                              'v2', 'apps', 'GET_{id}_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
 
@@ -288,10 +288,10 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_main_restage_app(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.post.return_value = mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81/restage',
-                                                          HTTPStatus.CREATED,
-                                                          None,
-                                                          'v2', 'apps', 'POST_{id}_restage_response.json')
+            self.client.post.return_value = self.mock_response('/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81/restage',
+                                                               HTTPStatus.CREATED,
+                                                               None,
+                                                               'v2', 'apps', 'POST_{id}_restage_response.json')
             main.main()
             self.client.post.assert_called_with(self.client.post.return_value.url, json=None)
 
@@ -299,7 +299,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
     def test_main_restart_app_instance(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.delete.return_value = mock_response(
+            self.client.delete.return_value = self.mock_response(
                 '/v2/apps/906775ea-622e-4bc7-af5d-9aab3b652f81/instances/666',
                 HTTPStatus.NO_CONTENT,
                 None)

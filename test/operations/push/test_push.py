@@ -5,7 +5,6 @@ from unittest.mock import patch, MagicMock
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.operations.push.push import PushOperation
-from fake_requests import get_fixtures_path
 
 
 class TestPushOperation(TestCase, AbstractTestCase):
@@ -44,8 +43,9 @@ class TestPushOperation(TestCase, AbstractTestCase):
         host = PushOperation._to_host('idzone-3.0.7-rec-tb1_bobby')
         self.assertEquals('idzone-307-rec-tb1-bobby', host)
 
-    @patch.object(sys, 'argv', ['main', 'push_app', get_fixtures_path('fake', 'manifest_main.yml'), '-space_guid',
-                                'space_id'])
+    @patch.object(sys, 'argv',
+                  ['main', 'push_app', AbstractTestCase.get_fixtures_path('fake', 'manifest_main.yml'), '-space_guid',
+                   'space_id'])
     def test_main_push(self):
         class FakeOperation(object):
             def __init__(self):
@@ -57,4 +57,4 @@ class TestPushOperation(TestCase, AbstractTestCase):
                    new=lambda: client), \
              patch('cloudfoundry_client.main.operation_commands.PushOperation', new=lambda c: push_operation):
             main.main()
-            push_operation.push.assert_called_with('space_id', get_fixtures_path('fake', 'manifest_main.yml'))
+            push_operation.push.assert_called_with('space_id', self.get_fixtures_path('fake', 'manifest_main.yml'))

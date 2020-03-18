@@ -1,11 +1,14 @@
 import json
+import os
 from http import HTTPStatus
+from typing import Optional
 from unittest.mock import MagicMock, patch
 
 from oauth2_client.credentials_manager import CredentialManager
 
 from cloudfoundry_client.client import CloudFoundryClient
-from fake_requests import TARGET_ENDPOINT, mock_response
+from fake_requests import MockResponse
+
 
 
 def mock_cloudfoundry_client_class():
@@ -23,14 +26,68 @@ def mock_cloudfoundry_client_class():
 
 
 class AbstractTestCase(object):
+    TARGET_ENDPOINT = "http://somewhere.org"
+    AUTHORIZATION_ENDPOINT = "http://login.somewhere.org"
+    TOKEN_ENDPOINT = "http://token.somewhere.org"
+    DOPPLER_ENDPOINT = 'wss://doppler.nd-cfapi.itn.ftgroup:443'
+    LOG_STREAM_ENDPOINT = 'https://log-stream.nd-cfapi.itn.ftgroup'
+    API_V2_VERSION = "2.141.0"
+    API_V3_VERSION = "3.76.0"
+
     @classmethod
     def mock_client_class(cls):
         mock_cloudfoundry_client_class()
 
     def build_client(self):
         with patch('cloudfoundry_client.client.requests') as fake_requests:
-            fake_info_response = mock_response('/v2/info', HTTPStatus.OK, None)
-            fake_info_response.text = json.dumps(dict(api_version='2.X',
-                                                      authorization_endpoint=TARGET_ENDPOINT))
-            fake_requests.get.return_value = fake_info_response
-            self.client = CloudFoundryClient(TARGET_ENDPOINT)
+            self._mock_info_calls(fake_requests)
+            self.client = CloudFoundryClient(self.TARGET_ENDPOINT)
+
+    @staticmethod
+    def _mock_info_calls(requests):
+        requests.get.side_effect = [
+            MockResponse(
+                '%s/v2/info' % AbstractTestCase.TARGET_ENDPOINT,
+                status_code=HTTPStatus.OK,
+                text=json.dumps(dict(authorization_endpoint=AbstractTestCase.AUTHORIZATION_ENDPOINT,
+                                     token_endpoint=AbstractTestCase.TOKEN_ENDPOINT))),
+            MockResponse(
+                '%s/' % AbstractTestCase.TARGET_ENDPOINT,
+                status_code=HTTPStatus.OK,
+                text=json.dumps(dict(links={
+                    'self': dict(href=AbstractTestCase.TARGET_ENDPOINT),
+                    'cloud_controller_v2': dict(href='%s/v2' % AbstractTestCase.TARGET_ENDPOINT,
+                                                meta=dict(version=AbstractTestCase.API_V2_VERSION)),
+                    'cloud_controller_v3': dict(href='%s/v3' % AbstractTestCase.TARGET_ENDPOINT,
+                                                meta=dict(version=AbstractTestCase.API_V3_VERSION)),
+                    'logging': dict(href=AbstractTestCase.DOPPLER_ENDPOINT),
+                    'log_stream': dict(href=AbstractTestCase.LOG_STREAM_ENDPOINT),
+                    'app_ssh': dict(href='ssh.nd-cfapi.itn.ftgroup:80'),
+                    'uaa': dict(href='https://uaa.nd-cfapi.itn.ftgroup'),
+                    'network_policy_v0': dict(
+                        href='https://api.nd-cfapi.itn.ftgroup/networking/v0/external'),
+                    'network_policy_v1': dict(
+                        href='https://api.nd-cfapi.itn.ftgroup/networking/v1/external')
+                })))
+        ]
+
+    @staticmethod
+    def get_fixtures_path(*paths):
+        return os.path.join(os.path.dirname(__file__), 'fixtures', *paths)
+
+    @staticmethod
+    def mock_response(uri: str, status_code: HTTPStatus, headers: Optional[dict], *path_parts: str):
+        if len(path_parts) > 0:
+            file_name = path_parts[len(path_parts) - 1]
+            extension_idx = file_name.rfind('.')
+            binary_file = extension_idx >= 0 and file_name[extension_idx:] == '.bin'
+            with(open(AbstractTestCase.get_fixtures_path(*path_parts),
+                      'rb' if binary_file else 'r')) as f:
+                return MockResponse(url='%s%s' % (AbstractTestCase.TARGET_ENDPOINT, uri),
+                                    status_code=status_code,
+                                    text=f.read(),
+                                    headers=headers)
+        else:
+            return MockResponse('%s%s' % (AbstractTestCase.TARGET_ENDPOINT, uri),
+                                status_code,
+                                '')

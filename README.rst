@@ -68,6 +68,26 @@ To instantiate the client, nothing easier
     client.refresh_token = 'refresh-token'
     client._access_token = 'access-token'
 
+It can also be instantiated with oauth code flow if you possess a dedicated oauth application with its redirection
+
+.. code-block:: python
+    from flask import request
+    from cloudfoundry_client.client import CloudFoundryClient
+    target_endpoint = 'https://somewhere.org'
+    proxy = dict(http=os.environ.get('HTTP_PROXY', ''), https=os.environ.get('HTTPS_PROXY', ''))
+    client = CloudFoundryClient(target_endpoint, proxy=proxy, verify=False, client_id='my-client-id', client_secret='my-client-secret')
+
+    @app.route('/login')
+    def login():
+        global client
+        return redirect(client.generate_authorize_url('http://localhost:9999/code', '666'))
+
+    @app.route('/code')
+    def code():
+        global client
+        client.init_authorize_code_process('http://localhost:9999/code', request.args.get('code'))
+
+
 And then you can use it as follows:
 
 .. code-block:: python

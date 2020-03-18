@@ -6,7 +6,6 @@ from unittest.mock import call, patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
-from fake_requests import mock_response
 
 
 class TestSpaces(unittest.TestCase, AbstractTestCase):
@@ -18,16 +17,16 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_list(self):
-        self.client.get.return_value = mock_response('/v2/spaces?q=organization_guid%3Aorg_id',
-                                                     HTTPStatus.OK,
-                                                     None,
-                                                     'v2', 'spaces', 'GET_response.json')
+        self.client.get.return_value = self.mock_response('/v2/spaces?q=organization_guid%3Aorg_id',
+                                                          HTTPStatus.OK,
+                                                          None,
+                                                          'v2', 'spaces', 'GET_response.json')
         cpt = reduce(lambda increment, _: increment + 1, self.client.v2.spaces.list(organization_guid='org_id'), 0)
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(cpt, 1)
 
     def test_get(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/spaces/space_id',
             HTTPStatus.OK,
             None,
@@ -38,22 +37,22 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
 
     def test_entity(self):
         self.client.get.side_effect = [
-            mock_response(
+            self.mock_response(
                 '/v2/spaces/space_id',
                 HTTPStatus.OK,
                 None,
                 'v2', 'spaces', 'GET_{id}_response.json'),
-            mock_response(
+            self.mock_response(
                 '/v2/organizations/d7d77408-a250-45e3-8de5-71fcf199bbab',
                 HTTPStatus.OK,
                 None,
                 'v2', 'organizations', 'GET_{id}_response.json'),
-            mock_response(
+            self.mock_response(
                 '/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9/apps',
                 HTTPStatus.OK,
                 None,
                 'v2', 'apps', 'GET_response.json'),
-            mock_response(
+            self.mock_response(
                 '/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9/service_instances',
                 HTTPStatus.OK,
                 None,
@@ -72,10 +71,10 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
     def test_main_list_spaces(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.get.return_value = mock_response('/v2/spaces',
-                                                         HTTPStatus.OK,
-                                                         None,
-                                                         'v2', 'spaces', 'GET_response.json')
+            self.client.get.return_value = self.mock_response('/v2/spaces',
+                                                              HTTPStatus.OK,
+                                                              None,
+                                                              'v2', 'spaces', 'GET_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
 
@@ -83,9 +82,9 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
     def test_main_get_spaces(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.get.return_value = mock_response('/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9',
-                                                         HTTPStatus.OK,
-                                                         None,
-                                                         'v2', 'spaces', 'GET_{id}_response.json')
+            self.client.get.return_value = self.mock_response('/v2/spaces/2d745a4b-67e3-4398-986e-2adbcf8f7ec9',
+                                                              HTTPStatus.OK,
+                                                              None,
+                                                              'v2', 'spaces', 'GET_{id}_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)

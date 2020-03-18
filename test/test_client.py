@@ -7,7 +7,6 @@ from urllib.parse import quote
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.client import CloudFoundryClient
 from fake_requests import MockResponse, MockSession, FakeRequests
-from fake_requests import TARGET_ENDPOINT
 
 
 class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
@@ -21,15 +20,12 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
         with patch('oauth2_client.credentials_manager.requests', new=requests), \
              patch('cloudfoundry_client.client.requests', new=requests):
             requests.Session.return_value = session
-            requests.get.return_value = MockResponse('%s/v2/info' % TARGET_ENDPOINT,
-                                                     status_code=HTTPStatus.OK,
-                                                     text=json.dumps(dict(api_version='2.1',
-                                                                          authorization_endpoint=TARGET_ENDPOINT)))
-            requests.post.return_value = MockResponse('%s/oauth/token' % TARGET_ENDPOINT,
+            self._mock_info_calls(requests)
+            requests.post.return_value = MockResponse('%s/oauth/token' % self.TOKEN_ENDPOINT,
                                                       status_code=HTTPStatus.OK,
                                                       text=json.dumps(dict(access_token='access-token',
                                                                            refresh_token='refresh-token')))
-            client = CloudFoundryClient(TARGET_ENDPOINT, token_format='opaque')
+            client = CloudFoundryClient(self.TARGET_ENDPOINT, token_format='opaque')
             client.init_with_user_credentials('somebody', 'p@s$w0rd')
             self.assertEqual('Bearer access-token', session.headers.get('Authorization'))
             requests.post.assert_called_with(requests.post.return_value.url,
@@ -48,15 +44,12 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
         with patch('oauth2_client.credentials_manager.requests', new=requests), \
              patch('cloudfoundry_client.client.requests', new=requests):
             requests.Session.return_value = session
-            requests.get.return_value = MockResponse('%s/v2/info' % TARGET_ENDPOINT,
-                                                     status_code=HTTPStatus.OK,
-                                                     text=json.dumps(dict(api_version='2.1',
-                                                                          authorization_endpoint=TARGET_ENDPOINT)))
-            requests.post.return_value = MockResponse('%s/oauth/token' % TARGET_ENDPOINT,
+            self._mock_info_calls(requests)
+            requests.post.return_value = MockResponse('%s/oauth/token' % self.TOKEN_ENDPOINT,
                                                       status_code=HTTPStatus.OK,
                                                       text=json.dumps(dict(access_token='access-token',
                                                                            refresh_token='refresh-token')))
-            client = CloudFoundryClient(TARGET_ENDPOINT, token_format='opaque')
+            client = CloudFoundryClient(self.TARGET_ENDPOINT, token_format='opaque')
             client.init_with_token('refresh-token')
             self.assertEqual('Bearer access-token', session.headers.get('Authorization'))
             requests.post.assert_called_with(requests.post.return_value.url,
@@ -74,16 +67,13 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
         with patch('oauth2_client.credentials_manager.requests', new=requests), \
              patch('cloudfoundry_client.client.requests', new=requests):
             requests.Session.return_value = session
-            requests.get.return_value = MockResponse('%s/v2/info' % TARGET_ENDPOINT,
-                                                     status_code=HTTPStatus.OK,
-                                                     text=json.dumps(dict(api_version='2.1',
-                                                                          authorization_endpoint=TARGET_ENDPOINT)))
-            requests.post.return_value = MockResponse('%s/oauth/token' % TARGET_ENDPOINT,
+            self._mock_info_calls(requests)
+            requests.post.return_value = MockResponse('%s/oauth/token' % self.TOKEN_ENDPOINT,
                                                       status_code=HTTPStatus.OK,
                                                       text=json.dumps(dict(access_token='access-token',
                                                                            refresh_token='refresh-token')))
-            client = CloudFoundryClient(TARGET_ENDPOINT, login_hint=quote(json.dumps(dict(origin='uaa'),
-                                                                                     separators=(',', ':'))))
+            client = CloudFoundryClient(self.TARGET_ENDPOINT, login_hint=quote(json.dumps(dict(origin='uaa'),
+                                                                                          separators=(',', ':'))))
             client.init_with_user_credentials('somebody', 'p@s$w0rd')
             self.assertEqual('Bearer access-token', session.headers.get('Authorization'))
             requests.post.assert_called_with(requests.post.return_value.url,
@@ -95,3 +85,16 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
                                              headers=dict(Accept='application/json', Authorization='Basic Y2Y6'),
                                              proxies=dict(http='', https=''),
                                              verify=True)
+
+    def test_get_info(self):
+        requests = FakeRequests()
+        session = MockSession()
+        with patch('oauth2_client.credentials_manager.requests', new=requests), \
+             patch('cloudfoundry_client.client.requests', new=requests):
+            requests.Session.return_value = session
+            self._mock_info_calls(requests)
+            info = CloudFoundryClient._get_info(self.TARGET_ENDPOINT)
+            self.assertEqual(info.api_endpoint, self.TARGET_ENDPOINT)
+            self.assertEqual(info.api_v2_version, self.API_V2_VERSION)
+            self.assertEqual(info.doppler_endpoint, self.DOPPLER_ENDPOINT)
+            self.assertEqual(info.log_stream_endpoint, self.LOG_STREAM_ENDPOINT)

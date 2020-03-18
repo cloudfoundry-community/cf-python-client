@@ -6,7 +6,6 @@ from unittest.mock import patch
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.main import main
 from cloudfoundry_client.v3.entities import Entity
-from fake_requests import mock_response
 
 
 class TestTasks(unittest.TestCase, AbstractTestCase):
@@ -18,10 +17,10 @@ class TestTasks(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_list(self):
-        self.client.get.return_value = mock_response('/v3/tasks',
-                                                     HTTPStatus.OK,
-                                                     None,
-                                                     'v3', 'tasks', 'GET_response.json')
+        self.client.get.return_value = self.mock_response('/v3/tasks',
+                                                          HTTPStatus.OK,
+                                                          None,
+                                                          'v3', 'tasks', 'GET_response.json')
         all_tasks = [task for task in self.client.v3.tasks.list()]
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(2, len(all_tasks))
@@ -29,17 +28,17 @@ class TestTasks(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(all_tasks[0], Entity)
 
     def test_get(self):
-        self.client.get.return_value = mock_response('/v3/tasks/task_id',
-                                                     HTTPStatus.OK,
-                                                     None,
-                                                     'v3', 'tasks', 'GET_{id}_response.json')
+        self.client.get.return_value = self.mock_response('/v3/tasks/task_id',
+                                                          HTTPStatus.OK,
+                                                          None,
+                                                          'v3', 'tasks', 'GET_{id}_response.json')
         task = self.client.v3.tasks.get('task_id')
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual("migrate", task['name'])
         self.assertIsInstance(task, Entity)
 
     def test_create(self):
-        self.client.post.return_value = mock_response(
+        self.client.post.return_value = self.mock_response(
             '/v3/apps/app_guid/tasks',
             HTTPStatus.CREATED,
             None,
@@ -51,7 +50,7 @@ class TestTasks(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(task)
 
     def test_cancel(self):
-        self.client.post.return_value = mock_response(
+        self.client.post.return_value = self.mock_response(
             '/v3/tasks/task_guid/actions/cancel',
             HTTPStatus.ACCEPTED,
             None,
@@ -64,10 +63,10 @@ class TestTasks(unittest.TestCase, AbstractTestCase):
     def test_list_tasks(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.get.return_value = mock_response('/v3/tasks?names=task_name',
-                                                         HTTPStatus.OK,
-                                                         None,
-                                                         'v3', 'tasks', 'GET_response.json')
+            self.client.get.return_value = self.mock_response('/v3/tasks?names=task_name',
+                                                              HTTPStatus.OK,
+                                                              None,
+                                                              'v3', 'tasks', 'GET_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
 
@@ -75,10 +74,10 @@ class TestTasks(unittest.TestCase, AbstractTestCase):
     def test_create_task(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.post.return_value = mock_response('/v3/apps/app_id/tasks',
-                                                          HTTPStatus.CREATED,
-                                                          None,
-                                                          'v3', 'tasks', 'POST_response.json')
+            self.client.post.return_value = self.mock_response('/v3/apps/app_id/tasks',
+                                                               HTTPStatus.CREATED,
+                                                               None,
+                                                               'v3', 'tasks', 'POST_response.json')
             main.main()
             self.client.post.assert_called_with(self.client.post.return_value.url,
                                                 files=None,
@@ -88,9 +87,9 @@ class TestTasks(unittest.TestCase, AbstractTestCase):
     def test_cancel_task(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.post.return_value = mock_response('/v3/tasks/task_id/actions/cancel',
-                                                          HTTPStatus.CREATED,
-                                                          None,
-                                                          'v3', 'tasks', 'POST_{id}_actions_cancel_response.json')
+            self.client.post.return_value = self.mock_response('/v3/tasks/task_id/actions/cancel',
+                                                               HTTPStatus.CREATED,
+                                                               None,
+                                                               'v3', 'tasks', 'POST_{id}_actions_cancel_response.json')
             main.main()
             self.client.post.assert_called_with(self.client.post.return_value.url, files=None, json=None)

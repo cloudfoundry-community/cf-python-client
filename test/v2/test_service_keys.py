@@ -7,7 +7,6 @@ from unittest.mock import patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
-from fake_requests import mock_response
 
 
 class TestServiceKeys(unittest.TestCase, AbstractTestCase):
@@ -19,7 +18,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_list(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/service_keys?q=service_instance_guid%3Ainstance_guid',
             HTTPStatus.OK,
             None,
@@ -30,7 +29,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
         self.assertEqual(cpt, 1)
 
     def test_get(self):
-        self.client.get.return_value = mock_response(
+        self.client.get.return_value = self.mock_response(
             '/v2/service_keys/key_id',
             HTTPStatus.OK,
             None,
@@ -40,7 +39,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(result)
 
     def test_create(self):
-        self.client.post.return_value = mock_response(
+        self.client.post.return_value = self.mock_response(
             '/v2/service_keys',
             HTTPStatus.CREATED,
             None,
@@ -53,7 +52,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(service_key)
 
     def test_delete(self):
-        self.client.delete.return_value = mock_response(
+        self.client.delete.return_value = self.mock_response(
             '/v2/service_keys/key_id',
             HTTPStatus.NO_CONTENT,
             None)
@@ -64,10 +63,10 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
     def test_main_list_service_keys(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.get.return_value = mock_response('/v2/service_keys',
-                                                         HTTPStatus.OK,
-                                                         None,
-                                                         'v2', 'service_keys', 'GET_response.json')
+            self.client.get.return_value = self.mock_response('/v2/service_keys',
+                                                              HTTPStatus.OK,
+                                                              None,
+                                                              'v2', 'service_keys', 'GET_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
 
@@ -75,10 +74,10 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
     def test_main_get_service_key(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.get.return_value = mock_response('/v2/service_keys/67755c27-28ed-4087-9688-c07d92f3bcc9',
-                                                         HTTPStatus.OK,
-                                                         None,
-                                                         'v2', 'service_keys', 'GET_{id}_response.json')
+            self.client.get.return_value = self.mock_response('/v2/service_keys/67755c27-28ed-4087-9688-c07d92f3bcc9',
+                                                              HTTPStatus.OK,
+                                                              None,
+                                                              'v2', 'service_keys', 'GET_{id}_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
 
@@ -88,7 +87,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
     def test_main_create_service_key(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.post.return_value = mock_response(
+            self.client.post.return_value = self.mock_response(
                 '/v2/service_keys',
                 HTTPStatus.CREATED,
                 None,
@@ -103,7 +102,7 @@ class TestServiceKeys(unittest.TestCase, AbstractTestCase):
     def test_main_delete_service_key(self):
         with patch('cloudfoundry_client.main.main.build_client_from_configuration',
                    new=lambda: self.client):
-            self.client.delete.return_value = mock_response(
+            self.client.delete.return_value = self.mock_response(
                 '/v2/service_keys/67755c27-28ed-4087-9688-c07d92f3bcc9',
                 HTTPStatus.NO_CONTENT,
                 None)
