@@ -1,3 +1,4 @@
+aiohttp==3.6.2
 protobuf==3.6.1
 oauth2-client==1.2.0
 websocket-client==0.53.0

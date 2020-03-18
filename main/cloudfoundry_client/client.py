@@ -7,6 +7,7 @@ from oauth2_client.credentials_manager import CredentialManager, ServiceInformat
 from requests import Response
 
 from cloudfoundry_client.doppler.client import DopplerClient
+from cloudfoundry_client.rlpgateway.client import RLPGatewayClient
 from cloudfoundry_client.networking.v1.external.policies import PolicyManager
 from cloudfoundry_client.errors import InvalidStatusCode
 from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
@@ -36,11 +37,12 @@ _logger = logging.getLogger(__name__)
 
 
 class Info:
-    def __init__(self, api_version: str, authorization_endpoint: str, api_endpoint: str, doppler_endpoint: str):
+    def __init__(self, api_version: str, authorization_endpoint: str, api_endpoint: str, doppler_endpoint: str, log_stream_endpoint: str):
         self.api_version = api_version
         self.authorization_endpoint = authorization_endpoint
         self.api_endpoint = api_endpoint
         self.doppler_endpoint = doppler_endpoint
+        self.log_stream_endpoint = log_stream_endpoint
 
 
 class NetworkingV1External(object):
@@ -126,6 +128,11 @@ class CloudFoundryClient(CredentialManager):
                                           'http' if info.doppler_endpoint.startswith('ws://') else 'https'],
                                       self.service_information.verify,
                                       self) if info.doppler_endpoint is not None else None
+        self._rlpgateway = RLPGatewayClient(info.log_stream_endpoint,
+                                            self.proxies['https'],
+                                            self.service_information.verify,
+                                            self,
+                                            ) if info.log_stream_endpoint is not None else None
         self.networking_v1_external = NetworkingV1External(target_endpoint_trimmed, self)
         self.info = info
 
@@ -137,17 +144,31 @@ class CloudFoundryClient(CredentialManager):
 
             return self._doppler
 
+    @property
+    def rlpgateway(self):
+        if self._rlpgateway is None:
+            raise NotImplementedError('No RLP gateway endpoint for this instance')
+        else:
+
+            return self._rlpgateway
+
     @staticmethod
     def _get_info(target_endpoint: str, proxy: Optional[dict] = None, verify: bool = True) -> Info:
         info_response = CloudFoundryClient._check_response(requests.get('%s/v2/info' % target_endpoint,
                                                                         proxies=proxy if proxy is not None else dict(
                                                                             http='', https=''),
                                                                         verify=verify))
+        links_response = CloudFoundryClient._check_response(requests.get('%s/' % target_endpoint,
+                                                                        proxies=proxy if proxy is not None else dict(
+                                                                            http='', https=''),
+                                                                        verify=verify))
         info = info_response.json()
+        links = links_response.json()
         return Info(info['api_version'],
                     info['authorization_endpoint'],
                     target_endpoint,
-                    info.get('doppler_logging_endpoint'))
+                    info.get('doppler_logging_endpoint'),
+                    links['links'].get('log_stream').get('href'))
 
     @staticmethod
     def _is_token_expired(response: Response) -> bool:

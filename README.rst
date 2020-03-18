@@ -262,6 +262,21 @@ Logs can also be streamed using a websocket as follows:
         print(log)
 
 
+Logs can also be streamed directly from RLP gateway:
+
+.. code-block:: python
+
+    from cloudfoundry_client.client import CloudFoundryClient
+    target_endpoint = 'https://somewhere.org'
+    proxy = dict(http=os.environ.get('HTTP_PROXY', ''), https=os.environ.get('HTTPS_PROXY', ''))
+    rlp_client = CloudFoundryClient(target_endpoint, client_id='client_id', client_secret='client_secret', verify=False)
+    # init with client credentials
+    rlp_client.init_with_client_credentials()
+
+    async for log in rlp_client.rlpgateway.stream_logs('app-guid'):
+        print(log)
+
+
 Command Line Interface
 ----------------------
 
