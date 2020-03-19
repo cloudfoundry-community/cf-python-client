@@ -71,6 +71,7 @@ To instantiate the client, nothing easier
 It can also be instantiated with oauth code flow if you possess a dedicated oauth application with its redirection
 
 .. code-block:: python
+
     from flask import request
     from cloudfoundry_client.client import CloudFoundryClient
     target_endpoint = 'https://somewhere.org'
