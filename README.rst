@@ -286,16 +286,23 @@ Logs can also be streamed directly from RLP gateway:
 
 .. code-block:: python
 
+    import asyncio
     from cloudfoundry_client.client import CloudFoundryClient
+
     target_endpoint = 'https://somewhere.org'
     proxy = dict(http=os.environ.get('HTTP_PROXY', ''), https=os.environ.get('HTTPS_PROXY', ''))
     rlp_client = CloudFoundryClient(target_endpoint, client_id='client_id', client_secret='client_secret', verify=False)
     # init with client credentials
     rlp_client.init_with_client_credentials()
 
-    async for log in rlp_client.rlpgateway.stream_logs('app-guid'):
-        print(log)
+    async def get_logs_for_app(rlp_client, app_guid):
+        async for log in rlp_client.rlpgateway.stream_logs(app_guid):
+            print(log)
 
+    loop = asyncio.get_event_loop()
+    loop.create_task(get_logs_for_app(rlp_client, "app_guid"))
+    loop.run_forever()
+    loop.close()
 
 Command Line Interface
 ----------------------

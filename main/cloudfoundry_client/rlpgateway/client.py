@@ -31,12 +31,12 @@ class RLPGatewayClient(object):
     async def stream_logs(self, app_guid):
         url = '%s/v2/read?log&source_id=%s' % (self.rlp_gateway_endpoint, app_guid)
         async with aiohttp.ClientSession() as session:
-            response = await session.get(
+            async with session.get(
                 url=url,
                 headers={"Authorization": self.credentials_manager._access_token},
-            )
-            if response.status == 204:
-                yield {}
-            else:
-                async for data in response.content.iter_any():
-                    yield data
+            ) as response:
+                if response.status == 204:
+                    yield {}
+                else:
+                    async for data in response.content.iter_any():
+                        yield data
