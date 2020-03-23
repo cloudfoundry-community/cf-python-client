@@ -299,7 +299,7 @@ Logs can also be streamed directly from RLP Gateway:
     async def get_logs_for_app(rlp_client, app_guid):
         async for log in rlp_client.rlpgateway.stream_logs(app_guid,
                                                            params=['counter', 'gauge', 'counter.name=request_count'],
-                                                           headers={'User-Agent': 'test'})):
+                                                           headers={'User-Agent': 'cf-python-client'})):
             print(log)
 
     loop = asyncio.get_event_loop()
