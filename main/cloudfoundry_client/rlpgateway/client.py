@@ -36,10 +36,11 @@ class RLPGatewayClient(object):
         if "headers" in kwargs:
             headers.update(kwargs["headers"])
         if "params" in kwargs:
-            for param in kwargs["params"]:
-                url = f"{url}&{param}"
+            params = kwargs["params"]
+        else:
+            params = None
         async with aiohttp.ClientSession(headers=headers) as session:
-            async with session.get(url=url) as response:
+            async with session.get(url=url, params=params) as response:
                 if response.status == 204:
                     yield {}
                 else:
