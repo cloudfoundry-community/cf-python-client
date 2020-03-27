@@ -282,8 +282,9 @@ Logs can also be streamed using a websocket as follows:
         # read message infinitely (use break to exit... it will close the underlying websocket)
         print(log)
 
+..
 
-Logs can also be streamed directly from RLP gateway:
+Logs can also be streamed directly from RLP Gateway:
 
 .. code-block:: python
 
@@ -297,13 +298,16 @@ Logs can also be streamed directly from RLP gateway:
     rlp_client.init_with_client_credentials()
 
     async def get_logs_for_app(rlp_client, app_guid):
-        async for log in rlp_client.rlpgateway.stream_logs(app_guid):
+        async for log in rlp_client.rlpgateway.stream_logs(app_guid,
+                                                           params={'counter': '', 'gauge': ''},
+                                                           headers={'User-Agent': 'cf-python-client'})):
             print(log)
 
     loop = asyncio.get_event_loop()
     loop.create_task(get_logs_for_app(rlp_client, "app_guid"))
     loop.run_forever()
     loop.close()
+..
 
 Command Line Interface
 ----------------------
