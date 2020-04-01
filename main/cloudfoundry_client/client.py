@@ -41,8 +41,8 @@ class Info:
                  authorization_endpoint: str,
                  token_endpoint: str,
                  api_endpoint: str,
-                 doppler_endpoint: str,
-                 log_stream_endpoint: str):
+                 doppler_endpoint: Optional[str],
+                 log_stream_endpoint: Optional[str]):
         self.api_v2_version = api_v2_version
         self.authorization_endpoint = authorization_endpoint
         self.token_endpoint = token_endpoint
@@ -166,17 +166,21 @@ class CloudFoundryClient(CredentialManager):
                                                                             http='', https=''),
                                                                         verify=verify))
         info = info_response.json()
-        links_response = CloudFoundryClient._check_response(requests.get('%s/' % target_endpoint,
+        root_response = CloudFoundryClient._check_response(requests.get('%s/' % target_endpoint,
                                                                          proxies=proxy if proxy is not None else dict(
                                                                              http='', https=''),
                                                                          verify=verify))
-        links = links_response.json()
-        return Info(links['links']['cloud_controller_v2']['meta']['version'],
+        root_info = root_response.json()
+
+        root_links = root_info['links']
+        logging = root_links.get('logging')
+        log_stream = root_links.get('log_stream')
+        return Info(root_links['cloud_controller_v2']['meta']['version'],
                     info['authorization_endpoint'],
                     info['token_endpoint'],
                     target_endpoint,
-                    links['links'].get('logging').get('href'),
-                    links['links'].get('log_stream').get('href'))
+                    logging.get('href') if logging is not None else None,
+                    log_stream.get('href') if log_stream is not None else None)
 
     @staticmethod
     def _is_token_expired(response: Response) -> bool:
