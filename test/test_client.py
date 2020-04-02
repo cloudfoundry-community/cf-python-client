@@ -14,6 +14,26 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
     def setUpClass(cls):
         cls.mock_client_class()
 
+    def test_build_client_when_no_log_stream(self):
+        requests = FakeRequests()
+        session = MockSession()
+        with patch('oauth2_client.credentials_manager.requests', new=requests), \
+             patch('cloudfoundry_client.client.requests', new=requests):
+            requests.Session.return_value = session
+            self._mock_info_calls(requests, with_log_streams=False)
+            client = CloudFoundryClient(self.TARGET_ENDPOINT, token_format='opaque')
+            self.assertRaises(NotImplementedError, lambda: client.rlpgateway)
+
+    def test_build_client_when_no_doppler(self):
+        requests = FakeRequests()
+        session = MockSession()
+        with patch('oauth2_client.credentials_manager.requests', new=requests), \
+             patch('cloudfoundry_client.client.requests', new=requests):
+            requests.Session.return_value = session
+            self._mock_info_calls(requests, with_doppler=False)
+            client = CloudFoundryClient(self.TARGET_ENDPOINT, token_format='opaque')
+            self.assertRaises(NotImplementedError, lambda: client.doppler)
+
     def test_grant_password_request_with_token_format_opaque(self):
         requests = FakeRequests()
         session = MockSession()

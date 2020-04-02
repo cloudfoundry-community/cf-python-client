@@ -10,7 +10,6 @@ from cloudfoundry_client.client import CloudFoundryClient
 from fake_requests import MockResponse
 
 
-
 def mock_cloudfoundry_client_class():
     if not getattr(CloudFoundryClient, 'CLASS_MOCKED', False):
         mocked_attributes = ['get', 'post', 'patch', 'put', 'delete']
@@ -44,7 +43,7 @@ class AbstractTestCase(object):
             self.client = CloudFoundryClient(self.TARGET_ENDPOINT)
 
     @staticmethod
-    def _mock_info_calls(requests):
+    def _mock_info_calls(requests, with_doppler: bool = True, with_log_streams: bool = True):
         requests.get.side_effect = [
             MockResponse(
                 '%s/v2/info' % AbstractTestCase.TARGET_ENDPOINT,
@@ -60,8 +59,8 @@ class AbstractTestCase(object):
                                                 meta=dict(version=AbstractTestCase.API_V2_VERSION)),
                     'cloud_controller_v3': dict(href='%s/v3' % AbstractTestCase.TARGET_ENDPOINT,
                                                 meta=dict(version=AbstractTestCase.API_V3_VERSION)),
-                    'logging': dict(href=AbstractTestCase.DOPPLER_ENDPOINT),
-                    'log_stream': dict(href=AbstractTestCase.LOG_STREAM_ENDPOINT),
+                    'logging': dict(href=AbstractTestCase.DOPPLER_ENDPOINT) if with_doppler else None,
+                    'log_stream': dict(href=AbstractTestCase.LOG_STREAM_ENDPOINT) if with_log_streams else None,
                     'app_ssh': dict(href='ssh.nd-cfapi.itn.ftgroup:80'),
                     'uaa': dict(href='https://uaa.nd-cfapi.itn.ftgroup'),
                     'network_policy_v0': dict(
