@@ -41,5 +41,5 @@ class RLPGatewayClient(object):
                 if response.status == 204:
                     yield {}
                 else:
-                    async for data in response.content.iter_any():
+                    async for data in response.content:
                         yield data
