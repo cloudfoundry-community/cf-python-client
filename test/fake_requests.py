@@ -17,8 +17,8 @@ class MockSession(object):
 
 
 class MockResponse(object):
-    def __init__(self, url: str, status_code: HTTPStatus, text: str, headers: dict = None):
-        self.status_code = status_code.value
+    def __init__(self, url: str, status_code: int, text: str, headers: dict = None):
+        self.status_code = status_code
         self.url = url
         self.text = text
         self.headers = dict()

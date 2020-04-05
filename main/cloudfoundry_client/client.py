@@ -247,6 +247,6 @@ class CloudFoundryClient(CredentialManager):
         else:
             try:
                 body = response.json()
-            except Exception as _:
+            except ValueError as _:
                 body = response.text
-            raise InvalidStatusCode(response.status_code, body)
+            raise InvalidStatusCode(HTTPStatus(response.status_code), body)
