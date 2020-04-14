@@ -47,12 +47,12 @@ class AbstractTestCase(object):
         requests.get.side_effect = [
             MockResponse(
                 '%s/v2/info' % AbstractTestCase.TARGET_ENDPOINT,
-                status_code=HTTPStatus.OK,
+                status_code=HTTPStatus.OK.value,
                 text=json.dumps(dict(authorization_endpoint=AbstractTestCase.AUTHORIZATION_ENDPOINT,
                                      token_endpoint=AbstractTestCase.TOKEN_ENDPOINT))),
             MockResponse(
                 '%s/' % AbstractTestCase.TARGET_ENDPOINT,
-                status_code=HTTPStatus.OK,
+                status_code=HTTPStatus.OK.value,
                 text=json.dumps(dict(links={
                     'self': dict(href=AbstractTestCase.TARGET_ENDPOINT),
                     'cloud_controller_v2': dict(href='%s/v2' % AbstractTestCase.TARGET_ENDPOINT,
@@ -83,10 +83,10 @@ class AbstractTestCase(object):
             with(open(AbstractTestCase.get_fixtures_path(*path_parts),
                       'rb' if binary_file else 'r')) as f:
                 return MockResponse(url='%s%s' % (AbstractTestCase.TARGET_ENDPOINT, uri),
-                                    status_code=status_code,
+                                    status_code=status_code.value,
                                     text=f.read(),
                                     headers=headers)
         else:
             return MockResponse('%s%s' % (AbstractTestCase.TARGET_ENDPOINT, uri),
-                                status_code,
+                                status_code.value,
                                 '')

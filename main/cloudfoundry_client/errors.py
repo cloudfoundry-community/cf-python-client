@@ -13,11 +13,11 @@ class InvalidStatusCode(Exception):
 
     def __str__(self):
         if self.body is None:
-            return '%d' % self.status_code.value
+            return self.status_code.name
         elif type(self.body) == str:
-            return '%d : %s' % (self.status_code.value, self.body)
+            return '%s : %s' % (self.status_code.name, self.body)
         else:
-            return '%d : %s' % (self.status_code.value, json.dumps(self.body))
+            return '%s : %s' % (self.status_code.name, json.dumps(self.body))
 
 
 class InvalidEntity(Exception):

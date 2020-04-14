@@ -42,7 +42,7 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
             requests.Session.return_value = session
             self._mock_info_calls(requests)
             requests.post.return_value = MockResponse('%s/oauth/token' % self.TOKEN_ENDPOINT,
-                                                      status_code=HTTPStatus.OK,
+                                                      status_code=HTTPStatus.OK.value,
                                                       text=json.dumps(dict(access_token='access-token',
                                                                            refresh_token='refresh-token')))
             client = CloudFoundryClient(self.TARGET_ENDPOINT, token_format='opaque')
@@ -66,7 +66,7 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
             requests.Session.return_value = session
             self._mock_info_calls(requests)
             requests.post.return_value = MockResponse('%s/oauth/token' % self.TOKEN_ENDPOINT,
-                                                      status_code=HTTPStatus.OK,
+                                                      status_code=HTTPStatus.OK.value,
                                                       text=json.dumps(dict(access_token='access-token',
                                                                            refresh_token='refresh-token')))
             client = CloudFoundryClient(self.TARGET_ENDPOINT, token_format='opaque')
@@ -89,7 +89,7 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
             requests.Session.return_value = session
             self._mock_info_calls(requests)
             requests.post.return_value = MockResponse('%s/oauth/token' % self.TOKEN_ENDPOINT,
-                                                      status_code=HTTPStatus.OK,
+                                                      status_code=HTTPStatus.OK.value,
                                                       text=json.dumps(dict(access_token='access-token',
                                                                            refresh_token='refresh-token')))
             client = CloudFoundryClient(self.TARGET_ENDPOINT, login_hint=quote(json.dumps(dict(origin='uaa'),
