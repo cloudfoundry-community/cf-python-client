@@ -41,5 +41,10 @@ class RLPGatewayClient(object):
                 if response.status == 204:
                     yield {}
                 else:
-                    async for data in response.content:
-                        yield data
+                    buffer = b""
+                    async for data in response.content.iter_chunked(1024):
+                        buffer += data
+                        if b"\n\n" in buffer and buffer.startswith(b"data:"):
+                            log_message = buffer.split(b"\n\n")[0]
+                            buffer = buffer.replace(log_message + b"\n\n", b"")
+                            yield log_message
