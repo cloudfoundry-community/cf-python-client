@@ -187,7 +187,14 @@ class CloudFoundryClient(CredentialManager):
         if response.status_code == HTTPStatus.UNAUTHORIZED.value:
             try:
                 json_data = response.json()
-                result = json_data.get('code', 0) == 1000 and json_data.get('error_code', '') == 'CF-InvalidAuthToken'
+                if json_data.get('errors'):  # V3 error response
+                    result = False
+                    for error in json_data.get('errors'):
+                        if error.get('code', 0) == 1000 and error.get('title', '') == 'CF-InvalidAuthToken':
+                            result = True
+                            break
+                else:  # V2 error response
+                    result = json_data.get('code', 0) == 1000 and json_data.get('error_code', '') == 'CF-InvalidAuthToken'
                 _logger.info('_is_token_expired - %s' % str(result))
                 return result
             except BaseException as _:
