@@ -41,7 +41,7 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
              patch('cloudfoundry_client.client.requests', new=requests):
             requests.Session.return_value = session
             self._mock_info_calls(requests)
-            requests.post.return_value = MockResponse('%s/oauth/token' % self.TOKEN_ENDPOINT,
+            requests.post.return_value = MockResponse('%s/oauth/token' % self.AUTHORIZATION_ENDPOINT,
                                                       status_code=HTTPStatus.OK.value,
                                                       text=json.dumps(dict(access_token='access-token',
                                                                            refresh_token='refresh-token')))
@@ -65,7 +65,7 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
              patch('cloudfoundry_client.client.requests', new=requests):
             requests.Session.return_value = session
             self._mock_info_calls(requests)
-            requests.post.return_value = MockResponse('%s/oauth/token' % self.TOKEN_ENDPOINT,
+            requests.post.return_value = MockResponse('%s/oauth/token' % self.AUTHORIZATION_ENDPOINT,
                                                       status_code=HTTPStatus.OK.value,
                                                       text=json.dumps(dict(access_token='access-token',
                                                                            refresh_token='refresh-token')))
@@ -88,7 +88,7 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
              patch('cloudfoundry_client.client.requests', new=requests):
             requests.Session.return_value = session
             self._mock_info_calls(requests)
-            requests.post.return_value = MockResponse('%s/oauth/token' % self.TOKEN_ENDPOINT,
+            requests.post.return_value = MockResponse('%s/oauth/token' % self.AUTHORIZATION_ENDPOINT,
                                                       status_code=HTTPStatus.OK.value,
                                                       text=json.dumps(dict(access_token='access-token',
                                                                            refresh_token='refresh-token')))

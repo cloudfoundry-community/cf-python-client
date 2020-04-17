@@ -39,13 +39,11 @@ _logger = logging.getLogger(__name__)
 class Info:
     def __init__(self, api_v2_version: str,
                  authorization_endpoint: str,
-                 token_endpoint: str,
                  api_endpoint: str,
                  doppler_endpoint: Optional[str],
                  log_stream_endpoint: Optional[str]):
         self.api_v2_version = api_v2_version
         self.authorization_endpoint = authorization_endpoint
-        self.token_endpoint = token_endpoint
         self.api_endpoint = api_endpoint
         self.doppler_endpoint = doppler_endpoint
         self.log_stream_endpoint = log_stream_endpoint
@@ -124,8 +122,8 @@ class CloudFoundryClient(CredentialManager):
         info = self._get_info(target_endpoint_trimmed, proxy, verify=verify)
         if not info.api_v2_version.startswith('2.'):
             raise AssertionError('Only version 2 is supported for now. Found %s' % info.api_v2_version)
-        service_information = ServiceInformation('%s/oauth/authorize' % info.authorization_endpoint,
-                                                 '%s/oauth/token' % info.token_endpoint,
+        service_information = ServiceInformation(None,
+                                                 '%s/oauth/token' % info.authorization_endpoint,
                                                  client_id, client_secret, [], verify)
         super(CloudFoundryClient, self).__init__(service_information, proxies=proxy)
         self.v2 = V2(target_endpoint_trimmed, self)
@@ -177,7 +175,6 @@ class CloudFoundryClient(CredentialManager):
         log_stream = root_links.get('log_stream')
         return Info(root_links['cloud_controller_v2']['meta']['version'],
                     info['authorization_endpoint'],
-                    info['token_endpoint'],
                     target_endpoint,
                     logging.get('href') if logging is not None else None,
                     log_stream.get('href') if log_stream is not None else None)
@@ -226,6 +223,10 @@ class CloudFoundryClient(CredentialManager):
         if self.token_format is not None:
             request['token_format'] = self.token_format
         return request
+
+    def _grant_client_credentials_request(self) -> dict:
+        return dict(grant_type="client_credentials", scope=' '.join(self.service_information.scopes),
+                    client_id=self.service_information.client_id, client_secret=self.service_information.client_secret)
 
     def get(self, url: str, params: Optional[dict] = None, **kwargs) -> Response:
         response = super(CloudFoundryClient, self).get(url, params, **kwargs)
