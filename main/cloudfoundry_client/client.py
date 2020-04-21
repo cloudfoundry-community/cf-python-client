@@ -167,9 +167,9 @@ class CloudFoundryClient(CredentialManager):
                                                                         verify=verify))
         info = info_response.json()
         root_response = CloudFoundryClient._check_response(requests.get('%s/' % target_endpoint,
-                                                                         proxies=proxy if proxy is not None else dict(
-                                                                             http='', https=''),
-                                                                         verify=verify))
+                                                                        proxies=proxy if proxy is not None else dict(
+                                                                            http='', https=''),
+                                                                        verify=verify))
         root_info = root_response.json()
 
         root_links = root_info['links']
@@ -187,17 +187,20 @@ class CloudFoundryClient(CredentialManager):
         if response.status_code == HTTPStatus.UNAUTHORIZED.value:
             try:
                 json_data = response.json()
-                if json_data.get('errors'):  # V3 error response
-                    result = False
+                invalid_token_error = 'CF-InvalidAuthToken'
+                if json_data.get('errors', None) is not None:  # V3 error response
                     for error in json_data.get('errors'):
-                        if error.get('code', 0) == 1000 and error.get('title', '') == 'CF-InvalidAuthToken':
-                            result = True
-                            break
+                        if error.get('code', 0) == 1000 and error.get('title', '') == invalid_token_error:
+                            _logger.info('_is_token_v3_expired - true')
+                            return True
+                    _logger.info('_is_token_v3_expired - false')
+                    return False
                 else:  # V2 error response
-                    result = json_data.get('code', 0) == 1000 and json_data.get('error_code', '') == 'CF-InvalidAuthToken'
-                _logger.info('_is_token_expired - %s' % str(result))
-                return result
-            except BaseException as _:
+                    token_expired = json_data.get('code', 0) == 1000 \
+                                    and json_data.get('error_code', '') == invalid_token_error
+                    _logger.info('_is_token__v2_expired - %s' % str(token_expired))
+                    return token_expired
+            except Exception as _:
                 return False
         else:
             return False

@@ -118,3 +118,18 @@ class TestCloudfoundryClient(unittest.TestCase, AbstractTestCase, ):
             self.assertEqual(info.api_v2_version, self.API_V2_VERSION)
             self.assertEqual(info.doppler_endpoint, self.DOPPLER_ENDPOINT)
             self.assertEqual(info.log_stream_endpoint, self.LOG_STREAM_ENDPOINT)
+
+    def test_invalid_token_v3(self):
+        response = MockResponse('http://some-cf-url', 401, text=json.dumps(dict(
+            errors=[dict(code=666, title='Some-Error', detail='Error detail'),
+                    dict(code=1000, title='CF-InvalidAuthToken', detail='Invalid token')]
+        )))
+        result = CloudFoundryClient._is_token_expired(response)
+        self.assertTrue(result)
+
+    def test_invalid_token_v2(self):
+        response = MockResponse('http://some-cf-url', 401,
+                                text=json.dumps(dict(code=1000, error_code='CF-InvalidAuthToken')
+                                                ))
+        result = CloudFoundryClient._is_token_expired(response)
+        self.assertTrue(result)
