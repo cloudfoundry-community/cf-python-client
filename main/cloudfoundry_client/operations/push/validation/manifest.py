@@ -6,7 +6,7 @@ import yaml
 
 
 class ManifestReader(object):
-    MEMORY_PATTERN = re.compile("^(\d+)([KMGT])B?$")
+    MEMORY_PATTERN = re.compile(r"^(\d+)([KMGT])B?$")
 
     POSITIVE_FIELDS = ['instances', 'timeout']
 
