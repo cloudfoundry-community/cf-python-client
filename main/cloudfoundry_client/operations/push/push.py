@@ -197,7 +197,7 @@ class PushOperation(object):
         return existing_route
 
     @staticmethod
-    def _split_route(requested_route: str) -> Tuple[str, int, str]:
+    def _split_route(requested_route: Dict[str, str]) -> Tuple[str, int, str]:
         route_splitted = PushOperation.SPLIT_ROUTE_PATTERN.match(requested_route['route'])
         if route_splitted is None:
             raise AssertionError('Invalid route: %s' % requested_route['route'])
