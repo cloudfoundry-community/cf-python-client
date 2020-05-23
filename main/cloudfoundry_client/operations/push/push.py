@@ -19,7 +19,7 @@ _logger = logging.getLogger(__name__)
 class PushOperation(object):
     UPLOAD_TIMEOUT = 15 * 60
 
-    SPLIT_ROUTE_PATTERN = re.compile('(?P<protocol>[a-z]+://)?(?P<domain>[^:/]+)(?P<port>:\d+)?(?P<path>/.*)?')
+    SPLIT_ROUTE_PATTERN = re.compile(r'(?P<protocol>[a-z]+://)?(?P<domain>[^:/]+)(?P<port>:\d+)?(?P<path>/.*)?')
 
     def __init__(self, client: CloudFoundryClient):
         self.client = client
@@ -340,7 +340,7 @@ class PushOperation(object):
     @staticmethod
     def _to_host(host: str) -> str:
         def no_space(h: str) -> str:
-            return re.sub('[\s_]+', "-", h)
+            return re.sub(r'[\s_]+', "-", h)
 
         def only_alphabetical_and_hyphen(h: str) -> str:
             return re.sub("[^a-z0-9-]", "", h)
