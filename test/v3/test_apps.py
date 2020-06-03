@@ -2,6 +2,7 @@ import unittest
 from http import HTTPStatus
 
 from abstract_test_case import AbstractTestCase
+from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.v3.entities import Entity
 
 
@@ -65,3 +66,10 @@ class TestApps(unittest.TestCase, AbstractTestCase):
             '/v3/apps/app_id', HTTPStatus.NO_CONTENT, None)
         self.client.v3.apps.remove('app_id')
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
+
+    def test_get_env(self):
+        self.client.get.return_value = self.mock_response('/v3/apps/app_id/env', HTTPStatus.OK, None,
+                                                          'v3', 'apps', 'GET_{id}_env_response.json')
+        env = self.client.v3.apps.get_env('app_id')
+        self.assertIsInstance(env, JsonObject)
+        self.assertEquals(env['application_env_json']['VCAP_APPLICATION']['limits']['fds'], 16384)
