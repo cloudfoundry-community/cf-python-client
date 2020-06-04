@@ -84,5 +84,5 @@ class TestApps(unittest.TestCase, AbstractTestCase):
                                                           'v3', 'apps', 'GET_{id}_routes_response.json')
         routes = self.client.v3.apps.get_routes('app_id')
         self.assertIsInstance(routes, JsonObject)
-        self.assertEquals(routes['resources'][0]['guid'],
+        self.assertEquals(routes['resources'][0]['destinations'][0]['guid'],
                           "385bf117-17f5-4689-8c5c-08c6cc821fed")
