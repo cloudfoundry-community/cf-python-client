@@ -11,3 +11,6 @@ class AppManager(EntityManager):
 
     def get_env(self, application_guid: str) -> JsonObject:
         return super(AppManager, self)._get('%s%s/%s/env' % (self.target_endpoint, self.entity_uri, application_guid))
+
+    def get_routes(self, application_guid: str) -> JsonObject:
+        return super(AppManager, self)._get('%s%s/%s/routes' % (self.target_endpoint, self.entity_uri, application_guid))
