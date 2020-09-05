@@ -30,8 +30,12 @@ class RLPGatewayClient(object):
 
     async def stream_logs(self, app_guid, **kwargs):
         url = f"{self.rlp_gateway_endpoint}/v2/read"
-        headers = dict(Authorization=self.credentials_manager._access_token)
-        params = dict(log="", source_id=app_guid)
+        headers = {
+            "Authorization": self.credentials_manager._access_token,
+            "Accept": "text/event-stream",
+            "Cache-Control": "no-cache",
+        }
+        params = {"log": "", "source_id": app_guid}
         if "headers" in kwargs:
             headers.update(kwargs["headers"])
         if "params" in kwargs:
@@ -48,3 +52,11 @@ class RLPGatewayClient(object):
                             log_message = buffer.split(b"\n\n")[0]
                             buffer = buffer.replace(log_message + b"\n\n", b"")
                             yield log_message
+                        elif buffer.startswith(
+                            b"event: heartbeat"
+                        ) or buffer.startswith(b"event: closing"):
+                            # Consume heartbeats to keep the connection alive
+                            buffer = b""
+                            yield data
+                        else:
+                            yield data
