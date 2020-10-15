@@ -133,6 +133,7 @@ So far the implemented managers that are available are:
 - ``service_plans``
 - ``service_plan_visibilities``
 - ``service_instances``
+- ``user_provided_service_instances``
 - ``service_keys``
 - ``service_bindings``
 - ``service_brokers``
