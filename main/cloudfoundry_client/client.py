@@ -32,6 +32,7 @@ from cloudfoundry_client.v3.isolation_segments import IsolationSegmentManager
 from cloudfoundry_client.v3.organizations import OrganizationManager
 from cloudfoundry_client.v3.spaces import SpaceManager
 from cloudfoundry_client.v3.tasks import TaskManager
+from cloudfoundry_client.v3.jobs import JobManager as JobManagerV3
 
 _logger = logging.getLogger(__name__)
 
@@ -94,6 +95,7 @@ class V3(object):
         self.organizations = OrganizationManager(target_endpoint, credential_manager)
         self.service_instances = EntityManagerV3(target_endpoint, credential_manager, '/v3/service_instances')
         self.tasks = TaskManager(target_endpoint, credential_manager)
+        self.jobs = JobManagerV3(target_endpoint, credential_manager)
 
 
 class CloudFoundryClient(CredentialManager):
