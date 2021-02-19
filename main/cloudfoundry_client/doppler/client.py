@@ -20,30 +20,33 @@ class DopplerClient(object):
         self.proxy_host = None
         self.proxy_port = None
         self.ws_doppler_endpoint = doppler_endpoint
-        self.http_doppler_endpoint = re.sub('^ws', 'http', doppler_endpoint)
+        self.http_doppler_endpoint = re.sub("^ws", "http", doppler_endpoint)
         self.verify_ssl = verify_ssl
         self.credentials_manager = credentials_manager
         if proxy is not None and len(proxy) > 0:
             proxy_domain = urlparse(proxy).netloc
-            idx = proxy_domain.find(':')
+            idx = proxy_domain.find(":")
             if 0 < idx < len(proxy_domain) - 2:
                 self.proxy_host = proxy_domain[:idx]
-                self.proxy_port = int(proxy_domain[idx + 1:])
+                self.proxy_port = int(proxy_domain[idx + 1 :])
 
     def recent_logs(self, app_guid: str) -> EnvelopeStream:
-        url = '%s/apps/%s/recentlogs' % (self.http_doppler_endpoint, app_guid)
+        url = "%s/apps/%s/recentlogs" % (self.http_doppler_endpoint, app_guid)
         response = self.credentials_manager.get(url, stream=True)
         boundary = DopplerClient._extract_boundary(response)
-        _logger.debug('Boundary: %s' % boundary)
+        _logger.debug("Boundary: %s" % boundary)
         for part in DopplerClient._read_multi_part_response(response, boundary):
             yield DopplerClient._parse_envelope(part)
 
     def stream_logs(self, app_guid: str) -> EnvelopeStream:
-        url = '%s/apps/%s/stream' % (self.ws_doppler_endpoint, app_guid)
-        with WebsocketFrameReader(url,
-                                  lambda: self.credentials_manager._access_token,
-                                  verify_ssl=self.verify_ssl,
-                                  proxy_host=self.proxy_host, proxy_port=self.proxy_port) as websocket:
+        url = "%s/apps/%s/stream" % (self.ws_doppler_endpoint, app_guid)
+        with WebsocketFrameReader(
+            url,
+            lambda: self.credentials_manager._access_token,
+            verify_ssl=self.verify_ssl,
+            proxy_host=self.proxy_host,
+            proxy_port=self.proxy_port,
+        ) as websocket:
             for message in websocket:
                 yield DopplerClient._parse_envelope(message)
 
@@ -55,24 +58,24 @@ class DopplerClient(object):
 
     @staticmethod
     def _extract_boundary(response: Response) -> str:
-        content_type = response.headers['content-type']
-        _logger.debug('content-type=%s' % content_type)
-        boundary_field = 'boundary='
+        content_type = response.headers["content-type"]
+        _logger.debug("content-type=%s" % content_type)
+        boundary_field = "boundary="
         idx = content_type.find(boundary_field)
         if idx == -1:
             _logger.debug(response.text)
-            raise InvalidLogResponseException('Cannot extract boundary in %s' % content_type)
-        boundary = content_type[idx + len(boundary_field):]
-        idx = boundary.find(' ')
+            raise InvalidLogResponseException("Cannot extract boundary in %s" % content_type)
+        boundary = content_type[idx + len(boundary_field) :]
+        idx = boundary.find(" ")
         if idx != -1:
             boundary = boundary[:idx]
         return boundary
 
     @staticmethod
     def _read_multi_part_response(iterable, boundary):
-        remaining = ''
-        boundary_header = bytes('--%s' % boundary, 'UTF-8')
-        end_of_line = bytes('\r\n', 'UTF-8')
+        remaining = ""
+        boundary_header = bytes("--%s" % boundary, "UTF-8")
+        end_of_line = bytes("\r\n", "UTF-8")
         cpt_read = 0
         for chunk_data in iterable:
             # _logger.debug('reading %d bytes' % size)
@@ -93,11 +96,11 @@ class DopplerClient(object):
                         while part.find(end_of_line, 0, 2) == 0:
                             part = part[2:]
                         while part.rfind(end_of_line, len(part) - 2) == (len(part) - 2):
-                            part = part[0:len(part) - 2]
+                            part = part[0 : len(part) - 2]
                         yield part
-                    work = work[idx + len(boundary_header):]
-                    if work[0] == '-' and work[1] == '-':
-                        _logger.debug('end boundary reached')
+                    work = work[idx + len(boundary_header) :]
+                    if work[0] == "-" and work[1] == "-":
+                        _logger.debug("end boundary reached")
                         return
                     else:
                         idx = work.find(boundary_header)

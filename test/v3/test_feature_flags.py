@@ -13,35 +13,29 @@ class TestFeatureFlags(unittest.TestCase, AbstractTestCase):
         self.build_client()
 
     def test_list(self):
-        self.client.get.return_value = self.mock_response('/v3/feature_flags',
-                                                          HTTPStatus.OK,
-                                                          None,
-                                                          'v3', 'feature_flags', 'GET_response.json')
+        self.client.get.return_value = self.mock_response(
+            "/v3/feature_flags", HTTPStatus.OK, None, "v3", "feature_flags", "GET_response.json"
+        )
         all_feature_flags = [feature_flag for feature_flag in self.client.v3.feature_flags.list()]
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(2, len(all_feature_flags))
-        self.assertEqual(all_feature_flags[0]['name'], "my_feature_flag")
-        self.assertEqual(all_feature_flags[1]['name'], "my_second_feature_flag")
+        self.assertEqual(all_feature_flags[0]["name"], "my_feature_flag")
+        self.assertEqual(all_feature_flags[1]["name"], "my_second_feature_flag")
 
     def test_get(self):
-        self.client.get.return_value = self.mock_response('/v3/feature_flags/feature_flag_name',
-                                                          HTTPStatus.OK,
-                                                          None,
-                                                          'v3', 'feature_flags', 'GET_{id}_response.json')
-        feature_flag = self.client.v3.feature_flags.get('feature_flag_name')
+        self.client.get.return_value = self.mock_response(
+            "/v3/feature_flags/feature_flag_name", HTTPStatus.OK, None, "v3", "feature_flags", "GET_{id}_response.json"
+        )
+        feature_flag = self.client.v3.feature_flags.get("feature_flag_name")
         self.client.get.assert_called_with(self.client.get.return_value.url)
-        self.assertEqual("my_feature_flag", feature_flag['name'])
+        self.assertEqual("my_feature_flag", feature_flag["name"])
 
     def test_update(self):
         self.client.patch.return_value = self.mock_response(
-            '/v3/feature_flags/feature_flag_name',
-            HTTPStatus.OK,
-            None,
-            'v3', 'feature_flags', 'PATCH_{id}_response.json')
-        result = self.client.v3.feature_flags.update('feature_flag_name')
-        self.client.patch.assert_called_with(self.client.patch.return_value.url,
-                                             json={'enabled': True,
-                                                   'custom_error_message': None
-                                                   }
-                                             )
+            "/v3/feature_flags/feature_flag_name", HTTPStatus.OK, None, "v3", "feature_flags", "PATCH_{id}_response.json"
+        )
+        result = self.client.v3.feature_flags.update("feature_flag_name")
+        self.client.patch.assert_called_with(
+            self.client.patch.return_value.url, json={"enabled": True, "custom_error_message": None}
+        )
         self.assertIsNotNone(result)

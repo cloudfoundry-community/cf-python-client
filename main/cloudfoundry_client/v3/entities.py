@@ -1,6 +1,6 @@
 import functools
 import logging
-from typing import Any, Generator, Optional, List, Tuple, Union, TypeVar
+from typing import Any, Generator, Optional, List, Tuple, Union, TypeVar, TYPE_CHECKING
 from urllib.parse import quote
 
 from requests import Response
@@ -9,37 +9,41 @@ from cloudfoundry_client.errors import InvalidEntity
 from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.request_object import Request
 
+if TYPE_CHECKING:
+    from cloudfoundry_client.client import CloudFoundryClient
+
 _logger = logging.getLogger(__name__)
 
 
 class Entity(JsonObject):
-    def __init__(self, target_endpoint: str, client: 'CloudFoundryClient', **kwargs):
+    def __init__(self, target_endpoint: str, client: "CloudFoundryClient", **kwargs):
         super(Entity, self).__init__(**kwargs)
         try:
-            def default_method(m, u):
-                raise NotImplementedError('Unknown method %s for url %s' % (m, u))
 
-            for link_name, link in self.get('links', {}).items():
-                if link_name != 'self':
-                    link_method = link.get('method', 'GET').lower()
-                    ref = link['href']
-                    manager_name = link_name if link_name.endswith('s') else '%ss' % link_name
+            def default_method(m, u):
+                raise NotImplementedError("Unknown method %s for url %s" % (m, u))
+
+            for link_name, link in self.get("links", {}).items():
+                if link_name != "self":
+                    link_method = link.get("method", "GET").lower()
+                    ref = link["href"]
+                    manager_name = link_name if link_name.endswith("s") else "%ss" % link_name
                     try:
                         other_manager = getattr(client.v3, manager_name)
                     except AttributeError:
                         # generic manager
-                        other_manager = EntityManager(
-                            target_endpoint,
-                            client,
-                            '')
-                    if link_method == 'get':
-                        new_method = functools.partial(other_manager._paginate, ref) if link_name.endswith('s') \
+                        other_manager = EntityManager(target_endpoint, client, "")
+                    if link_method == "get":
+                        new_method = (
+                            functools.partial(other_manager._paginate, ref)
+                            if link_name.endswith("s")
                             else functools.partial(other_manager._get, ref)
-                    elif link_method == 'post':
+                        )
+                    elif link_method == "post":
                         new_method = functools.partial(other_manager._post, ref)
-                    elif link_method == 'put':
+                    elif link_method == "put":
                         new_method = functools.partial(other_manager._put, ref)
-                    elif link_method == 'delete':
+                    elif link_method == "delete":
                         new_method = functools.partial(other_manager._delete, ref)
                     else:
                         new_method = functools.partial(default_method, link_method, ref)
@@ -62,8 +66,8 @@ class ToOneRelationship(JsonObject):
     def from_json_object(to_one_relationship: JsonObject):
         if to_one_relationship is None:
             return ToOneRelationship(None)
-        data = to_one_relationship.pop('data', None)
-        result = ToOneRelationship(None if data is None else data['guid'])
+        data = to_one_relationship.pop("data", None)
+        result = ToOneRelationship(None if data is None else data["guid"])
         result.update(to_one_relationship)
         return result
 
@@ -75,7 +79,7 @@ class ToOneRelationship(JsonObject):
 class ToManyRelationship(JsonObject):
     @staticmethod
     def from_json_object(to_many_relations: JsonObject):
-        result = ToManyRelationship(*[relation['guid'] for relation in to_many_relations.pop('data')])
+        result = ToManyRelationship(*[relation["guid"] for relation in to_many_relations.pop("data")])
         result.update(to_many_relations)
         return result
 
@@ -84,77 +88,77 @@ class ToManyRelationship(JsonObject):
         self.guids = list(guids)
 
 
-ENTITY_TYPE = TypeVar('ENTITY_TYPE', bound=Entity)
+ENTITY_TYPE = TypeVar("ENTITY_TYPE", bound=Entity)
 
 
 class EntityManager(object):
-    def __init__(self, target_endpoint: str, client: 'CloudFoundryClient', entity_uri: str,
-                 entity_type: ENTITY_TYPE = Entity):
+    def __init__(self, target_endpoint: str, client: "CloudFoundryClient", entity_uri: str, entity_type: ENTITY_TYPE = Entity):
         self.target_endpoint = target_endpoint
         self.entity_uri = entity_uri
         self.client = client
         self.entity_type = entity_type
 
-    def _post(self, url: str, data: Optional[dict] = None, files: Any = None,
-              entity_type: ENTITY_TYPE = None) -> Entity:
+    def _post(self, url: str, data: Optional[dict] = None, files: Any = None, entity_type: ENTITY_TYPE = None) -> Entity:
         response = self.client.post(url, json=data, files=files)
-        _logger.debug('POST - %s - %s', url, response.text)
+        _logger.debug("POST - %s - %s", url, response.text)
         return self._read_response(response, entity_type)
 
     def _get(self, url: str, entity_type: Optional[ENTITY_TYPE] = None) -> Entity:
         response = self.client.get(url)
-        _logger.debug('GET - %s - %s', url, response.text)
+        _logger.debug("GET - %s - %s", url, response.text)
         return self._read_response(response, entity_type)
 
     def _put(self, url: str, data: dict, entity_type: Optional[ENTITY_TYPE] = None) -> Entity:
         response = self.client.put(url, json=data)
-        _logger.debug('PUT - %s - %s', url, response.text)
+        _logger.debug("PUT - %s - %s", url, response.text)
         return self._read_response(response, entity_type)
 
     def _patch(self, url: str, data: dict, entity_type: Optional[ENTITY_TYPE] = None) -> Entity:
         response = self.client.patch(url, json=data)
-        _logger.debug('PATCH - %s - %s', url, response.text)
+        _logger.debug("PATCH - %s - %s", url, response.text)
         return self._read_response(response, entity_type)
 
     def _delete(self, url: str):
         response = self.client.delete(url)
-        _logger.debug('DELETE - %s - %s', url, response.text)
+        _logger.debug("DELETE - %s - %s", url, response.text)
 
     def _list(self, requested_path: str, entity_type: Optional[ENTITY_TYPE] = None, **kwargs) -> PaginateEntities:
-        url_requested = EntityManager._get_url_filtered('%s%s' % (self.target_endpoint, requested_path), **kwargs)
+        url_requested = EntityManager._get_url_filtered("%s%s" % (self.target_endpoint, requested_path), **kwargs)
         for element in self._paginate(url_requested, entity_type):
             yield element
 
     def _paginate(self, url_requested: str, entity_type: Optional[ENTITY_TYPE] = None) -> PaginateEntities:
         response = self.client.get(url_requested)
         while True:
-            _logger.debug('GET - %s - %s', url_requested, response.text)
+            _logger.debug("GET - %s - %s", url_requested, response.text)
             response_json = self._read_response(response, JsonObject)
-            for resource in response_json['resources']:
+            for resource in response_json["resources"]:
                 yield self._entity(resource, entity_type)
-            if 'next' not in response_json['pagination'] \
-                    or response_json['pagination']['next'] is None \
-                    or response_json['pagination']['next'].get('href') is None:
+            if (
+                "next" not in response_json["pagination"]
+                or response_json["pagination"]["next"] is None
+                or response_json["pagination"]["next"].get("href") is None
+            ):
                 break
             else:
-                url_requested = response_json['pagination']['next']['href']
+                url_requested = response_json["pagination"]["next"]["href"]
                 response = self.client.get(url_requested)
 
     def _create(self, data: dict) -> Entity:
-        url = '%s%s' % (self.target_endpoint, self.entity_uri)
+        url = "%s%s" % (self.target_endpoint, self.entity_uri)
         return self._post(url, data=data)
 
     def _upload_bits(self, resource_id: str, filename: str) -> Entity:
-        url = '%s%s/%s/upload' % (self.target_endpoint, self.entity_uri, resource_id)
-        files = {'bits': (filename, open(filename, 'rb'))}
+        url = "%s%s/%s/upload" % (self.target_endpoint, self.entity_uri, resource_id)
+        files = {"bits": (filename, open(filename, "rb"))}
         return self._post(url, files=files)
 
     def _update(self, resource_id: str, data: dict) -> Entity:
-        url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
+        url = "%s%s/%s" % (self.target_endpoint, self.entity_uri, resource_id)
         return self._patch(url, data)
 
     def _remove(self, resource_id: str):
-        url = '%s%s/%s' % (self.target_endpoint, self.entity_uri, resource_id)
+        url = "%s%s/%s" % (self.target_endpoint, self.entity_uri, resource_id)
         self._delete(url)
 
     def __iter__(self) -> PaginateEntities:
@@ -167,16 +171,16 @@ class EntityManager(object):
         return self._list(self.entity_uri, **kwargs)
 
     def get_first(self, **kwargs) -> Optional[Entity]:
-        kwargs.setdefault('per_page', 1)
+        kwargs.setdefault("per_page", 1)
         for entity in self._list(self.entity_uri, **kwargs):
             return entity
         return None
 
     def get(self, entity_id: str, *extra_paths) -> Entity:
         if len(extra_paths) == 0:
-            requested_path = '%s%s/%s' % (self.target_endpoint, self.entity_uri, entity_id)
+            requested_path = "%s%s/%s" % (self.target_endpoint, self.entity_uri, entity_id)
         else:
-            requested_path = '%s%s/%s/%s' % (self.target_endpoint, self.entity_uri, entity_id, '/'.join(extra_paths))
+            requested_path = "%s%s/%s/%s" % (self.target_endpoint, self.entity_uri, entity_id, "/".join(extra_paths))
         return self._get(requested_path)
 
     def _read_response(self, response: Response, entity_type: Optional[ENTITY_TYPE]) -> Union[JsonObject, Entity]:
@@ -188,7 +192,7 @@ class EntityManager(object):
         return Request(**mandatory_parameters)
 
     def _entity(self, result: JsonObject, entity_type: Optional[ENTITY_TYPE]) -> Union[JsonObject, Entity]:
-        if 'guid' in result:
+        if "guid" in result:
             return (entity_type or self.entity_type)(self.target_endpoint, self.client, **result)
         else:
             return result
@@ -198,13 +202,12 @@ class EntityManager(object):
         def _append_encoded_parameter(parameters: List[str], args: Tuple[str, Any]) -> List[str]:
             parameter_name, parameter_value = args[0], args[1]
             if isinstance(parameter_value, (list, tuple)):
-                parameters.append('%s=%s' % (parameter_name, quote(','.join(parameter_value))))
+                parameters.append("%s=%s" % (parameter_name, quote(",".join(parameter_value))))
             else:
-                parameters.append('%s=%s' % (parameter_name, quote(str(parameter_value))))
+                parameters.append("%s=%s" % (parameter_name, quote(str(parameter_value))))
             return parameters
 
         if len(kwargs) > 0:
-            return '%s?%s' % (url,
-                              "&".join(functools.reduce(_append_encoded_parameter, sorted(list(kwargs.items())), [])))
+            return "%s?%s" % (url, "&".join(functools.reduce(_append_encoded_parameter, sorted(list(kwargs.items())), [])))
         else:
             return url
