@@ -185,6 +185,12 @@ class EntityManager(object):
 
     def _read_response(self, response: Response, entity_type: Optional[ENTITY_TYPE]) -> Union[JsonObject, Entity]:
         result = response.json(object_pairs_hook=JsonObject)
+        if 'Location' in response.headers:
+            result['links']['job'] = {
+                "href": response.headers['Location'],
+                "method": "GET",
+                }
+
         return self._entity(result, entity_type)
 
     @staticmethod
