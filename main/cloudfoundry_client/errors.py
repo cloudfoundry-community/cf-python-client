@@ -15,9 +15,9 @@ class InvalidStatusCode(Exception):
         if self.body is None:
             return self.status_code.name
         elif type(self.body) == str:
-            return '%s : %s' % (self.status_code.name, self.body)
+            return "%s : %s" % (self.status_code.name, self.body)
         else:
-            return '%s : %s' % (self.status_code.name, json.dumps(self.body))
+            return "%s : %s" % (self.status_code.name, json.dumps(self.body))
 
 
 class InvalidEntity(Exception):
@@ -26,4 +26,4 @@ class InvalidEntity(Exception):
         self.raw_entity = dict(**kwargs)
 
     def __str__(self):
-        return 'InvalidEntity: %s' % json.dumps(self.raw_entity)
+        return "InvalidEntity: %s" % json.dumps(self.raw_entity)

@@ -1,0 +1,7 @@
+[tool.black]
+line-length = 130
+exclude = '''
+^/(
+  (main\/cloudfoundry_client\/dropsonde.*)
+)/
+'''

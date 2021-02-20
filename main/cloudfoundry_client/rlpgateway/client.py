@@ -52,9 +52,7 @@ class RLPGatewayClient(object):
                             log_message = buffer.split(b"\n\n")[0]
                             buffer = buffer.replace(log_message + b"\n\n", b"")
                             yield log_message
-                        elif buffer.startswith(
-                            b"event: heartbeat"
-                        ) or buffer.startswith(b"event: closing"):
+                        elif buffer.startswith(b"event: heartbeat") or buffer.startswith(b"event: closing"):
                             # Consume heartbeats to keep the connection alive
                             buffer = b""
                             yield data

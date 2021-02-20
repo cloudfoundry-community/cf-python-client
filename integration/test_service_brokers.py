@@ -12,10 +12,8 @@ class TestServiceBrokers(unittest.TestCase):
         client = build_client_from_configuration()
         for broker in client.v2.service_brokers.list():
             if cpt == 0:
-                self.assertIsNotNone(
-                    client.v2.service_brokers.get_first(space_guid=broker['entity']['space_guid']))
-                self.assertIsNotNone(
-                    client.v2.service_brokers.get(broker['metadata']['guid']))
+                self.assertIsNotNone(client.v2.service_brokers.get_first(space_guid=broker["entity"]["space_guid"]))
+                self.assertIsNotNone(client.v2.service_brokers.get(broker["metadata"]["guid"]))
             cpt += 1
             _logger.debug(broker)
-        _logger.debug('test broker list - %d found', cpt)
+        _logger.debug("test broker list - %d found", cpt)

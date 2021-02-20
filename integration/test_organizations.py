@@ -11,10 +11,10 @@ class TestOrganizations(unittest.TestCase):
         client = build_client_from_configuration()
         for organization in client.v2.organizations.list():
             if cpt == 0:
-                organization = client.v2.organizations.get(organization['metadata']['guid'])
+                organization = client.v2.organizations.get(organization["metadata"]["guid"])
                 self.assertIsNotNone(organization)
-                organization = client.v2.organizations.get_first(name=organization['entity']['name'])
+                organization = client.v2.organizations.get_first(name=organization["entity"]["name"])
                 self.assertIsNotNone(organization)
                 _logger.debug(organization.json())
             cpt += 1
-        _logger.debug('test organization list - %d found', cpt)
+        _logger.debug("test organization list - %d found", cpt)

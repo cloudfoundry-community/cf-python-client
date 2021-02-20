@@ -3,4 +3,6 @@ protobuf==3.6.1
 oauth2-client==1.2.1
 websocket-client==0.54.0
 PyYAML==5.3.1
+requests~=2.25.1
+setuptools~=49.2.1
 polling2==0.4.6

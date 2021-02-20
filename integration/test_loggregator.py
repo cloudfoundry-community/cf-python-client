@@ -11,5 +11,5 @@ class TestLoggregator(unittest.TestCase):
         cpt = 0
         for log_message in client.loggregator.get_recent(client.log_app_guid):
             cpt += 1
-            _logger.debug('read %s', str(log_message))
-        _logger.debug('read %d', cpt)
+            _logger.debug("read %s", str(log_message))
+        _logger.debug("read %d", cpt)
