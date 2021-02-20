@@ -92,13 +92,15 @@ ENTITY_TYPE = TypeVar("ENTITY_TYPE", bound=Entity)
 
 
 class EntityManager(object):
-    def __init__(self, target_endpoint: str, client: "CloudFoundryClient", entity_uri: str, entity_type: ENTITY_TYPE = Entity):
+    def __init__(self, target_endpoint: str, client: "CloudFoundryClient", entity_uri: str,
+                 entity_type: ENTITY_TYPE = Entity):
         self.target_endpoint = target_endpoint
         self.entity_uri = entity_uri
         self.client = client
         self.entity_type = entity_type
 
-    def _post(self, url: str, data: Optional[dict] = None, files: Any = None, entity_type: ENTITY_TYPE = None) -> Entity:
+    def _post(self, url: str, data: Optional[dict] = None, files: Any = None,
+              entity_type: ENTITY_TYPE = None) -> Entity:
         response = self.client.post(url, json=data, files=files)
         _logger.debug("POST - %s - %s", url, response.text)
         return self._read_response(response, entity_type)
@@ -135,9 +137,9 @@ class EntityManager(object):
             for resource in response_json["resources"]:
                 yield self._entity(resource, entity_type)
             if (
-                "next" not in response_json["pagination"]
-                or response_json["pagination"]["next"] is None
-                or response_json["pagination"]["next"].get("href") is None
+                    "next" not in response_json["pagination"]
+                    or response_json["pagination"]["next"] is None
+                    or response_json["pagination"]["next"].get("href") is None
             ):
                 break
             else:
@@ -189,7 +191,7 @@ class EntityManager(object):
             result['links']['job'] = {
                 "href": response.headers['Location'],
                 "method": "GET",
-                }
+            }
 
         return self._entity(result, entity_type)
 
@@ -214,6 +216,7 @@ class EntityManager(object):
             return parameters
 
         if len(kwargs) > 0:
-            return "%s?%s" % (url, "&".join(functools.reduce(_append_encoded_parameter, sorted(list(kwargs.items())), [])))
+            return "%s?%s" % (
+                url, "&".join(functools.reduce(_append_encoded_parameter, sorted(list(kwargs.items())), [])))
         else:
             return url
