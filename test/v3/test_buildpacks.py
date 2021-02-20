@@ -1,7 +1,7 @@
 import sys
 import unittest
 from http import HTTPStatus
-from unittest.mock import patch
+from unittest.mock import patch, mock_open
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
@@ -113,3 +113,21 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
                                                               'v3', 'buildpacks', 'GET_{id}_response.json')
             main.main()
             self.client.get.assert_called_with(self.client.get.return_value.url)
+
+    def test_upload_buildpack(self):
+        self.client.post.return_value = self.mock_response(
+            '/v3/buildpacks/buildpack_id/upload',
+            HTTPStatus.ACCEPTED,
+            {
+                "Location": "https://somewhere.org/v3/jobs/job_guid"
+            },
+            'v3', 'buildpacks', 'POST_response.json')
+
+        with patch('cloudfoundry_client.v3.entities.open', mock_open(read_data='ZipContent')) as m:
+            result = self.client.v3.buildpacks.upload('buildpack_id', '/path/to/buildpack.zip',)
+
+            self.client.post.assert_called_with(self.client.post.return_value.url,
+                                                files={'bits': ('/path/to/buildpack.zip', m.return_value)},
+                                                json=None)
+
+        self.assertIsNotNone(result)
