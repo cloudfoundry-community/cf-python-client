@@ -101,18 +101,65 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
 
     def test_upload_buildpack(self):
         self.client.post.return_value = self.mock_response(
-            '/v3/buildpacks/buildpack_id/upload',
+            "/v3/buildpacks/buildpack_id/upload",
             HTTPStatus.ACCEPTED,
-            {
-                "Location": "https://somewhere.org/v3/jobs/job_guid"
-            },
-            'v3', 'buildpacks', 'POST_response.json')
+            {"Location": "https://somewhere.org/v3/jobs/job_id"},
+            "v3",
+            "buildpacks",
+            "POST_response.json",
+        )
 
-        with patch('cloudfoundry_client.v3.entities.open', mock_open(read_data='ZipContent')) as m:
-            result = self.client.v3.buildpacks.upload('buildpack_id', '/path/to/buildpack.zip',)
+        self.client.get.side_effect = [
+            self.mock_response(
+                "/v3/jobs/job_id",
+                HTTPStatus.OK,
+                None,
+                "v3",
+                "jobs",
+                "GET_{id}_complete_response.json",
+            ),
+            self.mock_response(
+                "/v3/buildpacks/buildpack_id",
+                HTTPStatus.OK,
+                None,
+                "v3",
+                "buildpacks",
+                "GET_{id}_response.json",
+            ),
+        ]
 
-            self.client.post.assert_called_with(self.client.post.return_value.url,
-                                                files={'bits': ('/path/to/buildpack.zip', m.return_value)},
-                                                json=None)
+        with patch("cloudfoundry_client.v3.entities.open", mock_open(read_data="ZipContent")) as m:
+            with patch("cloudfoundry_client.v3.jobs.JobManager.wait_for_job_completion") as job_mock:
+                result = self.client.v3.buildpacks.upload("buildpack_id", "/path/to/buildpack.zip")
+
+                # Check that we made the post call to upload the buildpack
+                self.client.post.assert_called_with(
+                    self.client.post.return_value.url, files={"bits": ("/path/to/buildpack.zip", m.return_value)}, json=None
+                )
+                # Check that we wait for job completion
+                job_mock.assert_called_once()
+                # We are doing upload->waitForJob->getbuildpack to get a fresh buildpack entity after the job finished
+                # We then rewrite the job information into the new buildpack entity since it is missing on get endpoint
+                # So check job link and function is also in the returned entity when we waited for the job.
+                self.assertIsNotNone(result["links"]["job"])
+                self.assertIsNotNone(result.job)
+
+    def test_upload_buildpack_dont_wait_for_job_completion(self):
+        self.client.post.return_value = self.mock_response(
+            "/v3/buildpacks/buildpack_id/upload",
+            HTTPStatus.ACCEPTED,
+            {"Location": "https://somewhere.org/v3/jobs/job_guid"},
+            "v3",
+            "buildpacks",
+            "POST_response.json",
+        )
+
+        with patch("cloudfoundry_client.v3.entities.open", mock_open(read_data="ZipContent")) as m:
+            result = self.client.v3.buildpacks.upload("buildpack_id", "/path/to/buildpack.zip", asynchronous=True)
+
+            self.client.post.assert_called_with(
+                self.client.post.return_value.url, files={"bits": ("/path/to/buildpack.zip", m.return_value)}, json=None
+            )
+            self.client.get.assert_not_called()
 
         self.assertIsNotNone(result)

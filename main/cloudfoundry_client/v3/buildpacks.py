@@ -54,5 +54,12 @@ class BuildpackManager(EntityManager):
         }
         return super(BuildpackManager, self)._update(buildpack_guid, data)
 
-    def upload(self, buildpack_guid: str, buildpack_zip: str) -> Entity:
-        return super(BuildpackManager, self)._upload_bits(buildpack_guid, buildpack_zip)
+    def upload(self, buildpack_guid: str, buildpack_zip: str, asynchronous: bool = False) -> Entity:
+        buildpack = super(BuildpackManager, self)._upload_bits(buildpack_guid, buildpack_zip)
+        if not asynchronous:
+            self.client.v3.jobs.wait_for_job_completion(buildpack.job()["guid"])
+            buildpack_after_job = super(BuildpackManager, self).get(buildpack["guid"])
+            buildpack_after_job["links"]["job"] = buildpack["links"]["job"]
+            buildpack_after_job.job = buildpack.job
+            return buildpack_after_job
+        return buildpack
