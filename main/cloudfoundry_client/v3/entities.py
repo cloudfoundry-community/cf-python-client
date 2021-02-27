@@ -19,20 +19,15 @@ class Entity(JsonObject):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient", **kwargs):
         super(Entity, self).__init__(**kwargs)
         try:
-
             def default_method(m, u):
                 raise NotImplementedError("Unknown method %s for url %s" % (m, u))
-
+            default_manager = self._default_manager(client, target_endpoint)
             for link_name, link in self.get("links", {}).items():
                 if link_name != "self":
                     link_method = link.get("method", "GET").lower()
                     ref = link["href"]
                     manager_name = link_name if link_name.endswith("s") else "%ss" % link_name
-                    try:
-                        other_manager = getattr(client.v3, manager_name)
-                    except AttributeError:
-                        # generic manager
-                        other_manager = EntityManager(target_endpoint, client, "")
+                    other_manager = getattr(client.v3, manager_name, default_manager)
                     if link_method == "get":
                         new_method = (
                             functools.partial(other_manager._paginate, ref)
@@ -51,6 +46,10 @@ class Entity(JsonObject):
                     setattr(self, link_name, new_method)
         except KeyError:
             raise InvalidEntity(**self)
+
+    @staticmethod
+    def _default_manager(client, target_endpoint):
+        return EntityManager(target_endpoint, client, "")
 
 
 PaginateEntities = Generator[Entity, None, None]
