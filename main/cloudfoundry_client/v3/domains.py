@@ -7,8 +7,8 @@ if TYPE_CHECKING:
 
 
 class Domain(Entity):
-    def __init__(self, target_endpoint: str, entity_manager: "EntityManager", **kwargs):
-        super(Domain, self).__init__(target_endpoint, entity_manager, **kwargs)
+    def __init__(self, target_endpoint: str, client: "CloudFoundryClient", **kwargs):
+        super(Domain, self).__init__(target_endpoint, client, **kwargs)
         relationships = self["relationships"]
         if "organization" in relationships:
             self["relationships"]["organization"] = ToOneRelationship.from_json_object(relationships["organization"])
