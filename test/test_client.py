@@ -4,6 +4,8 @@ from http import HTTPStatus
 from unittest.mock import patch
 from urllib.parse import quote
 
+from cloudfoundry_client.errors import InvalidStatusCode
+
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.client import CloudFoundryClient
 from fake_requests import MockResponse, MockSession, FakeRequests
@@ -153,3 +155,61 @@ class TestCloudfoundryClient(
         response = MockResponse("http://some-cf-url", 401, text=json.dumps(dict(code=1000, error_code="CF-InvalidAuthToken")))
         result = CloudFoundryClient._is_token_expired(response)
         self.assertTrue(result)
+
+    def test_log_request(self):
+        response = MockResponse(
+            "http://some-cf-url",
+            200,
+            text=json.dumps(dict(entity="entityTest", metadata="metadataTest")),
+            headers={"x-vcap-request-id": "testVcap"},
+        )
+        with self.assertLogs(level="DEBUG") as cm:
+            CloudFoundryClient._log_request("GET", "testURL", response)
+        self.assertEqual(
+            cm.output,
+            [
+                "DEBUG:cloudfoundry_client.client:GET: url=testURL - response="
+                '{"entity": "entityTest", "metadata": "metadataTest"} - vcap-request-id=testVcap'
+            ],
+        )
+
+    def test_log_request_empty_headers(self):
+        response = MockResponse("http://some-cf-url", 200, text=json.dumps(dict(entity="entityTest", metadata="metadataTest")))
+        with self.assertLogs(level="DEBUG") as cm:
+            CloudFoundryClient._log_request("GET", "testURL", response)
+        self.assertEqual(
+            cm.output,
+            [
+                "DEBUG:cloudfoundry_client.client:GET: url=testURL - response="
+                '{"entity": "entityTest", "metadata": "metadataTest"} - vcap-request-id=N/A'
+            ],
+        )
+
+    def test_check_response_500_without_vcap(self):
+        response = MockResponse("http://some-cf-url", 500, text=json.dumps(dict(entity="entityTest", metadata="metadataTest")))
+        with self.assertRaises(InvalidStatusCode):
+            CloudFoundryClient._check_response(response)
+
+    def test_check_response_500_with_vcap(self):
+        response = MockResponse(
+            "http://some-cf-url",
+            500,
+            text=json.dumps(dict(entity="entityTest", metadata="metadataTest")),
+            headers={"x-vcap-request-id": "testVcap"},
+        )
+        with self.assertRaisesRegex(InvalidStatusCode, "testVcap"):
+            CloudFoundryClient._check_response(response)
+
+    def test_check_response_500_text(self):
+        response = MockResponse("http://some-cf-url", 500, text="This is test text")
+        with self.assertRaisesRegex(InvalidStatusCode, "This is test text"):
+            CloudFoundryClient._check_response(response)
+
+    def test_check_response_500_json(self):
+        response = MockResponse("http://some-cf-url", 500, text=json.dumps(dict(entity="entityTest", metadata="metadataTest")))
+        with self.assertRaisesRegex(InvalidStatusCode, "metadataTest"):
+            CloudFoundryClient._check_response(response)
+
+    def test_check_response_200(self):
+        response = MockResponse("http://some-cf-url", 200, text=json.dumps(dict(entity="entityTest", metadata="metadataTest")))
+        self.assertIsNotNone(CloudFoundryClient._check_response(response))

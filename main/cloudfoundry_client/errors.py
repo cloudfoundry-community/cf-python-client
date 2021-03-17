@@ -7,17 +7,20 @@ class InvalidLogResponseException(Exception):
 
 
 class InvalidStatusCode(Exception):
-    def __init__(self, status_code: HTTPStatus, body):
+    def __init__(self, status_code: HTTPStatus, body, request_id=None):
         self.status_code = status_code
         self.body = body
+        self.request_id = request_id
 
     def __str__(self):
-        if self.body is None:
-            return self.status_code.name
-        elif type(self.body) == str:
-            return "%s : %s" % (self.status_code.name, self.body)
+        error_message = self.status_code.name
+        if type(self.body) == str:
+            error_message += f" = {self.body}"
         else:
-            return "%s : %s" % (self.status_code.name, json.dumps(self.body))
+            error_message += f" = {json.dumps(self.body)}"
+        if self.request_id:
+            error_message += f" - vcap-request-id = {self.request_id}"
+        return error_message
 
 
 class InvalidEntity(Exception):

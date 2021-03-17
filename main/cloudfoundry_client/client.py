@@ -253,23 +253,35 @@ class CloudFoundryClient(CredentialManager):
 
     def get(self, url: str, params: Optional[dict] = None, **kwargs) -> Response:
         response = super(CloudFoundryClient, self).get(url, params, **kwargs)
+        CloudFoundryClient._log_request("GET", url, response)
         return CloudFoundryClient._check_response(response)
 
     def post(self, url: str, data=None, json=None, **kwargs) -> Response:
         response = super(CloudFoundryClient, self).post(url, data, json, **kwargs)
+        CloudFoundryClient._log_request("POST", url, response)
         return CloudFoundryClient._check_response(response)
 
     def put(self, url: str, data=None, json=None, **kwargs) -> Response:
         response = super(CloudFoundryClient, self).put(url, data, json, **kwargs)
+        CloudFoundryClient._log_request("PUT", url, response)
         return CloudFoundryClient._check_response(response)
 
     def patch(self, url: str, data=None, json=None, **kwargs) -> Response:
         response = super(CloudFoundryClient, self).patch(url, data, json, **kwargs)
+        CloudFoundryClient._log_request("PATCH", url, response)
         return CloudFoundryClient._check_response(response)
 
     def delete(self, url: str, **kwargs) -> Response:
         response = super(CloudFoundryClient, self).delete(url, **kwargs)
+        CloudFoundryClient._log_request("DELETE", url, response)
         return CloudFoundryClient._check_response(response)
+
+    @staticmethod
+    def _log_request(method: str, url: str, response: Response):
+        _logger.debug(
+            f"{method}: url={url} - response={response.text} - vcap-request-id="
+            f"{response.headers.get('x-vcap-request-id', 'N/A')}"
+        )
 
     @staticmethod
     def _check_response(response: Response) -> Response:
@@ -280,4 +292,4 @@ class CloudFoundryClient(CredentialManager):
                 body = response.json()
             except ValueError:
                 body = response.text
-            raise InvalidStatusCode(HTTPStatus(response.status_code), body)
+            raise InvalidStatusCode(HTTPStatus(response.status_code), body, response.headers.get("x-vcap-request-id", None))
