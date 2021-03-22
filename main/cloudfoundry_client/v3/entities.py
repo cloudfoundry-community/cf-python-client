@@ -123,7 +123,7 @@ class EntityManager(object):
         response = self.client.delete(url)
         _logger.debug("DELETE - %s - %s", url, response.text)
         try:
-            return response.headers['Location']
+            return response.headers["Location"]
         except (AttributeError, KeyError):
             return None
 
