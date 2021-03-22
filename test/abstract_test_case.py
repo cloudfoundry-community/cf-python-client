@@ -100,4 +100,4 @@ class AbstractTestCase(object):
                     headers=headers,
                 )
         else:
-            return MockResponse("%s%s" % (AbstractTestCase.TARGET_ENDPOINT, uri), status_code.value, "")
+            return MockResponse("%s%s" % (AbstractTestCase.TARGET_ENDPOINT, uri), status_code.value, "", headers)
