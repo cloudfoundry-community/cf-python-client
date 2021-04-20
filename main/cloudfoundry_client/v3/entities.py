@@ -1,7 +1,7 @@
 import functools
 import logging
 from typing import Any, Generator, Optional, List, Tuple, Union, TypeVar, TYPE_CHECKING
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 from requests import Response
 
@@ -119,9 +119,13 @@ class EntityManager(object):
         _logger.debug("PATCH - %s - %s", url, response.text)
         return self._read_response(response, entity_type)
 
-    def _delete(self, url: str):
+    def _delete(self, url: str) -> Optional[str]:
         response = self.client.delete(url)
         _logger.debug("DELETE - %s - %s", url, response.text)
+        try:
+            return response.headers["Location"]
+        except (AttributeError, KeyError):
+            return None
 
     def _list(self, requested_path: str, entity_type: Optional[ENTITY_TYPE] = None, **kwargs) -> PaginateEntities:
         url_requested = EntityManager._get_url_filtered("%s%s" % (self.target_endpoint, requested_path), **kwargs)
@@ -158,9 +162,13 @@ class EntityManager(object):
         url = "%s%s/%s" % (self.target_endpoint, self.entity_uri, resource_id)
         return self._patch(url, data)
 
-    def _remove(self, resource_id: str):
+    def _remove(self, resource_id: str, asynchronous: bool = True):
         url = "%s%s/%s" % (self.target_endpoint, self.entity_uri, resource_id)
-        self._delete(url)
+        job_location = self._delete(url)
+        if not asynchronous and job_location is not None:
+            job_url = urlparse(job_location)
+            job_guid = job_url.path.rsplit("/", 1)[-1]
+            self.client.v3.jobs.wait_for_job_completion(job_guid)
 
     def __iter__(self) -> PaginateEntities:
         return self.list()
