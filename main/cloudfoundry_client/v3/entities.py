@@ -119,7 +119,7 @@ class EntityManager(object):
         _logger.debug("PATCH - %s - %s", url, response.text)
         return self._read_response(response, entity_type)
 
-    def _delete(self, url: str, entity_type: Optional[ENTITY_TYPE] = None) -> Optional[JsonObject]:
+    def _delete(self, url: str) -> Optional[str]:
         response = self.client.delete(url)
         _logger.debug("DELETE - %s - %s", url, response.text)
         try:
