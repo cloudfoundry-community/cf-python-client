@@ -279,8 +279,8 @@ class CloudFoundryClient(CredentialManager):
     @staticmethod
     def _log_request(method: str, url: str, response: Response):
         _logger.debug(
-            f"{method}: url={url} - response={response.text} - vcap-request-id="
-            f"{response.headers.get('x-vcap-request-id', 'N/A')}"
+            f"{method}: url={url} - status_code={response.status_code}"
+            f" - vcap-request-id={response.headers.get('x-vcap-request-id', 'N/A')} - response={response.text}"
         )
 
     @staticmethod

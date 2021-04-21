@@ -1,4 +1,3 @@
-import logging
 from functools import partial, reduce
 from typing import Callable, List, Tuple, Any, Optional, Generator, TYPE_CHECKING
 from urllib.parse import quote
@@ -10,8 +9,6 @@ from cloudfoundry_client.request_object import Request
 
 if TYPE_CHECKING:
     from cloudfoundry_client.client import CloudFoundryClient
-
-_logger = logging.getLogger(__name__)
 
 
 class Entity(JsonObject):
@@ -63,18 +60,11 @@ class EntityManager(object):
             entity_builder if entity_builder is not None else lambda pairs: Entity(target_endpoint, client, pairs)
         )
 
-    def _get(self, requested_path: str, entity_builder: Optional[EntityBuilder] = None) -> Entity:
-        url = "%s%s" % (self.target_endpoint, requested_path)
-        response = self.client.get(url)
-        _logger.debug("GET - %s - %s", requested_path, response.text)
-        return self._read_response(response, entity_builder)
-
     def _list(self, requested_path: str, entity_builder: Optional[EntityBuilder] = None, **kwargs) -> PaginateEntities:
         url_requested = self._get_url_filtered("%s%s" % (self.target_endpoint, requested_path), **kwargs)
         response = self.client.get(url_requested)
         entity_builder = self._get_entity_builder(entity_builder)
         while True:
-            _logger.debug("GET - %s - %s", url_requested, response.text)
             response_json = self._read_response(response, JsonObject)
             for resource in response_json["resources"]:
                 yield entity_builder(list(resource.items()))
@@ -96,19 +86,21 @@ class EntityManager(object):
         url = "%s%s/%s" % (self.target_endpoint, self.entity_uri, resource_id)
         self._delete(url, **kwargs)
 
+    def _get(self, requested_path: str, entity_builder: Optional[EntityBuilder] = None) -> Entity:
+        url = "%s%s" % (self.target_endpoint, requested_path)
+        response = self.client.get(url)
+        return self._read_response(response, entity_builder)
+
     def _post(self, url: str, data: Optional[dict] = None, **kwargs):
         response = self.client.post(url, json=data, **kwargs)
-        _logger.debug("POST - %s - %s", url, response.text)
         return self._read_response(response)
 
     def _put(self, url: str, data: Optional[dict] = None, **kwargs):
         response = self.client.put(url, json=data, **kwargs)
-        _logger.debug("PUT - %s - %s", url, response.text)
         return self._read_response(response)
 
     def _delete(self, url: str, **kwargs):
-        response = self.client.delete(url, **kwargs)
-        _logger.debug("DELETE - %s - %s", url, response.text)
+        self.client.delete(url, **kwargs)
 
     def __iter__(self) -> PaginateEntities:
         return self.list()
