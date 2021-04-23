@@ -168,8 +168,8 @@ class TestCloudfoundryClient(
         self.assertEqual(
             cm.output,
             [
-                "DEBUG:cloudfoundry_client.client:GET: url=testURL - response="
-                '{"entity": "entityTest", "metadata": "metadataTest"} - vcap-request-id=testVcap'
+                "DEBUG:cloudfoundry_client.client:GET: url=testURL - status_code=200 - vcap-request-id=testVcap - response="
+                '{"entity": "entityTest", "metadata": "metadataTest"}'
             ],
         )
 
@@ -180,8 +180,8 @@ class TestCloudfoundryClient(
         self.assertEqual(
             cm.output,
             [
-                "DEBUG:cloudfoundry_client.client:GET: url=testURL - response="
-                '{"entity": "entityTest", "metadata": "metadataTest"} - vcap-request-id=N/A'
+                "DEBUG:cloudfoundry_client.client:GET: url=testURL - status_code=200 - vcap-request-id=N/A - response="
+                '{"entity": "entityTest", "metadata": "metadataTest"}'
             ],
         )
 

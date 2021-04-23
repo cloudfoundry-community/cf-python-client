@@ -1,5 +1,4 @@
 import functools
-import logging
 from typing import Any, Generator, Optional, List, Tuple, Union, TypeVar, TYPE_CHECKING
 from urllib.parse import quote, urlparse
 
@@ -11,8 +10,6 @@ from cloudfoundry_client.request_object import Request
 
 if TYPE_CHECKING:
     from cloudfoundry_client.client import CloudFoundryClient
-
-_logger = logging.getLogger(__name__)
 
 
 class Entity(JsonObject):
@@ -101,27 +98,22 @@ class EntityManager(object):
     def _post(self, url: str, data: Optional[dict] = None, files: Any = None,
               entity_type: ENTITY_TYPE = None) -> Entity:
         response = self.client.post(url, json=data, files=files)
-        _logger.debug("POST - %s - %s", url, response.text)
         return self._read_response(response, entity_type)
 
     def _get(self, url: str, entity_type: Optional[ENTITY_TYPE] = None) -> Entity:
         response = self.client.get(url)
-        _logger.debug("GET - %s - %s", url, response.text)
         return self._read_response(response, entity_type)
 
     def _put(self, url: str, data: dict, entity_type: Optional[ENTITY_TYPE] = None) -> Entity:
         response = self.client.put(url, json=data)
-        _logger.debug("PUT - %s - %s", url, response.text)
         return self._read_response(response, entity_type)
 
     def _patch(self, url: str, data: dict, entity_type: Optional[ENTITY_TYPE] = None) -> Entity:
         response = self.client.patch(url, json=data)
-        _logger.debug("PATCH - %s - %s", url, response.text)
         return self._read_response(response, entity_type)
 
     def _delete(self, url: str) -> Optional[str]:
         response = self.client.delete(url)
-        _logger.debug("DELETE - %s - %s", url, response.text)
         try:
             return response.headers["Location"]
         except (AttributeError, KeyError):
@@ -135,7 +127,6 @@ class EntityManager(object):
     def _paginate(self, url_requested: str, entity_type: Optional[ENTITY_TYPE] = None) -> PaginateEntities:
         response = self.client.get(url_requested)
         while True:
-            _logger.debug("GET - %s - %s", url_requested, response.text)
             response_json = self._read_response(response, JsonObject)
             for resource in response_json["resources"]:
                 yield self._entity(resource, entity_type)
