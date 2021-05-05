@@ -34,4 +34,5 @@ class AppManager(EntityManager):
         return super(AppManager, self)._get("%s%s/%s/routes" % (self.target_endpoint, self.entity_uri, application_guid))
 
     def get_current_droplet(self, application_guid: str) -> JsonObject:
-        return super(AppManager, self)._get("%s%s/%s/droplets/current" % (self.target_endpoint, self.entity_uri, application_guid))
+        return super(AppManager, self)._get("%s%s/%s/droplets/current" % 
+        (self.target_endpoint, self.entity_uri, application_guid))
