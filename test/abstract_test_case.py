@@ -46,16 +46,6 @@ class AbstractTestCase(object):
     def _mock_info_calls(requests, with_doppler: bool = True, with_log_streams: bool = True):
         requests.get.side_effect = [
             MockResponse(
-                "%s/v2/info" % AbstractTestCase.TARGET_ENDPOINT,
-                status_code=HTTPStatus.OK.value,
-                text=json.dumps(
-                    dict(
-                        authorization_endpoint=AbstractTestCase.AUTHORIZATION_ENDPOINT,
-                        token_endpoint=AbstractTestCase.TOKEN_ENDPOINT,
-                    )
-                ),
-            ),
-            MockResponse(
                 "%s/" % AbstractTestCase.TARGET_ENDPOINT,
                 status_code=HTTPStatus.OK.value,
                 text=json.dumps(
@@ -74,6 +64,7 @@ class AbstractTestCase(object):
                             "log_stream": dict(href=AbstractTestCase.LOG_STREAM_ENDPOINT) if with_log_streams else None,
                             "app_ssh": dict(href="ssh.nd-cfapi.itn.ftgroup:80"),
                             "uaa": dict(href="https://uaa.nd-cfapi.itn.ftgroup"),
+                            "login": dict(href=AbstractTestCase.AUTHORIZATION_ENDPOINT),
                             "network_policy_v0": dict(href="https://api.nd-cfapi.itn.ftgroup/networking/v0/external"),
                             "network_policy_v1": dict(href="https://api.nd-cfapi.itn.ftgroup/networking/v1/external"),
                         }
