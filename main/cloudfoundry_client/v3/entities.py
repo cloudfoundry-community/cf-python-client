@@ -1,6 +1,6 @@
 import functools
 from json import JSONDecodeError
-from typing import Any, Generator, Optional, List, Tuple, Union, TypeVar, TYPE_CHECKING, Callable
+from typing import Any, Generator, Optional, List, Tuple, Union, TypeVar, TYPE_CHECKING, Callable, Type
 from urllib.parse import quote, urlparse
 
 from requests import Response
@@ -22,6 +22,7 @@ class Entity(JsonObject):
         super(Entity, self).__init__(**kwargs)
         default_manager = self._default_manager(target_endpoint, client)
         self._create_navigable_links(client.v3, default_manager)
+        self._create_navigable_included_entities(client.v3, default_manager)
 
     def _create_navigable_links(self, v3_client: "V3", default_manager: "EntityManager") -> None:
         try:
@@ -41,6 +42,15 @@ class Entity(JsonObject):
                     setattr(self, link_name, new_method)
         except KeyError:
             raise InvalidEntity(**self)
+
+    def _create_navigable_included_entities(self, v3_client: "V3", default_manager: "EntityManager") -> None:
+        for entity_name, entity_data in self.get("_included", {}).items():
+            manager_name = plural(entity_name)
+            other_manager = getattr(v3_client, manager_name, default_manager)
+            entity_type = other_manager._get_entity_type(entity_name)
+            entity = entity_type(other_manager.target_endpoint, other_manager.client, **entity_data)
+            setattr(self, entity_name, lambda: entity)
+        self.pop("_included", None)
 
     @staticmethod
     def _default_manager(target_endpoint: str, client: "CloudFoundryClient") -> "EntityManager":
@@ -118,8 +128,9 @@ class EntityManager(object):
         response = self.client.post(url, json=data, files=files)
         return self._read_response(response, entity_type)
 
-    def _get(self, url: str, entity_type: Optional[ENTITY_TYPE] = None) -> Entity:
-        response = self.client.get(url)
+    def _get(self, url: str, entity_type: Optional[ENTITY_TYPE] = None, **kwargs) -> Entity:
+        url_requested = EntityManager._get_url_with_encoded_params(url, **kwargs)
+        response = self.client.get(url_requested)
         return self._read_response(response, entity_type)
 
     def _put(self, url: str, data: dict, entity_type: Optional[ENTITY_TYPE] = None) -> Entity:
@@ -138,7 +149,8 @@ class EntityManager(object):
             return None
 
     def _list(self, requested_path: str, entity_type: Optional[ENTITY_TYPE] = None, **kwargs) -> PaginateEntities:
-        url_requested = EntityManager._get_url_filtered("%s%s" % (self.target_endpoint, requested_path), **kwargs)
+        url_requested = EntityManager._get_url_with_encoded_params("%s%s" % (self.target_endpoint, requested_path),
+                                                                   **kwargs)
         for element in self._paginate(url_requested, entity_type):
             yield element
 
@@ -194,12 +206,12 @@ class EntityManager(object):
             return entity
         return None
 
-    def get(self, entity_id: str, *extra_paths) -> Entity:
+    def get(self, entity_id: str, *extra_paths, **kwargs) -> Entity:
         if len(extra_paths) == 0:
             requested_path = "%s%s/%s" % (self.target_endpoint, self.entity_uri, entity_id)
         else:
             requested_path = "%s%s/%s/%s" % (self.target_endpoint, self.entity_uri, entity_id, "/".join(extra_paths))
-        return self._get(requested_path)
+        return self._get(requested_path, **kwargs)
 
     def _read_response(self, response: Response, entity_type: Optional[ENTITY_TYPE]) -> Union[JsonObject, Entity]:
         try:
@@ -214,11 +226,35 @@ class EntityManager(object):
                 "method": "GET",
             }
 
-        return self._entity(result, entity_type)
+        return self._entity(self._mixin_included_resources(result), entity_type)
 
     @staticmethod
     def _request(**mandatory_parameters) -> Request:
         return Request(**mandatory_parameters)
+
+    def _mixin_included_resources(self, result: JsonObject) -> JsonObject:
+        if "included" not in result:
+            return result
+        for resource in result.get("resources", [result]):
+            self._include_resources(resource, result)
+        del result["included"]
+        return result
+
+    def _include_resources(self, resource: JsonObject, result: JsonObject) -> None:
+        for relationship_name, relationship in resource.get("relationships", {}).items():
+            relationship_guid = relationship.get("data", {}).get("guid", None)
+            included_resources = result["included"].get(plural(relationship_name), None)
+            if relationship_guid is not None and included_resources is not None:
+                included_resource = next((r for r in included_resources if relationship_guid == r.get("guid", None)),
+                                         None)
+                if included_resource is not None:
+                    self._include_resources(included_resource, result)
+                    included = resource.setdefault("_included", {})
+                    included.update({relationship_name: included_resource})
+
+    @staticmethod
+    def _get_entity_type(entity_name: str) -> Type[ENTITY_TYPE]:
+        return Entity
 
     def _entity(self, result: JsonObject, entity_type: Optional[ENTITY_TYPE]) -> Union[JsonObject, Entity]:
         if "guid" in result or ("links" in result and "job" in result["links"]):
@@ -227,7 +263,7 @@ class EntityManager(object):
             return result
 
     @staticmethod
-    def _get_url_filtered(url: str, **kwargs) -> str:
+    def _get_url_with_encoded_params(url: str, **kwargs) -> str:
         def _append_encoded_parameter(parameters: List[str], args: Tuple[str, Any]) -> List[str]:
             parameter_name, parameter_value = args[0], args[1]
             if isinstance(parameter_value, (list, tuple)):

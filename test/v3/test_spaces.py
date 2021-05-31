@@ -28,7 +28,9 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(result, Entity)
 
     def test_list(self):
-        self.client.get.return_value = self.mock_response("/v3/spaces", HTTPStatus.OK, None, "v3", "spaces", "GET_response.json")
+        self.client.get.return_value = self.mock_response(
+            "/v3/spaces", HTTPStatus.OK, None, "v3", "spaces", "GET_response.json"
+        )
         all_spaces = [space for space in self.client.v3.spaces.list()]
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(2, len(all_spaces))
@@ -45,7 +47,9 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(space, Entity)
 
     def test_get_then_organization(self):
-        get_space = self.mock_response("/v3/spaces/space_id", HTTPStatus.OK, None, "v3", "spaces", "GET_{id}_response.json")
+        get_space = self.mock_response(
+            "/v3/spaces/space_id", HTTPStatus.OK, None, "v3", "spaces", "GET_{id}_response.json"
+        )
         get_organization = self.mock_response(
             "/v3/organizations/e00705b9-7b42-4561-ae97-2520399d2133",
             HTTPStatus.OK,
@@ -92,3 +96,29 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.client.delete.return_value = self.mock_response("/v3/spaces/space_id", HTTPStatus.NO_CONTENT, None)
         self.client.v3.spaces.remove("space_id")
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
+
+    def test_get_include_organization(self):
+        self.client.get.return_value = self.mock_response(
+            "/v3/spaces/space_id?include=organization",
+            HTTPStatus.OK,
+            None,
+            "v3",
+            "spaces",
+            "GET_{id}_response_include_org.json"
+        )
+        org = self.client.v3.spaces.get("space_id", include="organization").organization()
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+        self.assertEqual("my-organization", org["name"])
+        self.assertIsInstance(org, Entity)
+
+    def test_list_include_organization(self):
+        self.client.get.return_value = self.mock_response(
+            "/v3/spaces?include=organization", HTTPStatus.OK, None, "v3", "spaces", "GET_response_include_org.json"
+        )
+        all_orgs = [space.organization() for space in self.client.v3.spaces.list(include="organization")]
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+        self.assertEqual(2, len(all_orgs))
+        self.assertEqual(all_orgs[0]["name"], "org1")
+        self.assertIsInstance(all_orgs[0], Entity)
+        self.assertEqual(all_orgs[1]["name"], "org2")
+        self.assertIsInstance(all_orgs[1], Entity)
