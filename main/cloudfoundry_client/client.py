@@ -174,12 +174,6 @@ class CloudFoundryClient(CredentialManager):
 
     @staticmethod
     def _get_info(target_endpoint: str, proxy: Optional[dict] = None, verify: bool = True) -> Info:
-        info_response = CloudFoundryClient._check_response(
-            requests.get(
-                "%s/info" % target_endpoint, proxies=proxy if proxy is not None else dict(http="", https=""), verify=verify
-            )
-        )
-        info = info_response.json()
         root_response = CloudFoundryClient._check_response(
             requests.get("%s/" % target_endpoint, proxies=proxy if proxy is not None else dict(http="", https=""), verify=verify)
         )
@@ -190,7 +184,7 @@ class CloudFoundryClient(CredentialManager):
         log_stream = root_links.get("log_stream")
         return Info(
             root_links["cloud_controller_v2"]["meta"]["version"],
-            info["authorization_endpoint"],
+            root_links["login"]["href"],
             target_endpoint,
             logging.get("href") if logging is not None else None,
             log_stream.get("href") if log_stream is not None else None,
