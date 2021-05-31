@@ -1,6 +1,6 @@
 import functools
 from json import JSONDecodeError
-from typing import Any, Generator, Optional, List, Tuple, Union, TypeVar, TYPE_CHECKING
+from typing import Any, Generator, Optional, List, Tuple, Union, TypeVar, TYPE_CHECKING, Callable
 from urllib.parse import quote, urlparse
 
 from requests import Response
@@ -10,36 +10,31 @@ from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.request_object import Request
 
 if TYPE_CHECKING:
-    from cloudfoundry_client.client import CloudFoundryClient
+    from cloudfoundry_client.client import CloudFoundryClient, V3
+
+
+def plural(name: str) -> str:
+    return name if name.endswith("s") else "%ss" % name
 
 
 class Entity(JsonObject):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient", **kwargs):
         super(Entity, self).__init__(**kwargs)
+        default_manager = self._default_manager(target_endpoint, client)
+        self._create_navigable_links(client.v3, default_manager)
+
+    def _create_navigable_links(self, v3_client: "V3", default_manager: "EntityManager") -> None:
         try:
-
-            def default_method(m, u):
-                raise NotImplementedError("Unknown method %s for url %s" % (m, u))
-
-            default_manager = self._default_manager(client, target_endpoint)
+            default_method = self._default_method()
             for link_name, link in self.get("links", {}).items():
                 if link_name != "self":
                     link_method = link.get("method", "GET").lower()
+                    manager_method = self._manager_method(link_name, link_method)
                     ref = link["href"]
-                    manager_name = link_name if link_name.endswith("s") else "%ss" % link_name
-                    other_manager = getattr(client.v3, manager_name, default_manager)
-                    if link_method == "get":
-                        new_method = (
-                            functools.partial(other_manager._paginate, ref)
-                            if link_name.endswith("s")
-                            else functools.partial(other_manager._get, ref)
-                        )
-                    elif link_method == "post":
-                        new_method = functools.partial(other_manager._post, ref)
-                    elif link_method == "put":
-                        new_method = functools.partial(other_manager._put, ref)
-                    elif link_method == "delete":
-                        new_method = functools.partial(other_manager._delete, ref)
+                    if manager_method is not None:
+                        manager_name = plural(link_name)
+                        other_manager = getattr(v3_client, manager_name, default_manager)
+                        new_method = functools.partial(getattr(other_manager, manager_method), ref)
                     else:
                         new_method = functools.partial(default_method, link_method, ref)
                     new_method.__name__ = link_name
@@ -48,8 +43,30 @@ class Entity(JsonObject):
             raise InvalidEntity(**self)
 
     @staticmethod
-    def _default_manager(client, target_endpoint):
+    def _default_manager(target_endpoint: str, client: "CloudFoundryClient") -> "EntityManager":
         return EntityManager(target_endpoint, client, "")
+
+    @staticmethod
+    def _default_method() -> Callable:
+        def default_method(m, u):
+            raise NotImplementedError("Unknown method %s for url %s" % (m, u))
+
+        return default_method
+
+    @staticmethod
+    def _manager_method(link_name: str, link_method: str) -> Optional[str]:
+        if link_method == "get":
+            if link_name.endswith("s"):
+                return "_paginate"
+            else:
+                return "_get"
+        elif link_method == "post":
+            return "_post"
+        elif link_method == "put":
+            return "_put"
+        elif link_method == "delete":
+            return "_delete"
+        return None
 
 
 PaginateEntities = Generator[Entity, None, None]
