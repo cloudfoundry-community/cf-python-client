@@ -12,12 +12,12 @@ class App(Entity):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient", **kwargs):
         super(App, self).__init__(target_endpoint, client, **kwargs)
         # patch environment_variables method
-        environment_variables_link = self.get("links", {}).get('environment_variables', {}).get('href', None)
+        environment_variables_link = self.get("links", {}).get("environment_variables", {}).get("href", None)
         if environment_variables_link is not None:
             other_manager = self._default_manager(client, target_endpoint)
             new_method = functools.partial(other_manager._get, environment_variables_link)
-            new_method.__name__ = 'environment_variables'
-            setattr(self, 'environment_variables', new_method)
+            new_method.__name__ = "environment_variables"
+            setattr(self, "environment_variables", new_method)
 
 
 class AppManager(EntityManager):

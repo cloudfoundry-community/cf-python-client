@@ -1,4 +1,5 @@
 import functools
+from json import JSONDecodeError
 from typing import Any, Generator, Optional, List, Tuple, Union, TypeVar, TYPE_CHECKING
 from urllib.parse import quote, urlparse
 
@@ -16,8 +17,10 @@ class Entity(JsonObject):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient", **kwargs):
         super(Entity, self).__init__(**kwargs)
         try:
+
             def default_method(m, u):
                 raise NotImplementedError("Unknown method %s for url %s" % (m, u))
+
             default_manager = self._default_manager(client, target_endpoint)
             for link_name, link in self.get("links", {}).items():
                 if link_name != "self":
@@ -88,15 +91,13 @@ ENTITY_TYPE = TypeVar("ENTITY_TYPE", bound=Entity)
 
 
 class EntityManager(object):
-    def __init__(self, target_endpoint: str, client: "CloudFoundryClient", entity_uri: str,
-                 entity_type: ENTITY_TYPE = Entity):
+    def __init__(self, target_endpoint: str, client: "CloudFoundryClient", entity_uri: str, entity_type: ENTITY_TYPE = Entity):
         self.target_endpoint = target_endpoint
         self.entity_uri = entity_uri
         self.client = client
         self.entity_type = entity_type
 
-    def _post(self, url: str, data: Optional[dict] = None, files: Any = None,
-              entity_type: ENTITY_TYPE = None) -> Entity:
+    def _post(self, url: str, data: Optional[dict] = None, files: Any = None, entity_type: ENTITY_TYPE = None) -> Entity:
         response = self.client.post(url, json=data, files=files)
         return self._read_response(response, entity_type)
 
@@ -131,9 +132,9 @@ class EntityManager(object):
             for resource in response_json["resources"]:
                 yield self._entity(resource, entity_type)
             if (
-                    "next" not in response_json["pagination"]
-                    or response_json["pagination"]["next"] is None
-                    or response_json["pagination"]["next"].get("href") is None
+                "next" not in response_json["pagination"]
+                or response_json["pagination"]["next"] is None
+                or response_json["pagination"]["next"].get("href") is None
             ):
                 break
             else:
@@ -184,10 +185,15 @@ class EntityManager(object):
         return self._get(requested_path)
 
     def _read_response(self, response: Response, entity_type: Optional[ENTITY_TYPE]) -> Union[JsonObject, Entity]:
-        result = response.json(object_pairs_hook=JsonObject)
-        if 'Location' in response.headers:
-            result['links']['job'] = {
-                "href": response.headers['Location'],
+        try:
+            result = response.json(object_pairs_hook=JsonObject)
+        except JSONDecodeError:
+            # assume that response is empty
+            result = {"links": {}}
+
+        if "Location" in response.headers:
+            result["links"]["job"] = {
+                "href": response.headers["Location"],
                 "method": "GET",
             }
 
@@ -198,7 +204,7 @@ class EntityManager(object):
         return Request(**mandatory_parameters)
 
     def _entity(self, result: JsonObject, entity_type: Optional[ENTITY_TYPE]) -> Union[JsonObject, Entity]:
-        if "guid" in result:
+        if "guid" in result or ("links" in result and "job" in result["links"]):
             return (entity_type or self.entity_type)(self.target_endpoint, self.client, **result)
         else:
             return result
@@ -214,7 +220,6 @@ class EntityManager(object):
             return parameters
 
         if len(kwargs) > 0:
-            return "%s?%s" % (
-                url, "&".join(functools.reduce(_append_encoded_parameter, sorted(list(kwargs.items())), [])))
+            return "%s?%s" % (url, "&".join(functools.reduce(_append_encoded_parameter, sorted(list(kwargs.items())), [])))
         else:
             return url

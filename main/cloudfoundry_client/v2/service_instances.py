@@ -6,11 +6,11 @@ if TYPE_CHECKING:
     from cloudfoundry_client.client import CloudFoundryClient
 
 
-class ServiceInstanceManager(EntityManager):
+class ServiceInstanceManagerV2(EntityManager):
     list_query_parameters = ["page", "results-per-page", "order-direction", "return_user_provided_service_instances"]
 
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServiceInstanceManager, self).__init__(target_endpoint, client, "/v2/service_instances")
+        super(ServiceInstanceManagerV2, self).__init__(target_endpoint, client, "/v2/service_instances")
 
     def create(
         self,
@@ -25,7 +25,7 @@ class ServiceInstanceManager(EntityManager):
         request["parameters"] = parameters
         request["tags"] = tags
         params = None if not accepts_incomplete else dict(accepts_incomplete="true")
-        return super(ServiceInstanceManager, self)._create(request, params=params)
+        return super(ServiceInstanceManagerV2, self)._create(request, params=params)
 
     def update(
         self,
@@ -42,10 +42,10 @@ class ServiceInstanceManager(EntityManager):
         request["parameters"] = parameters
         request["tags"] = tags
         params = None if not accepts_incomplete else dict(accepts_incomplete="true")
-        return super(ServiceInstanceManager, self)._update(instance_guid, request, params=params)
+        return super(ServiceInstanceManagerV2, self)._update(instance_guid, request, params=params)
 
     def list_permissions(self, instance_guid: str) -> Dict[str, bool]:
-        return super(ServiceInstanceManager, self)._get("%s/%s/permissions" % (self.entity_uri, instance_guid), dict)
+        return super(ServiceInstanceManagerV2, self)._get("%s/%s/permissions" % (self.entity_uri, instance_guid), dict)
 
     def remove(self, instance_guid: str, accepts_incomplete: Optional[bool] = False, purge: Optional[bool] = False):
         parameters = {}
@@ -53,4 +53,4 @@ class ServiceInstanceManager(EntityManager):
             parameters["accepts_incomplete"] = "true"
         if purge:
             parameters["purge"] = "true"
-        super(ServiceInstanceManager, self)._remove(instance_guid, params=parameters)
+        super(ServiceInstanceManagerV2, self)._remove(instance_guid, params=parameters)
