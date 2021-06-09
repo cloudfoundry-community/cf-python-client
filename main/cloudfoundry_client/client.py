@@ -25,6 +25,7 @@ from cloudfoundry_client.v2.service_plan_visibilities import ServicePlanVisibili
 from cloudfoundry_client.v2.service_plans import ServicePlanManagerV2
 
 from cloudfoundry_client.v3.service_brokers import ServiceBrokerManager
+from cloudfoundry_client.v3.service_offerings import ServiceOfferingsManager
 from cloudfoundry_client.v3.service_plans import ServicePlanManager
 from cloudfoundry_client.v3.apps import AppManager
 from cloudfoundry_client.v3.buildpacks import BuildpackManager
@@ -104,6 +105,7 @@ class V3(object):
         self.jobs = JobManager(target_endpoint, credential_manager)
         self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
         self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
+        self.service_offerings = ServiceOfferingsManager(target_endpoint, credential_manager)
 
 
 class CloudFoundryClient(CredentialManager):
