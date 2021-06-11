@@ -6,9 +6,9 @@ if TYPE_CHECKING:
     from cloudfoundry_client.client import CloudFoundryClient
 
 
-class ServicePlanManagerV2(EntityManager):
+class ServicePlanManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServicePlanManagerV2, self).__init__(target_endpoint, client, "/v2/service_plans")
+        super(ServicePlanManager, self).__init__(target_endpoint, client, "/v2/service_plans")
 
     def create_from_resource_file(self, path: str) -> Entity:
         raise NotImplementedError("No creation allowed")

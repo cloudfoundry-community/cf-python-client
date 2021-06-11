@@ -14,15 +14,15 @@ from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
 from cloudfoundry_client.v2.buildpacks import BuildpackManager as BuildpackManagerV2
 from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
 from cloudfoundry_client.v2.events import EventManager
-from cloudfoundry_client.v2.jobs import JobManagerV2
+from cloudfoundry_client.v2.jobs import JobManager as JobManagerV2
 from cloudfoundry_client.v2.resources import ResourceManager
 from cloudfoundry_client.v2.routes import RouteManager
 from cloudfoundry_client.v2.service_bindings import ServiceBindingManager
-from cloudfoundry_client.v2.service_brokers import ServiceBrokerManagerV2
-from cloudfoundry_client.v2.service_instances import ServiceInstanceManagerV2
+from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager as ServiceBrokerManagerV2
+from cloudfoundry_client.v2.service_instances import ServiceInstanceManager as ServiceInstanceManagerV2
 from cloudfoundry_client.v2.service_keys import ServiceKeyManager
 from cloudfoundry_client.v2.service_plan_visibilities import ServicePlanVisibilityManager
-from cloudfoundry_client.v2.service_plans import ServicePlanManagerV2
+from cloudfoundry_client.v2.service_plans import ServicePlanManager as ServicePlanManagerV2
 
 from cloudfoundry_client.v3.service_brokers import ServiceBrokerManager
 from cloudfoundry_client.v3.service_offerings import ServiceOfferingsManager

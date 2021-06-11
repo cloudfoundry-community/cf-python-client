@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from cloudfoundry_client.client import CloudFoundryClient
 
 
-class JobManagerV2(object):
+class JobManager(object):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         self.target_endpoint = target_endpoint
         self.client = client
