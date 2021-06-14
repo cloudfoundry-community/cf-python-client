@@ -1,0 +1,13 @@
+{
+    "type": "organization",
+    "organizations": [
+        {
+            "guid": "0fc1ad4f-e1d7-4436-8e23-6b20f03c6482",
+            "name": "some_org"
+        },
+        {
+            "guid": "0fc1ad4f-e1d7-4436-8e23-6b20f03c6483",
+            "name": "other_org"
+        }
+    ]
+}

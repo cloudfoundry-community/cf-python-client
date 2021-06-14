@@ -18,12 +18,12 @@ class JobManager(EntityManager):
         super(JobManager, self).__init__(target_endpoint, client, "/v3/jobs")
 
     def wait_for_job_completion(
-            self,
-            job_guid: str,
-            step: int = 1,
-            step_function: types.FunctionType = lambda step: min(step + step, 60),
-            poll_forever: bool = False,
-            timeout: int = 600,
+        self,
+        job_guid: str,
+        step: int = 1,
+        step_function: types.FunctionType = lambda step: min(step + step, 60),
+        poll_forever: bool = False,
+        timeout: int = 600,
     ) -> Entity:
         try:
             return polling2.poll(

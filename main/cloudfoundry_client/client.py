@@ -14,25 +14,29 @@ from cloudfoundry_client.v2.apps import AppManager as AppManagerV2
 from cloudfoundry_client.v2.buildpacks import BuildpackManager as BuildpackManagerV2
 from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
 from cloudfoundry_client.v2.events import EventManager
-from cloudfoundry_client.v2.jobs import JobManager
+from cloudfoundry_client.v2.jobs import JobManager as JobManagerV2
 from cloudfoundry_client.v2.resources import ResourceManager
 from cloudfoundry_client.v2.routes import RouteManager
 from cloudfoundry_client.v2.service_bindings import ServiceBindingManager
-from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager
-from cloudfoundry_client.v2.service_instances import ServiceInstanceManager
+from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager as ServiceBrokerManagerV2
+from cloudfoundry_client.v2.service_instances import ServiceInstanceManager as ServiceInstanceManagerV2
 from cloudfoundry_client.v2.service_keys import ServiceKeyManager
 from cloudfoundry_client.v2.service_plan_visibilities import ServicePlanVisibilityManager
-from cloudfoundry_client.v2.service_plans import ServicePlanManager
-from cloudfoundry_client.v3.apps import AppManager as AppManagerV3
-from cloudfoundry_client.v3.buildpacks import BuildpackManager as BuildpackManagerV3
+from cloudfoundry_client.v2.service_plans import ServicePlanManager as ServicePlanManagerV2
+
+from cloudfoundry_client.v3.service_brokers import ServiceBrokerManager
+from cloudfoundry_client.v3.service_offerings import ServiceOfferingsManager
+from cloudfoundry_client.v3.service_plans import ServicePlanManager
+from cloudfoundry_client.v3.apps import AppManager
+from cloudfoundry_client.v3.buildpacks import BuildpackManager
 from cloudfoundry_client.v3.domains import DomainManager
 from cloudfoundry_client.v3.feature_flags import FeatureFlagManager
 from cloudfoundry_client.v3.isolation_segments import IsolationSegmentManager
 from cloudfoundry_client.v3.organizations import OrganizationManager
-from cloudfoundry_client.v3.service_instances import ServiceInstanceManager as ServiceInstanceManagerV3
+from cloudfoundry_client.v3.service_instances import ServiceInstanceManager
 from cloudfoundry_client.v3.spaces import SpaceManager
 from cloudfoundry_client.v3.tasks import TaskManager
-from cloudfoundry_client.v3.jobs import JobManager as JobManagerV3
+from cloudfoundry_client.v3.jobs import JobManager
 
 _logger = logging.getLogger(__name__)
 
@@ -62,13 +66,13 @@ class V2(object):
     def __init__(self, target_endpoint: str, credential_manager: "CloudFoundryClient"):
         self.apps = AppManagerV2(target_endpoint, credential_manager)
         self.buildpacks = BuildpackManagerV2(target_endpoint, credential_manager)
-        self.jobs = JobManager(target_endpoint, credential_manager)
+        self.jobs = JobManagerV2(target_endpoint, credential_manager)
         self.service_bindings = ServiceBindingManager(target_endpoint, credential_manager)
-        self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
-        self.service_instances = ServiceInstanceManager(target_endpoint, credential_manager)
+        self.service_brokers = ServiceBrokerManagerV2(target_endpoint, credential_manager)
+        self.service_instances = ServiceInstanceManagerV2(target_endpoint, credential_manager)
         self.service_keys = ServiceKeyManager(target_endpoint, credential_manager)
         self.service_plan_visibilities = ServicePlanVisibilityManager(target_endpoint, credential_manager)
-        self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
+        self.service_plans = ServicePlanManagerV2(target_endpoint, credential_manager)
         # Default implementations
         self.event = EventManager(target_endpoint, credential_manager)
         self.organizations = EntityManagerV2(target_endpoint, credential_manager, "/v2/organizations")
@@ -89,16 +93,19 @@ class V2(object):
 
 class V3(object):
     def __init__(self, target_endpoint: str, credential_manager: "CloudFoundryClient"):
-        self.apps = AppManagerV3(target_endpoint, credential_manager)
-        self.buildpacks = BuildpackManagerV3(target_endpoint, credential_manager)
+        self.apps = AppManager(target_endpoint, credential_manager)
+        self.buildpacks = BuildpackManager(target_endpoint, credential_manager)
         self.domains = DomainManager(target_endpoint, credential_manager)
         self.feature_flags = FeatureFlagManager(target_endpoint, credential_manager)
         self.isolation_segments = IsolationSegmentManager(target_endpoint, credential_manager)
         self.spaces = SpaceManager(target_endpoint, credential_manager)
         self.organizations = OrganizationManager(target_endpoint, credential_manager)
-        self.service_instances = ServiceInstanceManagerV3(target_endpoint, credential_manager)
+        self.service_instances = ServiceInstanceManager(target_endpoint, credential_manager)
         self.tasks = TaskManager(target_endpoint, credential_manager)
-        self.jobs = JobManagerV3(target_endpoint, credential_manager)
+        self.jobs = JobManager(target_endpoint, credential_manager)
+        self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
+        self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
+        self.service_offerings = ServiceOfferingsManager(target_endpoint, credential_manager)
 
 
 class CloudFoundryClient(CredentialManager):

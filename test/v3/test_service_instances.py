@@ -1,6 +1,7 @@
 import unittest
 from http import HTTPStatus
 from unittest.mock import patch
+
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.v3.entities import Entity
 
@@ -12,6 +13,36 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
 
     def setUp(self):
         self.build_client()
+
+    def test_create(self):
+        self.client.post.return_value = self.mock_response(
+            "/v3/service_instances",
+            HTTPStatus.ACCEPTED,
+            headers={"Location": "https://somewhere.org/v3/jobs/job_id"},
+        )
+        result = self.client.v3.service_instances.create(
+            name="space-name",
+            parameters={"foo": "bar"},
+            tags=["mytag", "myothertag"],
+            space_guid="space-guid-123",
+            service_plan_guid="service-plan-guid-123",
+        )
+        self.client.post.assert_called_with(
+            self.client.post.return_value.url,
+            json={
+                "name": "space-name",
+                "parameters": {"foo": "bar"},
+                "tags": ["mytag", "myothertag"],
+                "type": "managed",
+                "relationships": {
+                    "space": {"data": {"guid": "space-guid-123"}},
+                    "service_plan": {"data": {"guid": "service-plan-guid-123"}},
+                },
+            },
+            files=None,
+        )
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, Entity)
 
     def test_list(self):
         self.client.get.return_value = self.mock_response(

@@ -103,7 +103,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
         self.client.post.return_value = self.mock_response(
             "/v3/buildpacks/buildpack_id/upload",
             HTTPStatus.ACCEPTED,
-            {"Location": "https://somewhere.org/v3/jobs/job_id"},
+            {"Location": "https://somewhere.org/v3/jobs/job_id", "Content-Type": "application/json"},
             "v3",
             "buildpacks",
             "POST_response.json",
@@ -113,7 +113,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
             self.mock_response(
                 "/v3/jobs/job_id",
                 HTTPStatus.OK,
-                None,
+                {"Content-Type": "application/json"},
                 "v3",
                 "jobs",
                 "GET_{id}_complete_response.json",
@@ -121,7 +121,7 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
             self.mock_response(
                 "/v3/buildpacks/buildpack_id",
                 HTTPStatus.OK,
-                None,
+                {"Content-Type": "application/json"},
                 "v3",
                 "buildpacks",
                 "GET_{id}_response.json",
