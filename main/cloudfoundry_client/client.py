@@ -24,16 +24,17 @@ from cloudfoundry_client.v2.service_keys import ServiceKeyManager
 from cloudfoundry_client.v2.service_plan_visibilities import ServicePlanVisibilityManager
 from cloudfoundry_client.v2.service_plans import ServicePlanManager as ServicePlanManagerV2
 
-from cloudfoundry_client.v3.service_brokers import ServiceBrokerManager
-from cloudfoundry_client.v3.service_offerings import ServiceOfferingsManager
-from cloudfoundry_client.v3.service_plans import ServicePlanManager
 from cloudfoundry_client.v3.apps import AppManager
 from cloudfoundry_client.v3.buildpacks import BuildpackManager
 from cloudfoundry_client.v3.domains import DomainManager
 from cloudfoundry_client.v3.feature_flags import FeatureFlagManager
 from cloudfoundry_client.v3.isolation_segments import IsolationSegmentManager
+from cloudfoundry_client.v3.processes import ProcessManager
 from cloudfoundry_client.v3.organizations import OrganizationManager
+from cloudfoundry_client.v3.service_brokers import ServiceBrokerManager
 from cloudfoundry_client.v3.service_instances import ServiceInstanceManager
+from cloudfoundry_client.v3.service_offerings import ServiceOfferingsManager
+from cloudfoundry_client.v3.service_plans import ServicePlanManager
 from cloudfoundry_client.v3.spaces import SpaceManager
 from cloudfoundry_client.v3.tasks import TaskManager
 from cloudfoundry_client.v3.jobs import JobManager
@@ -98,14 +99,15 @@ class V3(object):
         self.domains = DomainManager(target_endpoint, credential_manager)
         self.feature_flags = FeatureFlagManager(target_endpoint, credential_manager)
         self.isolation_segments = IsolationSegmentManager(target_endpoint, credential_manager)
-        self.spaces = SpaceManager(target_endpoint, credential_manager)
-        self.organizations = OrganizationManager(target_endpoint, credential_manager)
-        self.service_instances = ServiceInstanceManager(target_endpoint, credential_manager)
-        self.tasks = TaskManager(target_endpoint, credential_manager)
         self.jobs = JobManager(target_endpoint, credential_manager)
+        self.organizations = OrganizationManager(target_endpoint, credential_manager)
+        self.processes = ProcessManager(target_endpoint, credential_manager)
         self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
-        self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
+        self.service_instances = ServiceInstanceManager(target_endpoint, credential_manager)
         self.service_offerings = ServiceOfferingsManager(target_endpoint, credential_manager)
+        self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
+        self.spaces = SpaceManager(target_endpoint, credential_manager)
+        self.tasks = TaskManager(target_endpoint, credential_manager)
 
 
 class CloudFoundryClient(CredentialManager):
