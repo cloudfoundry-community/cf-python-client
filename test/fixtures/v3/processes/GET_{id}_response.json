@@ -1,5 +1,5 @@
 {
-  "guid": "6a901b7c-9417-4dc1-8189-d3234aa0ab82",
+  "guid": "process_id",
   "type": "web",
   "command": "rackup",
   "instances": 5,
@@ -31,10 +31,10 @@
   "updated_at": "2016-03-23T18:48:42Z",
   "links": {
     "self": {
-      "href": "https://api.example.org/v3/processes/6a901b7c-9417-4dc1-8189-d3234aa0ab82"
+      "href": "https://api.example.org/v3/processes/process_id"
     },
     "scale": {
-      "href": "https://api.example.org/v3/processes/6a901b7c-9417-4dc1-8189-d3234aa0ab82/actions/scale",
+      "href": "https://api.example.org/v3/processes/process_id/actions/scale",
       "method": "POST"
     },
     "app": {
@@ -44,7 +44,7 @@
       "href": "https://api.example.org/v3/spaces/2f35885d-0c9d-4423-83ad-fd05066f8576"
     },
     "stats": {
-      "href": "https://api.example.org/v3/processes/6a901b7c-9417-4dc1-8189-d3234aa0ab82/stats"
+      "href": "https://api.example.org/v3/processes/process_id/stats"
     }
   }
 }
