@@ -160,10 +160,12 @@ class EntityManager(object):
             response_json = self._read_response(response, JsonObject)
             for resource in response_json["resources"]:
                 yield self._entity(resource, entity_type)
+            pagination = response_json.get("pagination")
             if (
-                "next" not in response_json["pagination"]
-                or response_json["pagination"]["next"] is None
-                or response_json["pagination"]["next"].get("href") is None
+                pagination is None
+                or "next" not in pagination
+                or pagination["next"] is None
+                or pagination["next"].get("href") is None
             ):
                 break
             else:
