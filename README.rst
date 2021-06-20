@@ -215,6 +215,23 @@ Another example:
     for task in client.v3.tasks.list(app_guids=['app-guid-1', 'app-guid-2']):
         task.cancel()
 
+When supported by the API, parent entities can be included in a single call. The included entities replace the links mentioned above.
+The following code snippet issues three requests to the API in order to get app, space and organization data:
+
+.. code-block:: python
+
+  app = client.v3.apps.get("app-guid")
+  print("App name: %s" % app["name])
+  space = app.space()
+  print("Space name: %s" % space["name])
+  org = space.organization()
+  print("Org name: %s" % org["name])
+
+By changing the first line only, a single request fetches all the data. The navigation from app to space and space to organization remains unchanged.
+
+.. code-block:: python
+
+  app = client.v3.apps.get("app-guid", include="space.organization")
 
 Available managers on API V3 are:
 
@@ -227,7 +244,10 @@ Available managers on API V3 are:
 - ``spaces``
 - ``tasks``
 
-The managers provide the same methods as the V2 managers.
+The managers provide the same methods as the V2 managers with the following differences:
+
+- ``get(**kwargs)``: supports keyword arguments that are passed on to the API, e.g. "include"
+
 
 Networking
 ----------

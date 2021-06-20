@@ -68,7 +68,8 @@ class TestApps(unittest.TestCase, AbstractTestCase):
             "GET_{id}_environment_variables_response.json",
         )
         self.client.get.side_effect = [get_app, get_environment_variables]
-        environment_variables = self.client.v3.apps.get("app_id").environment_variables()
+        app = self.client.v3.apps.get("app_id")
+        environment_variables = app.environment_variables()
         self.assertIsInstance(environment_variables, dict)
         self.assertEqual("production", environment_variables["var"]["RAILS_ENV"])
 
@@ -92,3 +93,32 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         routes = self.client.v3.apps.get_routes("app_id")
         self.assertIsInstance(routes, JsonObject)
         self.assertEquals(routes["resources"][0]["destinations"][0]["guid"], "385bf117-17f5-4689-8c5c-08c6cc821fed")
+
+    def test_get_include_space_and_org(self):
+        self.client.get.return_value = self.mock_response(
+            "/v3/apps/app_id?include=space.organization",
+            HTTPStatus.OK,
+            None,
+            "v3",
+            "apps",
+            "GET_{id}_response_include_space_and_org.json"
+        )
+        space = self.client.v3.apps.get("app_id", include="space.organization").space()
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+        org = space.organization()
+        self.assertEqual("my_space", space["name"])
+        self.assertIsInstance(space, Entity)
+        self.assertEqual("my_organization", org["name"])
+        self.assertIsInstance(org, Entity)
+
+    def test_list_include_space(self):
+        self.client.get.return_value = self.mock_response(
+            "/v3/apps?include=space", HTTPStatus.OK, None, "v3", "apps", "GET_response_include_space.json"
+        )
+        all_spaces = [app.space() for app in self.client.v3.apps.list(include="space")]
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+        self.assertEqual(2, len(all_spaces))
+        self.assertEqual(all_spaces[0]["name"], "my_space")
+        self.assertIsInstance(all_spaces[0], Entity)
+        self.assertEqual(all_spaces[1]["name"], "my_space")
+        self.assertIsInstance(all_spaces[1], Entity)

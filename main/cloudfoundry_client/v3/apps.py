@@ -1,5 +1,4 @@
-import functools
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.v3.entities import EntityManager, Entity
@@ -9,15 +8,11 @@ if TYPE_CHECKING:
 
 
 class App(Entity):
-    def __init__(self, target_endpoint: str, client: "CloudFoundryClient", **kwargs):
-        super(App, self).__init__(target_endpoint, client, **kwargs)
-        # patch environment_variables method
-        environment_variables_link = self.get("links", {}).get("environment_variables", {}).get("href", None)
-        if environment_variables_link is not None:
-            other_manager = self._default_manager(client, target_endpoint)
-            new_method = functools.partial(other_manager._get, environment_variables_link)
-            new_method.__name__ = "environment_variables"
-            setattr(self, "environment_variables", new_method)
+    @staticmethod
+    def _manager_method(link_name: str, link_method: str) -> Optional[str]:
+        if link_name == "environment_variables" and link_method == "get":
+            return "_get"  # instead of _paginate
+        return Entity._manager_method(link_name, link_method)
 
 
 class AppManager(EntityManager):
