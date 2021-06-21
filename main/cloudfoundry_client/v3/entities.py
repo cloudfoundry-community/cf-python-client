@@ -149,8 +149,7 @@ class EntityManager(object):
             return None
 
     def _list(self, requested_path: str, entity_type: Optional[ENTITY_TYPE] = None, **kwargs) -> PaginateEntities:
-        url_requested = EntityManager._get_url_with_encoded_params("%s%s" % (self.target_endpoint, requested_path),
-                                                                   **kwargs)
+        url_requested = EntityManager._get_url_with_encoded_params("%s%s" % (self.target_endpoint, requested_path), **kwargs)
         for element in self._paginate(url_requested, entity_type):
             yield element
 
@@ -244,11 +243,10 @@ class EntityManager(object):
 
     def _include_resources(self, resource: JsonObject, result: JsonObject) -> None:
         for relationship_name, relationship in resource.get("relationships", {}).items():
-            relationship_guid = relationship.get("data", {}).get("guid", None)
+            relationship_guid = (relationship.get("data") or {}).get("guid")
             included_resources = result["included"].get(plural(relationship_name), None)
             if relationship_guid is not None and included_resources is not None:
-                included_resource = next((r for r in included_resources if relationship_guid == r.get("guid", None)),
-                                         None)
+                included_resource = next((r for r in included_resources if relationship_guid == r.get("guid", None)), None)
                 if included_resource is not None:
                     self._include_resources(included_resource, result)
                     included = resource.setdefault("_included", {})
