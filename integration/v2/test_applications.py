@@ -48,8 +48,8 @@ class TestApps(unittest.TestCase):
                     self.assertEqual(e.body.get("error_code"), "CF-AppStoppedStatsError")
                 env = client.v2.apps.get_env(application["metadata"]["guid"])
                 self.assertIsNotNone(env)
-                self.assertIsNotNone(env.get("application_env_json", None))
-                self.assertIsNotNone(env["application_env_json"].get("VCAP_APPLICATION", None))
+                self.assertIsNotNone(env.get("application_env_json"))
+                self.assertIsNotNone(env["application_env_json"].get("VCAP_APPLICATION"))
                 self.assertGreater(len(env["application_env_json"]["VCAP_APPLICATION"].get("application_uris", [])), 0)
                 _logger.debug("env = %s", json.dumps(env))
             cpt += 1

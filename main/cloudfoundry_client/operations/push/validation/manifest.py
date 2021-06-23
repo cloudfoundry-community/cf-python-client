@@ -126,7 +126,7 @@ class ManifestReader(object):
 
     @staticmethod
     def _convert_environment(app_manifest: dict):
-        environment = app_manifest.get("env", None)
+        environment = app_manifest.get("env")
         if environment is not None:
             if type(environment) != dict:
                 raise AssertionError("'env' entry must be a dictionary")
