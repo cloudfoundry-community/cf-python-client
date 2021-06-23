@@ -205,7 +205,7 @@ class CloudFoundryClient(CredentialManager):
             try:
                 json_data = response.json()
                 invalid_token_error = "CF-InvalidAuthToken"
-                if json_data.get("errors", None) is not None:  # V3 error response
+                if json_data.get("errors") is not None:  # V3 error response
                     for error in json_data.get("errors"):
                         if error.get("code", 0) == 1000 and error.get("title", "") == invalid_token_error:
                             _logger.info("_is_token_v3_expired - true")
@@ -295,4 +295,4 @@ class CloudFoundryClient(CredentialManager):
                 body = response.json()
             except ValueError:
                 body = response.text
-            raise InvalidStatusCode(HTTPStatus(response.status_code), body, response.headers.get("x-vcap-request-id", None))
+            raise InvalidStatusCode(HTTPStatus(response.status_code), body, response.headers.get("x-vcap-request-id"))
