@@ -181,6 +181,15 @@ def main():
             allow_deletion=True,
         ),
         CommandDomain(
+            display_name="OrganizationQuotas",
+            entity_name="organization_quota",
+            api_version="v3",
+            filter_list_parameters=["names", "guids", "organization_guids"],
+            allow_retrieve_by_name=True,
+            allow_creation=True,
+            allow_deletion=True,
+        ),
+        CommandDomain(
             display_name="Spaces",
             entity_name="space",
             filter_list_parameters=["organization_guid"],

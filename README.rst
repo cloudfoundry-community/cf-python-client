@@ -240,6 +240,7 @@ Available managers on API V3 are:
 - ``domains``
 - ``feature-flags``
 - ``organizations``
+- ``organization_quotas``
 - ``service_instances``
 - ``spaces``
 - ``tasks``
