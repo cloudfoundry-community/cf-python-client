@@ -29,6 +29,7 @@ from cloudfoundry_client.v3.buildpacks import BuildpackManager
 from cloudfoundry_client.v3.domains import DomainManager
 from cloudfoundry_client.v3.feature_flags import FeatureFlagManager
 from cloudfoundry_client.v3.isolation_segments import IsolationSegmentManager
+from cloudfoundry_client.v3.organization_quotas import OrganizationQuotaManager
 from cloudfoundry_client.v3.processes import ProcessManager
 from cloudfoundry_client.v3.organizations import OrganizationManager
 from cloudfoundry_client.v3.service_brokers import ServiceBrokerManager
@@ -101,6 +102,7 @@ class V3(object):
         self.isolation_segments = IsolationSegmentManager(target_endpoint, credential_manager)
         self.jobs = JobManager(target_endpoint, credential_manager)
         self.organizations = OrganizationManager(target_endpoint, credential_manager)
+        self.organization_quotas = OrganizationQuotaManager(target_endpoint, credential_manager)
         self.processes = ProcessManager(target_endpoint, credential_manager)
         self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
         self.service_instances = ServiceInstanceManager(target_endpoint, credential_manager)
