@@ -181,8 +181,7 @@ class CloudFoundryClient(CredentialManager):
 
             return self._rlpgateway
 
-    @staticmethod
-    def _get_info(target_endpoint: str, proxy: Optional[dict] = None, verify: bool = True) -> Info:
+    def _get_info(self, target_endpoint: str, proxy: Optional[dict] = None, verify: bool = True) -> Info:
         root_response = CloudFoundryClient._check_response(
             requests.get("%s/" % target_endpoint, proxies=proxy if proxy is not None else dict(http="", https=""), verify=verify)
         )
@@ -193,11 +192,15 @@ class CloudFoundryClient(CredentialManager):
         log_stream = root_links.get("log_stream")
         return Info(
             root_links["cloud_controller_v2"]["meta"]["version"],
-            root_links["login"]["href"],
+            self._resolve_login_endpoint(root_links),
             target_endpoint,
             logging.get("href") if logging is not None else None,
             log_stream.get("href") if log_stream is not None else None,
         )
+
+    @staticmethod
+    def _resolve_login_endpoint(root_links):
+        return (root_links.get("login") or root_links.get("uaa") or root_links.get("self"))["href"]
 
     @staticmethod
     def _is_token_expired(response: Response) -> bool:
