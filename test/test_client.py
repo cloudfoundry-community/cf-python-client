@@ -129,7 +129,9 @@ class TestCloudfoundryClient(
         ):
             requests.Session.return_value = session
             self._mock_info_calls(requests)
-            info = CloudFoundryClient._get_info(self.TARGET_ENDPOINT)
+            client = CloudFoundryClient(self.TARGET_ENDPOINT)
+            self._mock_info_calls(requests)
+            info = client._get_info(self.TARGET_ENDPOINT)
             self.assertEqual(info.api_endpoint, self.TARGET_ENDPOINT)
             self.assertEqual(info.api_v2_version, self.API_V2_VERSION)
             self.assertEqual(info.doppler_endpoint, self.DOPPLER_ENDPOINT)
