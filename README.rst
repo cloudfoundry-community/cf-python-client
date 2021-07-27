@@ -221,11 +221,11 @@ The following code snippet issues three requests to the API in order to get app,
 .. code-block:: python
 
   app = client.v3.apps.get("app-guid")
-  print("App name: %s" % app["name])
+  print("App name: %s" % app["name"])
   space = app.space()
-  print("Space name: %s" % space["name])
+  print("Space name: %s" % space["name"])
   org = space.organization()
-  print("Org name: %s" % org["name])
+  print("Org name: %s" % org["name"])
 
 By changing the first line only, a single request fetches all the data. The navigation from app to space and space to organization remains unchanged.
 
