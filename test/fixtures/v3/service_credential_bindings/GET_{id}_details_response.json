@@ -1,0 +1,10 @@
+{
+  "credentials": {
+    "connection": "mydb://user@password:example.com"
+  },
+  "syslog_drain_url": "http://syslog.example.com/drain",
+  "volume_mounts": [
+    "/vcap/data",
+    "store"
+  ]
+}
