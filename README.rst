@@ -238,9 +238,16 @@ Available managers on API V3 are:
 - ``apps``
 - ``buildpacks``
 - ``domains``
-- ``feature-flags``
+- ``feature_flags``
+- ``isolation_segments``
+- ``jobs``
 - ``organizations``
+- ``organization_quotas``
+- ``processes``
+- ``service_brokers``
 - ``service_instances``
+- ``service_offerings``
+- ``service_plans``
 - ``spaces``
 - ``tasks``
 

@@ -1,0 +1,18 @@
+{
+    "data": [
+        {
+            "guid": "org-guid1"
+        },
+        {
+            "guid": "org-guid2"
+        },
+        {
+            "guid": "previous-org-guid"
+        }
+    ],
+    "links": {
+        "self": {
+            "href": "https://api.example.org/v3/organization_quotas/quota-guid/relationships/organizations"
+        }
+    }
+}
