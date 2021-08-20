@@ -32,7 +32,7 @@ class JobManager(EntityManager):
                 step_function=step_function,
                 poll_forever=poll_forever,
                 timeout=timeout,
-                check_success=lambda job: job["state"] != "PROCESSING",
+                check_success=lambda job: job["state"] == "FAILED" or job["state"] == "COMPLETE",
             )
         except polling2.TimeoutException as e:
             raise JobTimeout(e)
