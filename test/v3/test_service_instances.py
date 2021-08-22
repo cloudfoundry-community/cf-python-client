@@ -44,6 +44,41 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
         self.assertIsNotNone(result)
         self.assertIsInstance(result, Entity)
 
+    def test_update(self):
+        self.client.patch.return_value = self.mock_response(
+            "/v3/service_instances/instance-guid-123",
+            HTTPStatus.ACCEPTED,
+            headers={"Location": "https://somewhere.org/v3/jobs/job_id"},
+        )
+        result = self.client.v3.service_instances.update(
+            instance_guid="instance-guid-123",
+            name="space-name",
+            parameters={"foo": "bar"},
+            service_plan="custom_service_plan",
+            maintenance_info="1.2.3",
+            meta_labels={"foo": "bar"},
+            meta_annotations={"foo": "bar"},
+            tags=["mytag", "myothertag"],
+        )
+
+        self.client.patch.assert_called_with(
+            self.client.patch.return_value.url,
+            json={
+                "name": "space-name",
+                "parameters": {"foo": "bar"},
+                "relationships": {
+                    "service_plan": {
+                        "data": {"guid": "custom_service_plan"}},
+                },
+                "maintenance_info": {"version": "1.2.3"},
+                "tags": ["mytag", "myothertag"],
+                "metadata": {'labels': {'foo': 'bar'},
+                             'annotations': {'foo': 'bar'}}
+            },
+        )
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, Entity)
+
     def test_list(self):
         self.client.get.return_value = self.mock_response(
             "/v3/service_instances", HTTPStatus.OK, None, "v3", "service_instances", "GET_response.json"
