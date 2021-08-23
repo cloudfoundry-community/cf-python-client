@@ -19,6 +19,11 @@ class AppManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super(AppManager, self).__init__(target_endpoint, client, "/v3/apps", App)
 
+    def restart(self, application_guid: str):
+        return super(AppManager, self)._post("%s%s/%s/actions/restart" % (self.target_endpoint,
+                                                                          self.entity_uri,
+                                                                          application_guid))
+
     def remove(self, application_guid: str):
         super(AppManager, self)._remove(application_guid)
 

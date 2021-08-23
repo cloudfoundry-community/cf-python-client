@@ -73,6 +73,16 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(environment_variables, dict)
         self.assertEqual("production", environment_variables["var"]["RAILS_ENV"])
 
+    def test_restart(self):
+        self.client.post.return_value = self.mock_response(
+            "/v3/apps/app_id/actions/restart", HTTPStatus.OK, None, "v3", "apps",
+            "GET_{id}_response.json"
+        )
+
+        app = self.client.v3.apps.restart("app_id")
+        self.assertIsInstance(app, JsonObject)
+        self.assertEquals("my_app", app["name"])
+
     def test_remove(self):
         self.client.delete.return_value = self.mock_response("/v3/apps/app_id", HTTPStatus.NO_CONTENT, None)
         self.client.v3.apps.remove("app_id")
