@@ -1,4 +1,4 @@
-from typing import List, Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from dataclasses import dataclass, asdict
 
 from cloudfoundry_client.v3.entities import Entity, EntityManager, ToManyRelationship
@@ -47,7 +47,7 @@ class OrganizationQuotaManager(EntityManager):
         services_quota: Optional[ServicesQuota] = None,
         routes_quota: Optional[RoutesQuota] = None,
         domains_quota: Optional[DomainsQuota] = None,
-        assigned_organizations: Optional[List[str]] = None,
+        assigned_organizations: Optional[ToManyRelationship] = None,
     ) -> Entity:
         data = self._asdict(name, apps_quota, services_quota, routes_quota, domains_quota, assigned_organizations)
         return super()._create(data)
@@ -64,10 +64,11 @@ class OrganizationQuotaManager(EntityManager):
         data = self._asdict(name, apps_quota, services_quota, routes_quota, domains_quota)
         return super()._update(guid, data)
 
-    def apply_to_organizations(self, guid: str, organization_guids: List[str]) -> ToManyRelationship:
-        data = ToManyRelationship(*organization_guids)
+    def apply_to_organizations(self, guid: str, organizations: ToManyRelationship) -> ToManyRelationship:
         return ToManyRelationship.from_json_object(
-            super()._post("%s%s/%s/relationships/organizations" % (self.target_endpoint, self.entity_uri, guid), data=data)
+            super()._post(
+                "%s%s/%s/relationships/organizations" % (self.target_endpoint, self.entity_uri, guid), data=organizations
+            )
         )
 
     def _asdict(
@@ -77,7 +78,7 @@ class OrganizationQuotaManager(EntityManager):
         services_quota: Optional[ServicesQuota] = None,
         routes_quota: Optional[RoutesQuota] = None,
         domains_quota: Optional[DomainsQuota] = None,
-        assigned_organizations: Optional[List[str]] = None,
+        assigned_organizations: Optional[ToManyRelationship] = None,
     ):
         data = {"name": name}
         if apps_quota:

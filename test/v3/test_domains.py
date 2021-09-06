@@ -57,7 +57,7 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
             "domain_id",
             internal=False,
             organization=ToOneRelationship("organization-guid"),
-            shared_organizations=None,
+            shared_organizations=ToManyRelationship("other-org-guid-1", "other-org-guid-2"),
             meta_labels=None,
             meta_annotations=None,
         )
@@ -67,8 +67,15 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
             json={
                 "name": "domain_id",
                 "internal": False,
-                "organization": {"data": {"guid": "organization-guid"}},
-                "shared_organizations": None,
+                "relationships": {
+                    "organization": {"data": {"guid": "organization-guid"}},
+                    "shared_organizations": {
+                        "data": [
+                            {"guid": "other-org-guid-1"},
+                            {"guid": "other-org-guid-2"},
+                        ]
+                    },
+                },
                 "metadata": {"labels": None, "annotations": None},
             },
         )

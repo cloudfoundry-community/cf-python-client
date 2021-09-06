@@ -34,8 +34,10 @@ class DomainManager(EntityManager):
         data = {
             "name": name,
             "internal": internal,
-            "organization": organization,
-            "shared_organizations": shared_organizations,
+            "relationships": {
+                "organization": organization,
+                "shared_organizations": shared_organizations,
+            },
             "metadata": {"labels": meta_labels, "annotations": meta_annotations},
         }
         return super(DomainManager, self)._create(data)
