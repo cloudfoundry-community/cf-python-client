@@ -70,7 +70,7 @@ class TestOrganizationQuotas(unittest.TestCase, AbstractTestCase):
             services_quota=ServicesQuota(paid_services_allowed=True, total_service_instances=10, total_service_keys=20),
             routes_quota=RoutesQuota(total_routes=8, total_reserved_ports=4),
             domains_quota=DomainsQuota(total_domains=7),
-            assigned_organizations=["assigned-org"],
+            assigned_organizations=ToManyRelationship("assigned-org"),
         )
         self.client.post.assert_called_with(
             self.client.post.return_value.url,
@@ -81,7 +81,7 @@ class TestOrganizationQuotas(unittest.TestCase, AbstractTestCase):
                 "services": {"paid_services_allowed": True, "total_service_instances": 10, "total_service_keys": 20},
                 "routes": {"total_routes": 8, "total_reserved_ports": 4},
                 "domains": {"total_domains": 7},
-                "relationships": {"organizations": ["assigned-org"]},
+                "relationships": {"organizations": {"data": [{"guid": "assigned-org"}]}},
             },
         )
         self.assertIsNotNone(result)
@@ -97,7 +97,7 @@ class TestOrganizationQuotas(unittest.TestCase, AbstractTestCase):
         )
         result = self.client.v3.organization_quotas.apply_to_organizations(
             "quota_id",
-            organization_guids=["org-guid1", "org-guid2"],
+            organizations=ToManyRelationship("org-guid1", "org-guid2"),
         )
         self.client.post.assert_called_with(
             self.client.post.return_value.url, files=None, json={"data": [{"guid": "org-guid1"}, {"guid": "org-guid2"}]}
