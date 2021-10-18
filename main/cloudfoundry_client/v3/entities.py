@@ -175,6 +175,7 @@ class EntityManager(object):
 
             else:
                 yield self._entity(response_json, entity_type)
+                break
 
     def _create(self, data: dict) -> Entity:
         url = "%s%s" % (self.target_endpoint, self.entity_uri)
