@@ -67,7 +67,7 @@ class Entity(JsonObject):
     def _manager_method(link_name: str, link_method: str) -> Optional[str]:
         if link_method == "get":
             if link_name.endswith("s"):
-                return "_paginate"
+                return "_attempt_to_paginate"
             else:
                 return "_get"
         elif link_method == "post":
@@ -154,28 +154,32 @@ class EntityManager(object):
             yield element
 
     def _paginate(self, url_requested: str, entity_type: Optional[ENTITY_TYPE] = None) -> PaginateEntities:
-        response = self.client.get(url_requested)
-        while True:
-            response_json = self._read_response(response, JsonObject)
-            if "resources" in response_json:
-                for resource in response_json["resources"]:
-                    yield self._entity(resource, entity_type)
+        response_json = self._read_response(self.client.get(url_requested), JsonObject)
+        yield from self._crawl_pagination(entity_type, response_json)
 
-                pagination = response_json.get("pagination")
-                if (
+    def _attempt_to_paginate(self, url_requested: str, entity_type: Optional[ENTITY_TYPE] = None) \
+            -> Union[PaginateEntities, Entity]:
+        response_json = self._read_response(self.client.get(url_requested), JsonObject)
+        if "resources" in response_json:
+            return self._crawl_pagination(entity_type, response_json)
+        else:
+            return response_json
+
+    def _crawl_pagination(self, entity_type, response_json) -> PaginateEntities:
+        while True:
+            for resource in response_json["resources"]:
+                yield self._entity(resource, entity_type)
+            pagination = response_json.get("pagination")
+            if (
                     pagination is None
                     or "next" not in pagination
                     or pagination["next"] is None
                     or pagination["next"].get("href") is None
-                ):
-                    break
-                else:
-                    url_requested = response_json["pagination"]["next"]["href"]
-                    response = self.client.get(url_requested)
-
-            else:
-                yield self._entity(response_json, entity_type)
+            ):
                 break
+            else:
+                url_requested = response_json["pagination"]["next"]["href"]
+                response_json = self._read_response(self.client.get(url_requested), JsonObject)
 
     def _create(self, data: dict) -> Entity:
         url = "%s%s" % (self.target_endpoint, self.entity_uri)

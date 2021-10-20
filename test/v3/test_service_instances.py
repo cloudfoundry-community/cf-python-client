@@ -86,7 +86,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
         all_service_instances = [service_instance for service_instance in self.client.v3.service_instances.list()]
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(1, len(all_service_instances))
-        self.assertEqual(all_service_instances[0]["guid"], "85ccdcad-d725-4109-bca4-fd6ba062b5c8")
+        self.assertEqual(all_service_instances[0]["guid"], "88ce23e5-27c3-4381-a2df-32a28ec43133")
         self.assertIsInstance(all_service_instances[0], Entity)
 
     def test_get(self):
@@ -95,8 +95,25 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
         )
         service_instance = self.client.v3.service_instances.get("service_instance_id")
         self.client.get.assert_called_with(self.client.get.return_value.url)
-        self.assertEqual("85ccdcad-d725-4109-bca4-fd6ba062b5c8", service_instance["guid"])
+        self.assertEqual("service_instance_id", service_instance["guid"])
         self.assertIsInstance(service_instance, Entity)
+
+    def test_get_then_credentials(self):
+        get_service_instance = self.mock_response(
+            "/v3/service_instances/service_instance_id", HTTPStatus.OK, None, "v3", "service_instances", "GET_{id}_response.json")
+        get_credentials = self.mock_response(
+            "/v3/service_credential_bindings/service_instance_id/credentials",
+            HTTPStatus.OK,
+            None,
+            "v3",
+            "service_instances",
+            "GET_{id}_credentials_response.json",
+        )
+        self.client.get.side_effect = [get_service_instance, get_credentials]
+        service_instance = self.client.v3.service_instances.get("service_instance_id")
+        credentials = service_instance.credentials()
+        self.assertIsInstance(credentials, dict)
+        self.assertEqual("super-secret", credentials["password"])
 
     def test_remove_user_provided_service_instance(self):
         self.client.delete.return_value = self.mock_response(

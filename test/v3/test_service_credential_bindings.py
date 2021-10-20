@@ -2,7 +2,7 @@ import unittest
 from http import HTTPStatus
 
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.v3.service_credential_bindings import ServiceCredentialBinding
+from cloudfoundry_client.v3.entities import Entity
 
 
 class TestCredentialBindings(unittest.TestCase, AbstractTestCase):
@@ -24,7 +24,7 @@ class TestCredentialBindings(unittest.TestCase, AbstractTestCase):
         self.assertEqual(2, len(all_service_credential_bindings))
         self.assertEqual(all_service_credential_bindings[0]["name"], "some-binding-name")
         for domain in all_service_credential_bindings:
-            self.assertIsInstance(domain, ServiceCredentialBinding)
+            self.assertIsInstance(domain, Entity)
 
     def test_get(self):
         self.client.get.return_value = self.mock_response(
@@ -37,7 +37,7 @@ class TestCredentialBindings(unittest.TestCase, AbstractTestCase):
         result = self.client.v3.service_credential_bindings.get("service_credential_binding_id")
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertIsNotNone(result)
-        self.assertIsInstance(result, ServiceCredentialBinding)
+        self.assertIsInstance(result, Entity)
 
     def test_get_then_details(self):
         get_service_credential_binding = self.mock_response(
