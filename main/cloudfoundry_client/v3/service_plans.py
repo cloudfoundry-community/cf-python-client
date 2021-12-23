@@ -30,6 +30,8 @@ class ServicePlanManager(EntityManager):
     def get_visibility(self, service_plan_guid: str) -> Dict:
         return super(ServicePlanManager, self)._get(f"{self.target_endpoint}{self.entity_uri}/{service_plan_guid}/visibility")
 
+    # Updates a service plan visibility. It behaves similar to the POST service plan visibility endpoint but
+    # this endpoint will REPLACE the existing list of organizations when the service plan is organization visible.
     def update_visibility(self, service_plan_guid: str, type: str, organizations: Optional[List[dict]] = None) -> Dict:
         payload = {"type": type}
         if organizations:
@@ -38,6 +40,8 @@ class ServicePlanManager(EntityManager):
             url=f"{self.target_endpoint}{self.entity_uri}/{service_plan_guid}/visibility", data=payload
         )
 
+    # Applies a service plan visibility. It behaves similar to the PATCH service plan visibility endpoint but
+    # this endpoint will APPEND to the existing list of organizations when the service plan is organization visible.
     def apply_visibility_to_extra_orgs(self, service_plan_guid: str, organizations: List[dict]) -> Dict:
         payload = {"type": "organization", "organizations": organizations}
         return super(ServicePlanManager, self)._post(
