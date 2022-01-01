@@ -14,9 +14,16 @@ Installing
 Supported versions
 ~~~~~~~~~~~~~~~~~~
 
-:warning: Starting version ``1.11.0``, versions older that python ``3.6.0`` will not be supported anymore. This late version was released by the end 2016.
+:warning: Starting version ``1.11.0``, versions older than python ``3.6.0`` will not be supported anymore. This late version was released by the end 2016.
 
 For those that are still using python 2.7, it won't be supported by the end of 2020 and all library shall stop supporting it.
+
+:warning: Starting version ``1.25.0``, versions older than python ``3.7.0`` will not be supported anymore.
+
+See `official documentation`_.
+
+.. _`official documentation`: https://endoflife.date/python
+
 
 From pip
 ~~~~~~~~
