@@ -244,6 +244,7 @@ Available managers on API V3 are:
 - ``organizations``
 - ``organization_quotas``
 - ``processes``
+- ``security_groups``
 - ``service_brokers``
 - ``service_credential_bindings``
 - ``service_instances``

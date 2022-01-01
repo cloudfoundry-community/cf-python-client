@@ -32,6 +32,7 @@ from cloudfoundry_client.v3.isolation_segments import IsolationSegmentManager
 from cloudfoundry_client.v3.organization_quotas import OrganizationQuotaManager
 from cloudfoundry_client.v3.processes import ProcessManager
 from cloudfoundry_client.v3.organizations import OrganizationManager
+from cloudfoundry_client.v3.security_groups import SecurityGroupManager
 from cloudfoundry_client.v3.service_brokers import ServiceBrokerManager
 from cloudfoundry_client.v3.service_credential_bindings import ServiceCredentialBindingManager
 from cloudfoundry_client.v3.service_instances import ServiceInstanceManager
@@ -105,6 +106,7 @@ class V3(object):
         self.organizations = OrganizationManager(target_endpoint, credential_manager)
         self.organization_quotas = OrganizationQuotaManager(target_endpoint, credential_manager)
         self.processes = ProcessManager(target_endpoint, credential_manager)
+        self.security_groups = SecurityGroupManager(target_endpoint, credential_manager)
         self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
         self.service_credential_bindings = ServiceCredentialBindingManager(target_endpoint, credential_manager)
         self.service_instances = ServiceInstanceManager(target_endpoint, credential_manager)
