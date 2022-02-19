@@ -143,6 +143,10 @@ class EntityManager(object):
 
     def _delete(self, url: str) -> Optional[str]:
         response = self.client.delete(url)
+        return self._location(response)
+
+    @staticmethod
+    def _location(response):
         try:
             return response.headers["Location"]
         except (AttributeError, KeyError):
@@ -152,13 +156,18 @@ class EntityManager(object):
         url = "%s%s/%s" % (self.target_endpoint, self.entity_uri, resource_id)
         job_location = self._delete(url)
         if job_location is not None:
-            job_url = urlparse(job_location)
-            job_guid = job_url.path.rsplit("/", 1)[-1]
+            job_guid = self._extract_job_guid(job_location)
             if not asynchronous:
                 self.client.v3.jobs.wait_for_job_completion(job_guid)
             else:
                 return job_guid
         return None
+
+    @staticmethod
+    def _extract_job_guid(job_location):
+        job_url = urlparse(job_location)
+        job_guid = job_url.path.rsplit("/", 1)[-1]
+        return job_guid
 
     def _list(self, requested_path: str, entity_type: Optional[ENTITY_TYPE] = None, **kwargs) -> PaginateEntities:
         url_requested = EntityManager._get_url_with_encoded_params("%s%s" % (self.target_endpoint, requested_path), **kwargs)
