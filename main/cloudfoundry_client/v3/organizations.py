@@ -27,8 +27,8 @@ class OrganizationManager(EntityManager):
         data = {"name": name, "suspended": suspended, "metadata": {"labels": meta_labels, "annotations": meta_annotations}}
         return super(OrganizationManager, self)._update(guid, data)
 
-    def remove(self, guid: str):
-        super(OrganizationManager, self)._remove(guid)
+    def remove(self, guid: str, asynchronous: bool = True) -> Optional[str]:
+        return super(OrganizationManager, self)._remove(guid, asynchronous)
 
     def assign_default_isolation_segment(self, org_guid: str, iso_seg_guid: str) -> Entity:
         return ToOneRelationship.from_json_object(

@@ -148,6 +148,18 @@ class EntityManager(object):
         except (AttributeError, KeyError):
             return None
 
+    def _remove(self, resource_id: str, asynchronous: bool = True) -> Optional[str]:
+        url = "%s%s/%s" % (self.target_endpoint, self.entity_uri, resource_id)
+        job_location = self._delete(url)
+        if job_location is not None:
+            job_url = urlparse(job_location)
+            job_guid = job_url.path.rsplit("/", 1)[-1]
+            if not asynchronous:
+                self.client.v3.jobs.wait_for_job_completion(job_guid)
+            else:
+                return job_guid
+        return None
+
     def _list(self, requested_path: str, entity_type: Optional[ENTITY_TYPE] = None, **kwargs) -> PaginateEntities:
         url_requested = EntityManager._get_url_with_encoded_params("%s%s" % (self.target_endpoint, requested_path), **kwargs)
         for element in self._paginate(url_requested, entity_type):
@@ -193,14 +205,6 @@ class EntityManager(object):
     def _update(self, resource_id: str, data: dict) -> Entity:
         url = "%s%s/%s" % (self.target_endpoint, self.entity_uri, resource_id)
         return self._patch(url, data)
-
-    def _remove(self, resource_id: str, asynchronous: bool = True):
-        url = "%s%s/%s" % (self.target_endpoint, self.entity_uri, resource_id)
-        job_location = self._delete(url)
-        if not asynchronous and job_location is not None:
-            job_url = urlparse(job_location)
-            job_guid = job_url.path.rsplit("/", 1)[-1]
-            self.client.v3.jobs.wait_for_job_completion(job_guid)
 
     def __iter__(self) -> PaginateEntities:
         return self.list()

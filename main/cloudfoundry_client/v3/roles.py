@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cloudfoundry_client.v3.entities import EntityManager
 
@@ -10,5 +10,5 @@ class RoleManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super(RoleManager, self).__init__(target_endpoint, client, "/v3/roles")
 
-    def remove(self, role_guid: str):
-        super(RoleManager, self)._remove(role_guid)
+    def remove(self, role_guid: str, asynchronous: bool = True) -> Optional[str]:
+        return super(RoleManager, self)._remove(role_guid, asynchronous)

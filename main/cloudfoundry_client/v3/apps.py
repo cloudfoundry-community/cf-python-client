@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from cloudfoundry_client.json_object import JsonObject
 from cloudfoundry_client.v3.entities import EntityManager
@@ -16,8 +16,8 @@ class AppManager(EntityManager):
                                                                           self.entity_uri,
                                                                           application_guid))
 
-    def remove(self, application_guid: str):
-        super(AppManager, self)._remove(application_guid)
+    def remove(self, application_guid: str, asynchronous: bool = True) -> Optional[str]:
+        return super(AppManager, self)._remove(application_guid, asynchronous)
 
     def get_env(self, application_guid: str) -> JsonObject:
         return super(AppManager, self)._get("%s%s/%s/env" % (self.target_endpoint, self.entity_uri, application_guid))

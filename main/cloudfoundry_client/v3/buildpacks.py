@@ -30,8 +30,8 @@ class BuildpackManager(EntityManager):
         }
         return super(BuildpackManager, self)._create(data)
 
-    def remove(self, buildpack_guid: str):
-        super(BuildpackManager, self)._remove(buildpack_guid)
+    def remove(self, buildpack_guid: str, asynchronous: bool = True) -> Optional[str]:
+        return super(BuildpackManager, self)._remove(buildpack_guid, asynchronous)
 
     def update(
         self,
