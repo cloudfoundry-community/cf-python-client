@@ -58,8 +58,8 @@ class SecurityGroupManager(EntityManager):
         payload = self._generate_payload(name, rules, globally_enabled, staging_spaces, running_spaces)
         return super()._update(security_group_id, payload)
 
-    def remove(self, security_group_id: str):
-        return super()._remove(security_group_id)
+    def remove(self, security_group_id: str, asynchronous: bool = True) -> Optional[str]:
+        return super()._remove(security_group_id, asynchronous)
 
     def bind_running_security_group_to_spaces(self, security_group_id: str, space_guids: ToManyRelationship) \
             -> ToManyRelationship:

@@ -59,5 +59,5 @@ class ServiceBrokerManager(EntityManager):
             payload["metadata"] = metadata
         return super(ServiceBrokerManager, self)._update(guid, payload)
 
-    def remove(self, guid: str):
-        super(ServiceBrokerManager, self)._remove(guid)
+    def remove(self, guid: str, asynchronous: bool = True) -> Optional[str]:
+        return super(ServiceBrokerManager, self)._remove(guid, asynchronous)

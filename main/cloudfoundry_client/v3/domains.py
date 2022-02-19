@@ -50,8 +50,8 @@ class DomainManager(EntityManager):
         data = {"metadata": {"labels": meta_labels, "annotations": meta_annotations}}
         return super(DomainManager, self)._update(domain_guid, data)
 
-    def remove(self, domain_guid: str):
-        super(DomainManager, self)._remove(domain_guid)
+    def remove(self, domain_guid: str, asynchronous: bool = True) -> Optional[str]:
+        return super(DomainManager, self)._remove(domain_guid, asynchronous)
 
     def __create_shared_domain_url(self, domain_guid: str) -> str:
         # TODO use url parser for this
