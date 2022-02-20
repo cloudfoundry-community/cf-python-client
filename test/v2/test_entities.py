@@ -67,9 +67,9 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
 
     def test_range_query(self):
         url = EntityManager("http://cf.api", None, "/v2/events")._get_url_filtered(
-            "/v2/events", **{"type": "app.crash", "space_guid": "space-id", "timestamp": {">": "2022-02-08T16:41:25Z", "<": "2022-02-10T16:41:25Z"}}
+            "/v2/events", **{"type": "app.crash", "space_guid": "space-id", "timestamp": {">": "2022-02-08T16:41:25Z"}}
         )
-        self.assertEqual("/v2/events?q=space_guid%3Aspace-id&q=timestamp%3E2022-02-08T16%3A41%3A25Z&q=timestamp%3C2022-02-10T16%3A41%3A25Z&q=type%3Aapp.crash", url)
+        self.assertEqual("/v2/events?q=space_guid%3Aspace-id&q=timestamp%3E2022-02-08T16%3A41%3A25Z&q=type%3Aapp.crash", url)
 
     def test_list(self):
         client = MagicMock()
