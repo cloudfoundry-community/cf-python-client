@@ -50,6 +50,8 @@ class EntityManager(object):
 
     list_multi_parameters = ["order-by"]
 
+    timestamp_parameters = ["timestamp"]
+
     def __init__(
         self, target_endpoint: str, client: "CloudFoundryClient", entity_uri: str, entity_builder: Optional[EntityBuilder] = None
     ):
@@ -150,6 +152,13 @@ class EntityManager(object):
                     value_list = [value_list]
                 for value in value_list:
                     parameters.append("%s=%s" % (parameter_name, str(value)))
+            elif parameter_name in self.timestamp_parameters:
+                if isinstance(args[1], dict):
+                    operator_list = args[1].keys()
+                    for operator in operator_list:
+                        parameters.append("q=%s" % quote("%s%s%s" % (parameter_name, operator, args[1][operator])))
+                else:
+                    parameters.append("q=%s" % quote("%s:%s" % (parameter_name, str(parameter_value))))
             elif isinstance(parameter_value, (list, tuple)):
                 parameters.append("q=%s" % quote("%s IN %s" % (parameter_name, ",".join(parameter_value))))
             else:
