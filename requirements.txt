@@ -1,5 +1,5 @@
 aiohttp>=3.8.0
-protobuf>=3.19.0
+protobuf==3.20.1
 oauth2-client==1.2.1
 websocket-client==0.59.0
 PyYAML==6.0
