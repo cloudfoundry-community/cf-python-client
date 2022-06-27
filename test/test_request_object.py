@@ -1,6 +1,6 @@
 import unittest
 
-from cloudfoundry_client.request_object import Request
+from cloudfoundry_client.common_objects import Request
 
 
 class TestRequest(unittest.TestCase):

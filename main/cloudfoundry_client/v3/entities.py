@@ -1,13 +1,12 @@
 import functools
 from json import JSONDecodeError
-from typing import Any, Generator, Optional, List, Tuple, Union, TypeVar, TYPE_CHECKING, Callable, Type
+from typing import Any, Optional, List, Tuple, Union, TypeVar, TYPE_CHECKING, Callable, Type
 from urllib.parse import quote, urlparse
 
 from requests import Response
 
 from cloudfoundry_client.errors import InvalidEntity
-from cloudfoundry_client.json_object import JsonObject
-from cloudfoundry_client.request_object import Request
+from cloudfoundry_client.common_objects import JsonObject, Request, Pagination
 
 if TYPE_CHECKING:
     from cloudfoundry_client.client import CloudFoundryClient, V3
@@ -77,9 +76,6 @@ class Entity(JsonObject):
         elif link_method == "delete":
             return "_delete"
         return None
-
-
-PaginateEntities = Generator[Entity, None, None]
 
 
 class Relationship(JsonObject):
@@ -169,38 +165,39 @@ class EntityManager(object):
         job_guid = job_url.path.rsplit("/", 1)[-1]
         return job_guid
 
-    def _list(self, requested_path: str, entity_type: Optional[ENTITY_TYPE] = None, **kwargs) -> PaginateEntities:
+    def _list(self, requested_path: str, entity_type: Optional[ENTITY_TYPE] = None, **kwargs) -> Pagination[Entity]:
         url_requested = EntityManager._get_url_with_encoded_params("%s%s" % (self.target_endpoint, requested_path), **kwargs)
-        for element in self._paginate(url_requested, entity_type):
-            yield element
-
-    def _paginate(self, url_requested: str, entity_type: Optional[ENTITY_TYPE] = None) -> PaginateEntities:
         response_json = self._read_response(self.client.get(url_requested), JsonObject)
-        yield from self._crawl_pagination(entity_type, response_json)
+        return self._pagination(response_json, entity_type)
 
     def _attempt_to_paginate(self, url_requested: str, entity_type: Optional[ENTITY_TYPE] = None) \
-            -> Union[PaginateEntities, Entity]:
+            -> Union[Pagination[Entity], Entity]:
         response_json = self._read_response(self.client.get(url_requested), JsonObject)
         if "resources" in response_json:
-            return self._crawl_pagination(entity_type, response_json)
+            return self._pagination(response_json, entity_type)
         else:
             return response_json
 
-    def _crawl_pagination(self, entity_type, response_json) -> PaginateEntities:
-        while True:
-            for resource in response_json["resources"]:
-                yield self._entity(resource, entity_type)
-            pagination = response_json.get("pagination")
-            if (
-                    pagination is None
-                    or "next" not in pagination
-                    or pagination["next"] is None
-                    or pagination["next"].get("href") is None
-            ):
-                break
-            else:
-                url_requested = response_json["pagination"]["next"]["href"]
-                response_json = self._read_response(self.client.get(url_requested), JsonObject)
+    def _pagination(self, page: JsonObject, entity_type: Optional[ENTITY_TYPE] = None) -> Pagination[Entity]:
+        def _entity(json_object: JsonObject) -> Entity:
+            return self._entity(json_object, entity_type)
+
+        return Pagination(page,
+                          page.get("pagination", {}).get("total_results", 0),
+                          self._next_page,
+                          lambda p: p["resources"],
+                          _entity)
+
+    def _next_page(self, current_page: JsonObject) -> Union[None, JsonObject]:
+        pagination = current_page.get("pagination")
+        if (
+                pagination is None
+                or "next" not in pagination
+                or pagination["next"] is None
+                or pagination["next"].get("href") is None
+        ):
+            return None
+        return self._read_response(self.client.get(current_page["pagination"]["next"]["href"]), JsonObject)
 
     def _create(self, data: dict) -> Entity:
         url = "%s%s" % (self.target_endpoint, self.entity_uri)
@@ -215,13 +212,25 @@ class EntityManager(object):
         url = "%s%s/%s" % (self.target_endpoint, self.entity_uri, resource_id)
         return self._patch(url, data)
 
-    def __iter__(self) -> PaginateEntities:
+    def __iter__(self) -> Pagination[Entity]:
         return self.list()
 
     def __getitem__(self, entity_guid) -> Entity:
         return self.get(entity_guid)
 
-    def list(self, **kwargs) -> PaginateEntities:
+    def __len__(self):
+        return self.len()
+
+    def len(self, **kwargs):
+        url_requested = EntityManager._get_url_with_encoded_params("%s%s" % (self.target_endpoint, self.entity_uri), **kwargs)
+        response_json = self._read_response(self.client.get(url_requested, JsonObject))
+        pagination = response_json.get("pagination")
+        if pagination is not None:
+            return pagination.get("total_results", 0)
+        else:
+            return 0
+
+    def list(self, **kwargs) -> Pagination[Entity]:
         return self._list(self.entity_uri, **kwargs)
 
     def get_first(self, **kwargs) -> Optional[Entity]:

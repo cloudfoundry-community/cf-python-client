@@ -1,6 +1,7 @@
 from typing import Optional, TYPE_CHECKING
 
-from cloudfoundry_client.v3.entities import EntityManager, ToOneRelationship, ToManyRelationship, PaginateEntities, Entity
+from cloudfoundry_client.common_objects import Pagination
+from cloudfoundry_client.v3.entities import EntityManager, ToOneRelationship, ToManyRelationship, Entity
 
 if TYPE_CHECKING:
     from cloudfoundry_client.client import CloudFoundryClient
@@ -42,7 +43,7 @@ class DomainManager(EntityManager):
         }
         return super(DomainManager, self)._create(data)
 
-    def list_domains_for_org(self, org_guid: str, **kwargs) -> PaginateEntities:
+    def list_domains_for_org(self, org_guid: str, **kwargs) -> Pagination[Entity]:
         uri = "/v3/organizations/{guid}/domains".format(guid=org_guid)
         return self._list(uri, **kwargs)
 

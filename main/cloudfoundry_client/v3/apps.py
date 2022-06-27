@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Optional
 
-from cloudfoundry_client.json_object import JsonObject
+from cloudfoundry_client.common_objects import JsonObject
 from cloudfoundry_client.v3.entities import EntityManager
 
 if TYPE_CHECKING:

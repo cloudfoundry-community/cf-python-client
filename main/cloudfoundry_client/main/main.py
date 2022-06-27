@@ -13,7 +13,7 @@ from requests.exceptions import ConnectionError
 from cloudfoundry_client import __version__
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.errors import InvalidStatusCode
-from cloudfoundry_client.json_object import JsonObject
+from cloudfoundry_client.common_objects import JsonObject
 from cloudfoundry_client.main.apps_command_domain import AppCommandDomain
 from cloudfoundry_client.main.command_domain import CommandDomain, Command
 from cloudfoundry_client.main.operation_commands import generate_push_command

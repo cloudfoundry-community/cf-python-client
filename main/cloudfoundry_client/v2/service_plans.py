@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
-from cloudfoundry_client.v2.entities import EntityManager, Entity, PaginateEntities
+from cloudfoundry_client.common_objects import Pagination
+from cloudfoundry_client.v2.entities import EntityManager, Entity
 
 if TYPE_CHECKING:
     from cloudfoundry_client.client import CloudFoundryClient
@@ -13,5 +14,5 @@ class ServicePlanManager(EntityManager):
     def create_from_resource_file(self, path: str) -> Entity:
         raise NotImplementedError("No creation allowed")
 
-    def list_instances(self, service_plan_guid: str, **kwargs) -> PaginateEntities:
+    def list_instances(self, service_plan_guid: str, **kwargs) -> Pagination[Entity]:
         return self.client.v2.service_instances._list("%s/%s/service_instances" % (self.entity_uri, service_plan_guid), **kwargs)
