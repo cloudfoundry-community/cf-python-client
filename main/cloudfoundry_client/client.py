@@ -1,4 +1,6 @@
 import logging
+from pathlib import Path
+import json
 from http import HTTPStatus
 from typing import Optional
 
@@ -121,7 +123,7 @@ class V3(object):
 class CloudFoundryClient(CredentialManager):
     def __init__(self, target_endpoint: str, client_id: str = "cf", client_secret: str = "", **kwargs):
         """ "
-        :param target_endpoint :the target endpoint
+        :param target_endpoint :the target endpoint or 'from_cf_config'
         :param client_id: the client_id
         :param client_secret: the client secret
         :param proxy: a dict object with entries http and https
@@ -135,11 +137,15 @@ class CloudFoundryClient(CredentialManager):
             The passed string has to be a URL-Encoded JSON Object, containing the field origin with value as origin_key
             of an identity provider. Note that this identity provider must support the grant type password.
             See UAA API specifications
+        :param cf_config_path: string. Optional path to a cf cli config file. Defaults to ~/.cf/config.json
         """
         proxy = kwargs.get("proxy", dict(http="", https=""))
         verify = kwargs.get("verify", True)
         self.token_format = kwargs.get("token_format")
         self.login_hint = kwargs.get("login_hint")
+        cf_config = kwargs.get("cf_config_path", Path.home() / '.cf/config.json')
+        if target_endpoint == 'from_cf_config':
+            (target_endpoint, self.cf_token) = self._get_cf_config(cf_config)
         target_endpoint_trimmed = target_endpoint.rstrip("/")
         info = self._get_info(target_endpoint_trimmed, proxy, verify=verify)
         if not info.api_v2_version.startswith("2."):
@@ -205,6 +211,19 @@ class CloudFoundryClient(CredentialManager):
             logging.get("href") if logging is not None else None,
             log_stream.get("href") if log_stream is not None else None,
         )
+
+    @staticmethod
+    def _get_cf_config(config_path):
+        try:
+            with open(config_path) as f:
+                cf_config = json.load(f)
+            return (cf_config['Target'], cf_config['RefreshToken'])
+        except Exception as e:
+            _logger.critical('Could not retrieve cf config: %s', e)
+            raise
+
+    def init_with_cf_config(self):
+        self.init_with_token(self.cf_token)
 
     @staticmethod
     def _resolve_login_endpoint(root_links):
