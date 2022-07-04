@@ -143,8 +143,8 @@ class CloudFoundryClient(CredentialManager):
         verify = kwargs.get("verify", True)
         self.token_format = kwargs.get("token_format")
         self.login_hint = kwargs.get("login_hint")
-        cf_config = kwargs.get("cf_config_path", Path.home() / '.cf/config.json')
         if target_endpoint == 'from_cf_config':
+            cf_config = kwargs.get("cf_config_path", Path.home() / '.cf/config.json')
             (target_endpoint, self.cf_token) = self._get_cf_config(cf_config)
         target_endpoint_trimmed = target_endpoint.rstrip("/")
         info = self._get_info(target_endpoint_trimmed, proxy, verify=verify)
