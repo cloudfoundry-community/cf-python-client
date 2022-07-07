@@ -106,7 +106,7 @@ class TestCloudfoundryClient(
                 status_code=HTTPStatus.OK.value,
                 text=json.dumps(dict(access_token="access-token", refresh_token="refresh-token")),
             )
-            client = CloudFoundryClient("from_cf_config", cf_config_path="config.json")
+            client = CloudFoundryClient(cf_config_path="config.json")
             client.init_with_cf_config()
             file_remove('config.json')
             self.assertEqual("Bearer access-token", session.headers.get("Authorization"))

@@ -121,9 +121,9 @@ class V3(object):
 
 
 class CloudFoundryClient(CredentialManager):
-    def __init__(self, target_endpoint: str, client_id: str = "cf", client_secret: str = "", **kwargs):
+    def __init__(self, target_endpoint: Optional[str]=None, client_id: str = "cf", client_secret: str = "", **kwargs):
         """ "
-        :param target_endpoint :the target endpoint or 'from_cf_config'
+        :param target_endpoint :the target endpoint. Omit if you want to parse it from config file
         :param client_id: the client_id
         :param client_secret: the client secret
         :param proxy: a dict object with entries http and https
@@ -143,7 +143,7 @@ class CloudFoundryClient(CredentialManager):
         verify = kwargs.get("verify", True)
         self.token_format = kwargs.get("token_format")
         self.login_hint = kwargs.get("login_hint")
-        if target_endpoint == 'from_cf_config':
+        if not target_endpoint:
             cf_config = kwargs.get("cf_config_path", Path.home() / '.cf/config.json')
             (target_endpoint, self.cf_token) = self._get_cf_config(cf_config)
         target_endpoint_trimmed = target_endpoint.rstrip("/")
