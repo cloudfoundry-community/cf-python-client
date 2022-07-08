@@ -107,7 +107,7 @@ class TestCloudfoundryClient(
                 status_code=HTTPStatus.OK.value,
                 text=json.dumps(dict(access_token="access-token", refresh_token="refresh-token")),
             )
-            client = CloudFoundryClient.build_from_cf_config("config.json", proxy=proxy, verify=True) # noqa: F841
+            client = CloudFoundryClient.build_from_cf_config("config.json", proxy=proxy, verify=True)  # noqa: F841
             file_remove('config.json')
             self.assertEqual("Bearer access-token", session.headers.get("Authorization"))
             requests.post.assert_called_with(
