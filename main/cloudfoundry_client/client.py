@@ -209,7 +209,7 @@ class CloudFoundryClient(CredentialManager):
         )
 
     @staticmethod
-    def build_from_cf_config(config_path: Optional[str] = None,  **kwargs) -> 'CloudFoundryClient':
+    def build_from_cf_config(config_path: Optional[str] = None, **kwargs) -> 'CloudFoundryClient':
         config = Path(config_path) if config_path else Path.home() / '.cf/config.json'
         try:
             with open(config) as f:
