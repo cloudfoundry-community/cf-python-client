@@ -1,4 +1,6 @@
 import logging
+from pathlib import Path
+import json
 from http import HTTPStatus
 from typing import Optional
 
@@ -120,8 +122,8 @@ class V3(object):
 
 class CloudFoundryClient(CredentialManager):
     def __init__(self, target_endpoint: str, client_id: str = "cf", client_secret: str = "", **kwargs):
-        """ "
-        :param target_endpoint :the target endpoint
+        """
+        :param target_endpoint :the target endpoint.
         :param client_id: the client_id
         :param client_secret: the client secret
         :param proxy: a dict object with entries http and https
@@ -205,6 +207,19 @@ class CloudFoundryClient(CredentialManager):
             logging.get("href") if logging is not None else None,
             log_stream.get("href") if log_stream is not None else None,
         )
+
+    @staticmethod
+    def build_from_cf_config(config_path: Optional[str] = None, **kwargs) -> 'CloudFoundryClient':
+        config = Path(config_path) if config_path else Path.home() / '.cf/config.json'
+        try:
+            with open(config) as f:
+                cf_config = json.load(f)
+        except Exception as e:
+            _logger.critical('Could not retrieve cf config: %s', e)
+            raise
+        client = CloudFoundryClient(cf_config['Target'], **kwargs)
+        client.init_with_token(cf_config['RefreshToken'])
+        return client
 
     @staticmethod
     def _resolve_login_endpoint(root_links):

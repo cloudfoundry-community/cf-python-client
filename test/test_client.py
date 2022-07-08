@@ -1,4 +1,5 @@
 import json
+from os import remove as file_remove
 import unittest
 from http import HTTPStatus
 from unittest.mock import patch
@@ -86,6 +87,34 @@ class TestCloudfoundryClient(
                 data=dict(grant_type="refresh_token", scope="", refresh_token="refresh-token", token_format="opaque"),
                 headers=dict(Accept="application/json", Authorization="Basic Y2Y6"),
                 proxies=dict(http="", https=""),
+                verify=True,
+            )
+
+    def test_refresh_request_with_token_from_cf_config(self):
+        requests = FakeRequests()
+        session = MockSession()
+        proxy = dict(http='', https='')
+        cf_config_file_content = {"Target": self.TARGET_ENDPOINT, "RefreshToken": "refresh-token"}
+        with open("config.json", "w", encoding="utf-8") as f:
+            json.dump(cf_config_file_content, f, ensure_ascii=False, indent=4)
+        with patch("oauth2_client.credentials_manager.requests", new=requests), patch(
+            "cloudfoundry_client.client.requests", new=requests
+        ):
+            requests.Session.return_value = session
+            self._mock_info_calls(requests)
+            requests.post.return_value = MockResponse(
+                "%s/oauth/token" % self.AUTHORIZATION_ENDPOINT,
+                status_code=HTTPStatus.OK.value,
+                text=json.dumps(dict(access_token="access-token", refresh_token="refresh-token")),
+            )
+            client = CloudFoundryClient.build_from_cf_config("config.json", proxy=proxy, verify=True)  # noqa: F841
+            file_remove('config.json')
+            self.assertEqual("Bearer access-token", session.headers.get("Authorization"))
+            requests.post.assert_called_with(
+                requests.post.return_value.url,
+                data=dict(grant_type="refresh_token", scope="", refresh_token="refresh-token"),
+                headers=dict(Accept="application/json", Authorization="Basic Y2Y6"),
+                proxies=proxy,
                 verify=True,
             )
 
