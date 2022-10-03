@@ -7,8 +7,8 @@ from typing import Optional, Dict, TYPE_CHECKING
 
 from cloudfoundry_client.doppler.client import EnvelopeStream
 from cloudfoundry_client.errors import InvalidStatusCode
-from cloudfoundry_client.json_object import JsonObject
-from cloudfoundry_client.v2.entities import Entity, EntityManager, PaginateEntities
+from cloudfoundry_client.common_objects import JsonObject, Pagination
+from cloudfoundry_client.v2.entities import Entity, EntityManager
 
 if TYPE_CHECKING:
     from cloudfoundry_client.client import CloudFoundryClient
@@ -95,13 +95,13 @@ class AppManager(EntityManager):
     def associate_route(self, application_guid: str, route_guid: str) -> Application:
         self._put("%s%s/%s/routes/%s" % (self.target_endpoint, self.entity_uri, application_guid, route_guid))
 
-    def list_routes(self, application_guid: str, **kwargs) -> PaginateEntities:
+    def list_routes(self, application_guid: str, **kwargs) -> Pagination[Entity]:
         return self.client.v2.routes._list("%s/%s/routes" % (self.entity_uri, application_guid), **kwargs)
 
     def remove_route(self, application_guid: str, route_guid: str):
         self._delete("%s%s/%s/routes/%s" % (self.target_endpoint, self.entity_uri, application_guid, route_guid))
 
-    def list_service_bindings(self, application_guid: str, **kwargs) -> PaginateEntities:
+    def list_service_bindings(self, application_guid: str, **kwargs) -> Pagination[Entity]:
         return self.client.v2.service_bindings._list("%s/%s/service_bindings" % (self.entity_uri, application_guid), **kwargs)
 
     def start(

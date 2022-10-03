@@ -9,7 +9,7 @@ from typing import Callable, Any, List
 
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.errors import InvalidStatusCode
-from cloudfoundry_client.json_object import JsonObject
+from cloudfoundry_client.common_objects import JsonObject
 
 
 class Command(object):

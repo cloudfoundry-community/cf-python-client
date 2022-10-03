@@ -2,7 +2,7 @@ import unittest
 from http import HTTPStatus
 
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.json_object import JsonObject
+from cloudfoundry_client.common_objects import JsonObject
 from cloudfoundry_client.v3.entities import Entity
 
 

@@ -6,8 +6,7 @@ from urllib.parse import quote
 from requests import Response
 
 from cloudfoundry_client.errors import InvalidEntity
-from cloudfoundry_client.json_object import JsonObject
-from cloudfoundry_client.request_object import Request
+from cloudfoundry_client.common_objects import JsonObject, Request
 
 if TYPE_CHECKING:
     from cloudfoundry_client.client import CloudFoundryClient

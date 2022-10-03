@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, call
 
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.errors import InvalidEntity
-from cloudfoundry_client.v2.entities import EntityManager
+from cloudfoundry_client.v2.entities import EntityManager, Entity
 
 
 class TestEntities(unittest.TestCase, AbstractTestCase):
@@ -99,6 +99,32 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
         client.get.assert_has_calls([call(first_response.url), call(second_response.url)], any_order=False)
         self.assertEqual(cpt, 3)
 
+    def test_elements_are_entities(self):
+        client = MagicMock()
+        entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/first")
+
+        first_response = self.mock_response(
+            "/fake/first?order-direction=asc&page=1&results-per-page=20&q=space_guid%3Asome-id",
+            HTTPStatus.OK,
+            None,
+            "fake",
+            "GET_multi_page_0_response.json",
+        )
+        second_response = self.mock_response(
+            "/fake/next?order-direction=asc&page=2&results-per-page=50",
+            HTTPStatus.OK,
+            None,
+            "fake",
+            "GET_multi_page_1_response.json",
+        )
+        client.get.side_effect = [first_response, second_response]
+
+        entities_list = entity_manager.list(
+            **{"results-per-page": 20, "order-direction": "asc", "page": 1, "space_guid": "some-id"})
+
+        for entity in entities_list:
+            self.assertIsInstance(entity, Entity)
+
     def test_iter(self):
         client = MagicMock()
         entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/something")
@@ -120,3 +146,38 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
         client.get.assert_called_with(client.get.return_value.url)
 
         self.assertEqual(entity["entity"]["name"], "name-423")
+
+    def test_entity_manager_is_a_generator(self):
+        client = MagicMock()
+        entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/something")
+        client.get.return_value = self.mock_response(
+            "/fake/something/with-id", HTTPStatus.OK, None, "fake", "GET_{id}_response.json"
+        )
+
+        self.assertIsNotNone(getattr(entity_manager, "__iter__", None))
+        self.assertIsNotNone(getattr(entity_manager.__iter__, "__call__", None))
+        generator = entity_manager.__iter__()
+        self.assertIsNotNone(getattr(generator, "__next__", None))
+        self.assertIsNotNone(getattr(generator.__next__, "__call__", None))
+
+    def test_entity_list_is_a_generator(self):
+        client = MagicMock()
+        entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/something")
+        client.get.return_value = self.mock_response(
+            "/fake/something/with-id", HTTPStatus.OK, None, "fake", "GET_{id}_response.json"
+        )
+
+        generator = entity_manager.list()
+
+        self.assertIsNotNone(getattr(generator, "__next__", None))
+        self.assertIsNotNone(getattr(generator.__next__, "__call__", None))
+
+    def test_total_results(self):
+        client = MagicMock()
+        entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/something")
+        client.get.return_value = self.mock_response("/fake/something", HTTPStatus.OK, None, "fake", "GET_response.json")
+
+        cpt = entity_manager.list().total_results
+
+        self.assertEqual(cpt, 3)
+        client.get.assert_called_with(client.get.return_value.url)

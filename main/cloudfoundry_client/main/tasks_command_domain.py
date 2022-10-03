@@ -3,7 +3,7 @@ import os
 from argparse import Namespace, _SubParsersAction
 
 from cloudfoundry_client.client import CloudFoundryClient
-from cloudfoundry_client.json_object import JsonObject
+from cloudfoundry_client.common_objects import JsonObject
 from cloudfoundry_client.main.command_domain import CommandDomain, Command
 
 
