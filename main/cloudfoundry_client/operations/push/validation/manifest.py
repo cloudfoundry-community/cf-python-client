@@ -6,7 +6,7 @@ import yaml
 
 
 class ManifestReader(object):
-    MEMORY_PATTERN = re.compile(r"^(\d+)([KMGT])B?$")
+    SIZE_FIELD_PATTERNS = re.compile(r"^(\d+)([MG])B?$")
 
     POSITIVE_FIELDS = ["instances", "timeout"]
 
@@ -40,7 +40,7 @@ class ManifestReader(object):
             raise AssertionError("One of path or docker must be set")
         else:
             ManifestReader._absolute_path(manifest_directory, app_manifest)
-        ManifestReader._convert_memory(app_manifest)
+        ManifestReader._convert_size_fields(app_manifest)
         for field in ManifestReader.POSITIVE_FIELDS:
             ManifestReader._convert_positive(app_manifest, field)
         for field in ManifestReader.BOOLEAN_FIELDS:
@@ -61,25 +61,22 @@ class ManifestReader(object):
             raise AssertionError("hosts, host, domains, domain and no-hostname are all deprecated. Use the routes attribute")
 
     @staticmethod
-    def _convert_memory(manifest: dict):
-        if "memory" in manifest:
-            memory = manifest["memory"].upper()
-            match = ManifestReader.MEMORY_PATTERN.match(memory)
-            if match is None:
-                raise AssertionError("Invalid memory format: %s" % memory)
+    def _convert_size_fields(manifest: dict):
+        for field_name in ["memory", "disk_quota"]:
+            if field_name in manifest:
+                field_value = manifest[field_name].upper()
+                match = ManifestReader.SIZE_FIELD_PATTERNS.match(field_value)
+                if match is None:
+                    raise AssertionError("Invalid %s format: %s" % (field_name, field_value))
 
-            memory_number = int(match.group(1))
-            if match.group(2) == "K":
-                memory_number *= 1024
-            elif match.group(2) == "M":
-                memory_number *= 1024 * 1024
-            elif match.group(2) == "G":
-                memory_number *= 1024 * 1024 * 1024
-            elif match.group(2) == "T":
-                memory_number *= 1024 * 1024 * 1024 * 1024
-            else:
-                raise AssertionError("Invalid memory unit: %s" % memory)
-            manifest["memory"] = int(memory_number / (1024 * 1024))
+                size_converted = int(match.group(1))
+                if match.group(2) == "M":
+                    size_converted *= 1024 * 1024
+                elif match.group(2) == "G":
+                    size_converted *= 1024 * 1024 * 1024
+                else:
+                    raise AssertionError("Invalid %s unit: %s" % (field_name, field_value))
+                manifest[field_name] = int(size_converted / (1024 * 1024))
 
     @staticmethod
     def _convert_positive(manifest: dict, field: str):

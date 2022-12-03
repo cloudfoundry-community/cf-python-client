@@ -104,17 +104,22 @@ class TestManifestReader(unittest.TestCase):
         ManifestReader._validate_application_manifest(".", manifest)
         self.assertEqual(os.path.abspath("test"), manifest["path"])
 
-    def test_memory_in_kb(self):
-        manifest = dict(memory="2048KB")
-        ManifestReader._convert_memory(manifest)
-        self.assertEqual(2, manifest["memory"])
-
     def test_memory_in_mb(self):
         manifest = dict(memory="2048MB")
-        ManifestReader._convert_memory(manifest)
+        ManifestReader._convert_size_fields(manifest)
         self.assertEqual(2048, manifest["memory"])
 
     def test_memory_in_gb(self):
         manifest = dict(memory="1G")
-        ManifestReader._convert_memory(manifest)
+        ManifestReader._convert_size_fields(manifest)
         self.assertEqual(1024, manifest["memory"])
+
+    def test_disk_quota_in_mb(self):
+        manifest = dict(disk_quota="2048MB")
+        ManifestReader._convert_size_fields(manifest)
+        self.assertEqual(2048, manifest["disk_quota"])
+
+    def test_disk_quota_in_gb(self):
+        manifest = dict(disk_quota="1G")
+        ManifestReader._convert_size_fields(manifest)
+        self.assertEqual(1024, manifest["disk_quota"])
