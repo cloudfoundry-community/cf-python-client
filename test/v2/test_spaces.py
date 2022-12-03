@@ -63,6 +63,12 @@ class TestSpaces(unittest.TestCase, AbstractTestCase):
         self.assertEqual(cpt, 1)
         self.client.get.assert_has_calls([call(side_effect.url) for side_effect in self.client.get.side_effect], any_order=False)
 
+    def test_delete_unmapped_routes(self):
+        self.client.delete.return_value = self.mock_response(
+            "/v2/spaces/space_id/unmapped_routes", HTTPStatus.NO_CONTENT, None)
+        self.client.v2.spaces.delete_unmapped_routes("space_id")
+        self.client.delete.assert_called_with(self.client.delete.return_value.url)
+
     @patch.object(sys, "argv", ["main", "list_spaces"])
     def test_main_list_spaces(self):
         with patch("cloudfoundry_client.main.main.build_client_from_configuration", new=lambda: self.client):
