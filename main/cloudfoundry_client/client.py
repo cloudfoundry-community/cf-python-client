@@ -25,6 +25,7 @@ from cloudfoundry_client.v2.service_instances import ServiceInstanceManager as S
 from cloudfoundry_client.v2.service_keys import ServiceKeyManager
 from cloudfoundry_client.v2.service_plan_visibilities import ServicePlanVisibilityManager
 from cloudfoundry_client.v2.service_plans import ServicePlanManager as ServicePlanManagerV2
+from cloudfoundry_client.v2.spaces import SpaceManager as SpaceManagerV2
 
 from cloudfoundry_client.v3.apps import AppManager
 from cloudfoundry_client.v3.buildpacks import BuildpackManager
@@ -87,7 +88,7 @@ class V2(object):
         self.routes = RouteManager(target_endpoint, credential_manager)
         self.services = EntityManagerV2(target_endpoint, credential_manager, "/v2/services")
         self.shared_domains = EntityManagerV2(target_endpoint, credential_manager, "/v2/shared_domains")
-        self.spaces = EntityManagerV2(target_endpoint, credential_manager, "/v2/spaces")
+        self.spaces = SpaceManagerV2(target_endpoint, credential_manager)
         self.stacks = EntityManagerV2(target_endpoint, credential_manager, "/v2/stacks")
         self.user_provided_service_instances = EntityManagerV2(
             target_endpoint, credential_manager, "/v2/user_provided_service_instances"
