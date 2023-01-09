@@ -1,3 +1,4 @@
+syntax = "proto2";
 package events;
 
 option java_package = "org.cloudfoundry.dropsonde.events";

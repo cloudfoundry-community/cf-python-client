@@ -1,9 +1,8 @@
+syntax = "proto2";
 package events;
 
 option java_package = "org.cloudfoundry.dropsonde.events";
 option java_outer_classname = "MetricFactory";
-
-import "uuid.proto";
 
 /// A ValueMetric indicates the value of a metric at an instant in time.
 message ValueMetric {
