@@ -13,4 +13,3 @@ class SpaceManager(EntityManager):
     def delete_unmapped_routes(self, space_guid: str):
         url = "%s%s/%s/unmapped_routes" % (self.target_endpoint, self.entity_uri, space_guid)
         super(SpaceManager, self)._delete(url)
-
