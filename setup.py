@@ -8,7 +8,8 @@ from setuptools import setup, find_packages, Command, __version__
 src_dir = "main"
 package_directory = "cloudfoundry_client"
 package_name = "cloudfoundry-client"
-loggregator_dir = "loggregator"
+dropsonde_src = "vendors/dropsonde-protocol"
+dropsonde_dest = "dropsonde"
 sys.path.insert(0, os.path.realpath(src_dir))
 
 version_file = "%s/%s/__init__.py" % (src_dir, package_directory)
@@ -41,17 +42,18 @@ class GenerateCommand(Command):
         pass
 
     def run(self):
-        source_path = os.path.join(os.path.dirname(__file__), src_dir, package_directory, loggregator_dir)
+        source_path = os.path.join(os.path.dirname(__file__), dropsonde_src)
         for file_protobuf in os.listdir(source_path):
             if file_protobuf.endswith(".proto"):
                 file_path = os.path.join(source_path, file_protobuf)
-                print("Generating %s from %s" % (file_protobuf, file_path))
+                dest_path = os.path.join(src_dir, package_directory, dropsonde_dest)
+                print("Generating %s from %s to %s" % (file_protobuf, file_path, dest_path))
                 subprocess.call(
                     [
                         "protoc",
-                        "-I",
+                        "--proto_path",
                         source_path,
-                        "--python_out=%s" % source_path,
+                        "--python_out=%s" % dest_path,
                         file_path,
                     ]
                 )
