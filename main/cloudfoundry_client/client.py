@@ -138,6 +138,7 @@ class CloudFoundryClient(CredentialManager):
             The passed string has to be a URL-Encoded JSON Object, containing the field origin with value as origin_key
             of an identity provider. Note that this identity provider must support the grant type password.
             See UAA API specifications
+        :param user_agent: string. Can be used to set a custom http user agent
         """
         proxy = kwargs.get("proxy", dict(http="", https=""))
         verify = kwargs.get("verify", True)
@@ -150,7 +151,7 @@ class CloudFoundryClient(CredentialManager):
         service_information = ServiceInformation(
             None, "%s/oauth/token" % info.authorization_endpoint, client_id, client_secret, [], verify
         )
-        super(CloudFoundryClient, self).__init__(service_information, proxies=proxy)
+        super(CloudFoundryClient, self).__init__(service_information, proxies=proxy, user_agent=kwargs.get("user_agent"))
         self.v2 = V2(target_endpoint_trimmed, self)
         self.v3 = V3(target_endpoint_trimmed, self)
         self._doppler = (
