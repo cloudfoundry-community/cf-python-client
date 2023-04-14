@@ -151,7 +151,11 @@ class CloudFoundryClient(CredentialManager):
         service_information = ServiceInformation(
             None, "%s/oauth/token" % info.authorization_endpoint, client_id, client_secret, [], verify
         )
-        super(CloudFoundryClient, self).__init__(service_information, proxies=proxy, user_agent=kwargs.get("user_agent"))
+        super(CloudFoundryClient, self).__init__(
+            service_information,
+            proxies=proxy,
+            user_agent=kwargs.get("user_agent", "cf-python-client")
+        )
         self.v2 = V2(target_endpoint_trimmed, self)
         self.v3 = V3(target_endpoint_trimmed, self)
         self._doppler = (
