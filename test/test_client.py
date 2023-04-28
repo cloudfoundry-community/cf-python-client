@@ -60,15 +60,8 @@ class TestCloudfoundryClient(
             self.assertEqual("Bearer access-token", session.headers.get("Authorization"))
             requests.post.assert_called_with(
                 requests.post.return_value.url,
-                data=dict(
-                    grant_type="password",
-                    username="somebody",
-                    scope="",
-                    password="p@s$w0rd",
-                    token_format="opaque",
-                    client_id="cf",
-                ),
-                headers=dict(Accept="application/json"),
+                data=dict(grant_type="password", username="somebody", scope="", password="p@s$w0rd", token_format="opaque"),
+                headers=dict(Accept="application/json", Authorization="Basic Y2Y6"),
                 proxies=dict(http="", https=""),
                 verify=True,
             )
@@ -91,10 +84,8 @@ class TestCloudfoundryClient(
             self.assertEqual("Bearer access-token", session.headers.get("Authorization"))
             requests.post.assert_called_with(
                 requests.post.return_value.url,
-                data=dict(
-                    grant_type="refresh_token", scope="", refresh_token="refresh-token", token_format="opaque", client_id="cf"
-                ),
-                headers=dict(Accept="application/json"),
+                data=dict(grant_type="refresh_token", scope="", refresh_token="refresh-token", token_format="opaque"),
+                headers=dict(Accept="application/json", Authorization="Basic Y2Y6"),
                 proxies=dict(http="", https=""),
                 verify=True,
             )
@@ -121,8 +112,8 @@ class TestCloudfoundryClient(
             self.assertEqual("Bearer access-token", session.headers.get("Authorization"))
             requests.post.assert_called_with(
                 requests.post.return_value.url,
-                data=dict(grant_type="refresh_token", scope="", refresh_token="refresh-token", client_id="cf"),
-                headers=dict(Accept="application/json"),
+                data=dict(grant_type="refresh_token", scope="", refresh_token="refresh-token"),
+                headers=dict(Accept="application/json", Authorization="Basic Y2Y6"),
                 proxies=proxy,
                 verify=True,
             )
@@ -153,9 +144,8 @@ class TestCloudfoundryClient(
                     scope="",
                     password="p@s$w0rd",
                     login_hint="%7B%22origin%22%3A%22uaa%22%7D",
-                    client_id="cf",
                 ),
-                headers=dict(Accept="application/json"),
+                headers=dict(Accept="application/json", Authorization="Basic Y2Y6"),
                 proxies=dict(http="", https=""),
                 verify=True,
             )
