@@ -3,6 +3,7 @@ from http import HTTPStatus
 from unittest.mock import patch
 
 from abstract_test_case import AbstractTestCase
+from cloudfoundry_client.common_objects import JsonObject
 from cloudfoundry_client.v3.entities import Entity
 
 
@@ -157,3 +158,17 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
         self.client.v3.service_instances.remove("service_instance_id", asynchronous=False)
         self.client.delete.assert_called_with(self.client.delete.return_value.url)
         assert self.client.get.call_count == 2
+
+    def test_get_permissions(self):
+        self.client.get.return_value = self.mock_response(
+            "/v3/service_instances/service_instance_id/permissions",
+            HTTPStatus.OK,
+            None,
+            "v3",
+            "service_instances",
+            "GET_{id}_permissions_response.json"
+        )
+        permissions = self.client.v3.service_instances.get_permissions("service_instance_id")
+        self.assertIsInstance(permissions, JsonObject)
+        self.assertTrue(permissions["read"])
+        self.assertFalse(permissions["manage"])

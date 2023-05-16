@@ -1,5 +1,6 @@
 from typing import Optional, TYPE_CHECKING, List
 
+from cloudfoundry_client.common_objects import JsonObject
 from cloudfoundry_client.v3.entities import Entity, EntityManager, ToOneRelationship
 
 if TYPE_CHECKING:
@@ -72,3 +73,8 @@ class ServiceInstanceManager(EntityManager):
 
     def remove(self, guid: str, asynchronous: bool = True):
         super(ServiceInstanceManager, self)._remove(guid, asynchronous)
+
+    def get_permissions(self, instance_guid: str) -> JsonObject:
+        return super(ServiceInstanceManager, self)._get(
+            "%s%s/%s/permissions" % (self.target_endpoint, self.entity_uri, instance_guid)
+        )
