@@ -110,7 +110,7 @@ def build_client_from_configuration(previous_configuration: dict = None) -> Clou
                 client.init_with_token(configuration["refresh_token"])
                 return client
         except Exception as ex:
-            if type(ex) == ConnectionError:
+            if isinstance(ex, ConnectionError):
                 raise
             else:
                 _logger.exception("Could not restore configuration. Cleaning and recreating")
