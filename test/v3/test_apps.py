@@ -81,7 +81,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
 
         app = self.client.v3.apps.restart("app_id")
         self.assertIsInstance(app, JsonObject)
-        self.assertEquals("my_app", app["name"])
+        self.assertEqual("my_app", app["name"])
 
     def test_remove(self):
         self.client.delete.return_value = self.mock_response("/v3/apps/app_id", HTTPStatus.NO_CONTENT, None)
@@ -94,7 +94,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         )
         env = self.client.v3.apps.get_env("app_id")
         self.assertIsInstance(env, JsonObject)
-        self.assertEquals(env["application_env_json"]["VCAP_APPLICATION"]["limits"]["fds"], 16384)
+        self.assertEqual(env["application_env_json"]["VCAP_APPLICATION"]["limits"]["fds"], 16384)
 
     def test_get_routes(self):
         self.client.get.return_value = self.mock_response(
@@ -102,7 +102,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         )
         routes = self.client.v3.apps.get_routes("app_id")
         self.assertIsInstance(routes, JsonObject)
-        self.assertEquals(routes["resources"][0]["destinations"][0]["guid"], "385bf117-17f5-4689-8c5c-08c6cc821fed")
+        self.assertEqual(routes["resources"][0]["destinations"][0]["guid"], "385bf117-17f5-4689-8c5c-08c6cc821fed")
 
     def test_get_include_space_and_org(self):
         self.client.get.return_value = self.mock_response(
