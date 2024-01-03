@@ -1,2 +1,3 @@
 black==22.12.0
 flake8==5.0.4
+setuptools; python_version >= '3.12'

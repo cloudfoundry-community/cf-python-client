@@ -17,6 +17,7 @@ Supported versions
 - Starting version ``1.11.0``, versions older than python ``3.6.0`` will not be supported anymore. This late version was released by the end 2016.
   For those that are still using python 2.7, it won't be supported by the end of 2020 and all library shall stop supporting it.
 - Starting version ``1.25.0``, versions older than python ``3.7.0`` will not be supported anymore.
+- Starting version ``1.36.0``, versions older than python ``3.8.0`` will not be supported anymore.
 
 See `official documentation`_.
 
