@@ -195,11 +195,11 @@ class AppManager(EntityManager):
                 sleep(check_time)
                 sum_waiting += check_time
 
-    def _safe_get_instances(self, application_guid: str) -> JsonObject:
+    def _safe_get_instances(self, application_guid: str) -> Dict[str, JsonObject]:
         try:
             return self.get_instances(application_guid)
         except InvalidStatusCode as ex:
-            if ex.status_code == HTTPStatus.BAD_REQUEST and type(ex.body) == dict:
+            if ex.status_code == HTTPStatus.BAD_REQUEST and isinstance(ex.body, dict):
                 code = ex.body.get("code", -1)
                 # 170002: staging not finished
                 # 220001: instances error

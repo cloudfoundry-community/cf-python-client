@@ -90,12 +90,12 @@ class ManifestReader(object):
     def _convert_boolean(manifest: dict, field: str):
         if field in manifest:
             field_value = manifest[field]
-            manifest[field] = field_value if type(field_value) == bool else field_value.lower() == "true"
+            manifest[field] = field_value if isinstance(field_value, bool) else field_value.lower() == "true"
 
     @staticmethod
     def _validate_routes(manifest: dict):
         for route in manifest.get("routes", []):
-            if type(route) != dict or "route" not in route:
+            if not (isinstance(route, dict)) or "route" not in route:
                 raise AssertionError("routes attribute must be a list of object containing a route attribute")
 
     @staticmethod
@@ -125,11 +125,14 @@ class ManifestReader(object):
     def _convert_environment(app_manifest: dict):
         environment = app_manifest.get("env")
         if environment is not None:
-            if type(environment) != dict:
+            if not (isinstance(environment, dict)):
                 raise AssertionError("'env' entry must be a dictionary")
             app_manifest["env"] = {
-                key: json.dumps(value) for key, value in environment.items() if value is not None and type(value) != str
+                key: json.dumps(value) for key, value in environment.items()
+                if value is not None and not (isinstance(value, str))
             }
-            app_manifest["env"].update(
-                {key: value for key, value in environment.items() if value is not None and type(value) == str}
+            app_manifest["env"].update({
+                key: value for key, value in environment.items()
+                if value is not None and isinstance(value, str)
+            }
             )

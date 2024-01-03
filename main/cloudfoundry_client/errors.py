@@ -14,7 +14,7 @@ class InvalidStatusCode(Exception):
 
     def __str__(self):
         error_message = self.status_code.name
-        if type(self.body) == str:
+        if isinstance(self.body, str):
             error_message += f" = {self.body}"
         else:
             error_message += f" = {json.dumps(self.body)}"
