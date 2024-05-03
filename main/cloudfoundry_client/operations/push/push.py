@@ -152,20 +152,18 @@ class PushOperation(object):
                 _logger.error("Neither path nor port provided for route", requested_route)
                 raise AssertionError("Cannot set both port and path for route: %s" % requested_route)
             host, domain_name, domain = PushOperation._resolve_domain(route, private_domains, shared_domains)
-            if port is not None and host is not None:
-                _logger.error("Host provided in route %s for tcp domain %s", requested_route, domain_name)
-                raise AssertionError(
-                    "For route (%s) refers to domain %s that is a tcp one. It is hence routed by port and not by host"
-                    % (requested_route, domain_name)
-                )
             route_to_map = None
-            if port is not None and domain["entity"].get("router_group_type") != "tcp":
-                _logger.error("Port provided in route %s for non tcp domain %s", requested_route, domain_name)
-                raise AssertionError("Cannot set port on route(%s) for non tcp domain" % requested_route)
-            elif domain["entity"].get("router_group_type") == "tcp" and port is None:
-                _logger.error("No port provided in route %s for tcp domain %s", requested_route, domain_name)
-                raise AssertionError("Please specify a port on route (%s) for tcp domain" % requested_route)
-            elif domain["entity"].get("router_group_type") == "tcp":
+            if port is not None:
+                if domain["entity"].get("router_group_type") != "tcp":
+                    _logger.error("Port provided in route %s for non tcp domain %s", requested_route, domain_name)
+                    raise AssertionError("Cannot set port on route(%s) for non tcp domain" % requested_route)
+                elif len(host) > 0:
+                    _logger.error("Host provided in route %s for tcp domain %s", requested_route, domain_name)
+                    raise AssertionError(
+                        "For route (%s) refers to domain %s that is a tcp one. "
+                        "It is hence routed by port and not by host"
+                        % (requested_route, domain_name)
+                    )
                 if not any(
                     [route["entity"]["domain_guid"] == domain["metadata"]["guid"] and route["entity"]["port"] == port]
                     for route in existing_routes
