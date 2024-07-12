@@ -3,5 +3,5 @@ ignore = E203, W503
 max-line-length = 130
 max-complexity = 16
 buildins = CloudFoundryClient
-exclude = vendors,.git,.github,main/cloudfoundry_client/dropsonde,venv,.eggs,build
+exclude = vendors,.git,.github,cloudfoundry_client/dropsonde,.venv,.eggs,build
 

@@ -5,3 +5,42 @@ exclude = '''
   (main\/cloudfoundry_client\/dropsonde.*)
 )/
 '''
+
+[tool.poetry]
+name = "cloudfoundry_client"
+version = "1.37.1"
+description = "A client library for CloudFoundry"
+authors = ["Benjamin Einaudi <antechrestos@gmail.com>"]
+readme = "README.rst"
+homepage = "https://pypi.org/project/cloudfoundry-client/"
+documentation = "https://pypi.org/project/cloudfoundry-client/"
+repository = "https://github.com/cloudfoundry-community/cf-python-client"
+keywords = ["cloudfoundry", "cf"]
+include = ["requirements.txt"]
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+aiohttp = ">=3.8.0"
+protobuf = ">= 3.20.0, < 6.0.0"
+oauth2-client= "1.4.2"
+websocket-client= "~1.8.0"
+PyYAML = ">=6.0"
+requests = ">=2.5.0"
+polling2= "0.5.0"
+
+[tool.poetry.group.dev.dependencies]
+black= "24.4.2"
+flake8= "7.1.0"
+pytest = "~8.2.2"
+
+[tool.poetry.scripts]
+cloudfoundry-client = "cloudfoundry_client.main.main:main"
+
+[tool.pytest.ini_options]
+console_output_style = "count"
+pythonpath = [".", "tests",]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
