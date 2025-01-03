@@ -21,7 +21,7 @@ class Domain(Entity):
 
 class DomainManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(DomainManager, self).__init__(target_endpoint, client, "/v3/domains", Domain)
+        super(DomainManager, self).__init__(target_endpoint, client, "/domains", Domain)
 
     def create(
         self,
@@ -44,7 +44,7 @@ class DomainManager(EntityManager):
         return super(DomainManager, self)._create(data)
 
     def list_domains_for_org(self, org_guid: str, **kwargs) -> Pagination[Entity]:
-        uri = "/v3/organizations/{guid}/domains".format(guid=org_guid)
+        uri = "/organizations/{guid}/domains".format(guid=org_guid)
         return self._list(uri, **kwargs)
 
     def update(self, domain_guid: str, meta_labels: Optional[dict] = None, meta_annotations: Optional[dict] = None) -> Domain:

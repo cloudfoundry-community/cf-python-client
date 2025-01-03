@@ -12,4 +12,4 @@ class JobManager(object):
         self.client = client
 
     def get(self, job_guid: str) -> JsonObject:
-        return self.client.get("%s/v2/jobs/%s" % (self.target_endpoint, job_guid)).json(object_pairs_hook=JsonObject)
+        return self.client.get("%s/jobs/%s" % (self.target_endpoint, job_guid)).json(object_pairs_hook=JsonObject)

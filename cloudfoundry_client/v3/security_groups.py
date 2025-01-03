@@ -37,7 +37,7 @@ class GloballyEnabled:
 
 class SecurityGroupManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(SecurityGroupManager, self).__init__(target_endpoint, client, "/v3/security_groups")
+        super(SecurityGroupManager, self).__init__(target_endpoint, client, "/security_groups")
 
     def create(self,
                name: str,

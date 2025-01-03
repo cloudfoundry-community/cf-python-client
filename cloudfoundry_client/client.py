@@ -52,17 +52,27 @@ _logger = logging.getLogger(__name__)
 class Info:
     def __init__(
         self,
-        api_v2_version: str,
+        api_v2_url: str,
+        api_v3_url: str,
         authorization_endpoint: str,
         api_endpoint: str,
         doppler_endpoint: Optional[str],
         log_stream_endpoint: Optional[str],
     ):
-        self.api_v2_version = api_v2_version
+        self._api_v2_url = api_v2_url
+        self._api_v3_url = api_v3_url
         self.authorization_endpoint = authorization_endpoint
         self.api_endpoint = api_endpoint
         self.doppler_endpoint = doppler_endpoint
         self.log_stream_endpoint = log_stream_endpoint
+
+    @property
+    def api_v2_url(self) -> Optional[str]:
+        return self._api_v2_url
+
+    @property
+    def api_v3_url(self) -> Optional[str]:
+        return self._api_v3_url
 
 
 class NetworkingV1External(object):
@@ -83,18 +93,18 @@ class V2(object):
         self.service_plans = ServicePlanManagerV2(target_endpoint, credential_manager)
         # Default implementations
         self.event = EventManager(target_endpoint, credential_manager)
-        self.organizations = EntityManagerV2(target_endpoint, credential_manager, "/v2/organizations")
-        self.private_domains = EntityManagerV2(target_endpoint, credential_manager, "/v2/private_domains")
+        self.organizations = EntityManagerV2(target_endpoint, credential_manager, "/organizations")
+        self.private_domains = EntityManagerV2(target_endpoint, credential_manager, "/private_domains")
         self.routes = RouteManager(target_endpoint, credential_manager)
-        self.services = EntityManagerV2(target_endpoint, credential_manager, "/v2/services")
-        self.shared_domains = EntityManagerV2(target_endpoint, credential_manager, "/v2/shared_domains")
+        self.services = EntityManagerV2(target_endpoint, credential_manager, "/services")
+        self.shared_domains = EntityManagerV2(target_endpoint, credential_manager, "/shared_domains")
         self.spaces = SpaceManagerV2(target_endpoint, credential_manager)
-        self.stacks = EntityManagerV2(target_endpoint, credential_manager, "/v2/stacks")
+        self.stacks = EntityManagerV2(target_endpoint, credential_manager, "/stacks")
         self.user_provided_service_instances = EntityManagerV2(
-            target_endpoint, credential_manager, "/v2/user_provided_service_instances"
+            target_endpoint, credential_manager, "/user_provided_service_instances"
         )
-        self.security_groups = EntityManagerV2(target_endpoint, credential_manager, "/v2/security_groups")
-        self.users = EntityManagerV2(target_endpoint, credential_manager, "/v2/users")
+        self.security_groups = EntityManagerV2(target_endpoint, credential_manager, "/security_groups")
+        self.users = EntityManagerV2(target_endpoint, credential_manager, "/users")
         # Resources implementation used by push operation
         self.resources = ResourceManager(target_endpoint, credential_manager)
 
@@ -146,8 +156,6 @@ class CloudFoundryClient(CredentialManager):
         self.login_hint = kwargs.get("login_hint")
         target_endpoint_trimmed = target_endpoint.rstrip("/")
         info = self._get_info(target_endpoint_trimmed, proxy, verify=verify)
-        if not info.api_v2_version.startswith("2."):
-            raise AssertionError("Only version 2 is supported for now. Found %s" % info.api_v2_version)
         service_information = ServiceInformation(
             None, "%s/oauth/token" % info.authorization_endpoint, client_id, client_secret, [], verify
         )
@@ -156,8 +164,16 @@ class CloudFoundryClient(CredentialManager):
             proxies=proxy,
             user_agent=kwargs.get("user_agent", "cf-python-client")
         )
-        self.v2 = V2(target_endpoint_trimmed, self)
-        self.v3 = V3(target_endpoint_trimmed, self)
+        self._v2 = (
+            V2(info.api_v2_url, self)
+            if info.api_v2_url is not None
+            else None
+        )
+        self._v3 = (
+            V3(info.api_v3_url, self)
+            if info.api_v3_url is not None
+            else None
+        )
         self._doppler = (
             DopplerClient(
                 info.doppler_endpoint,
@@ -182,6 +198,18 @@ class CloudFoundryClient(CredentialManager):
         self.info = info
 
     @property
+    def v2(self) -> V2:
+        if self._v2 is None:
+            raise NotImplementedError("No V2 endpoint for this instance")
+        return self._v2
+
+    @property
+    def v3(self) -> V3:
+        if self._v3 is None:
+            raise NotImplementedError("No V3 endpoint for this instance")
+        return self._v3
+
+    @property
     def doppler(self) -> DopplerClient:
         if self._doppler is None:
             raise NotImplementedError("No droppler endpoint for this instance")
@@ -194,7 +222,6 @@ class CloudFoundryClient(CredentialManager):
         if self._rlpgateway is None:
             raise NotImplementedError("No RLP gateway endpoint for this instance")
         else:
-
             return self._rlpgateway
 
     def _get_info(self, target_endpoint: str, proxy: Optional[dict] = None, verify: bool = True) -> Info:
@@ -206,8 +233,11 @@ class CloudFoundryClient(CredentialManager):
         root_links = root_info["links"]
         logging = root_links.get("logging")
         log_stream = root_links.get("log_stream")
+        cloud_controller_v2 = root_links.get("cloud_controller_v2")
+        cloud_controller_v3 = root_links.get("cloud_controller_v3")
         return Info(
-            root_links["cloud_controller_v2"]["meta"]["version"],
+            cloud_controller_v2["href"] if cloud_controller_v2 is not None else None,
+            cloud_controller_v3["href"] if cloud_controller_v3 is not None else None,
             self._resolve_login_endpoint(root_links),
             target_endpoint,
             logging.get("href") if logging is not None else None,

@@ -12,5 +12,5 @@ class ResourceManager(object):
         self.client = client
 
     def match(self, items: List[dict]) -> List[JsonObject]:
-        response = self.client.put("%s/v2/resource_match" % self.client.info.api_endpoint, json=items)
+        response = self.client.put("%s/resource_match" % self.client.info.api_endpoint, json=items)
         return response.json(object_pairs_hook=JsonObject)

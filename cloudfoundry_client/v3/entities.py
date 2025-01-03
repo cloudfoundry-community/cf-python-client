@@ -188,7 +188,7 @@ class EntityManager(object):
                           lambda p: p["resources"],
                           _entity)
 
-    def _next_page(self, current_page: JsonObject) -> Union[None, JsonObject]:
+    def _next_page(self, current_page: JsonObject) -> Optional[JsonObject]:
         pagination = current_page.get("pagination")
         if (
                 pagination is None

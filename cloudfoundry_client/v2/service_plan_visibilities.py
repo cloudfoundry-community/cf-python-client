@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class ServicePlanVisibilityManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServicePlanVisibilityManager, self).__init__(target_endpoint, client, "/v2/service_plan_visibilities")
+        super(ServicePlanVisibilityManager, self).__init__(target_endpoint, client, "/service_plan_visibilities")
 
     def create(self, service_plan_guid: str, organization_guid: str) -> Entity:
         request = self._request()
