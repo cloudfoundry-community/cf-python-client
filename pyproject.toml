@@ -16,7 +16,6 @@ homepage = "https://pypi.org/project/cloudfoundry-client/"
 documentation = "https://pypi.org/project/cloudfoundry-client/"
 repository = "https://github.com/cloudfoundry-community/cf-python-client"
 keywords = ["cloudfoundry", "cf"]
-include = ["requirements.txt"]
 
 [tool.poetry.dependencies]
 python = ">=3.9"
@@ -29,8 +28,8 @@ requests = ">=2.5.0"
 polling2= "0.5.0"
 
 [tool.poetry.group.dev.dependencies]
-black= "24.4.2"
-flake8= "7.1.0"
+black= "24.10.0"
+flake8= "7.1.1"
 pytest = "~8.2.2"
 
 [tool.poetry.scripts]
