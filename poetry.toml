@@ -1,0 +1,5 @@
+[virtualenvs]
+create = true
+in-project = true
+prefer-active-python = true
+prompt = "cf-python-client"
