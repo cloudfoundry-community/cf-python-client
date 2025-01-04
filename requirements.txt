@@ -1,6 +1,0 @@
-aiohttp>=3.8.0
-protobuf>= 3.20.0, < 6.0.0
-oauth2-client==1.4.2
-websocket-client~=1.8.0
-PyYAML>=6.0
-requests>=2.5.0
