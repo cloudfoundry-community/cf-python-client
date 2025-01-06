@@ -42,6 +42,28 @@ class TestCloudfoundryClient(
             client = CloudFoundryClient(self.TARGET_ENDPOINT, token_format="opaque")
             self.assertRaises(NotImplementedError, lambda: client.doppler)
 
+    def test_build_client_when_no_v2(self):
+        requests = FakeRequests()
+        session = MockSession()
+        with patch("oauth2_client.credentials_manager.requests", new=requests), patch(
+            "cloudfoundry_client.client.requests", new=requests
+        ):
+            requests.Session.return_value = session
+            self._mock_info_calls(requests, with_v2=False)
+            client = CloudFoundryClient(self.TARGET_ENDPOINT, token_format="opaque")
+            self.assertRaises(NotImplementedError, lambda: client.v2)
+
+    def test_build_client_when_no_v3(self):
+        requests = FakeRequests()
+        session = MockSession()
+        with patch("oauth2_client.credentials_manager.requests", new=requests), patch(
+            "cloudfoundry_client.client.requests", new=requests
+        ):
+            requests.Session.return_value = session
+            self._mock_info_calls(requests, with_v3=False)
+            client = CloudFoundryClient(self.TARGET_ENDPOINT, token_format="opaque")
+            self.assertRaises(NotImplementedError, lambda: client.v3)
+
     def test_grant_password_request_with_token_format_opaque(self):
         requests = FakeRequests()
         session = MockSession()
@@ -162,7 +184,8 @@ class TestCloudfoundryClient(
             self._mock_info_calls(requests)
             info = client._get_info(self.TARGET_ENDPOINT)
             self.assertEqual(info.api_endpoint, self.TARGET_ENDPOINT)
-            self.assertEqual(info.api_v2_version, self.API_V2_VERSION)
+            self.assertEqual(info.api_v2_url, "%s/v2" % self.TARGET_ENDPOINT)
+            self.assertEqual(info.api_v3_url, "%s/v3" % self.TARGET_ENDPOINT)
             self.assertEqual(info.doppler_endpoint, self.DOPPLER_ENDPOINT)
             self.assertEqual(info.log_stream_endpoint, self.LOG_STREAM_ENDPOINT)
 

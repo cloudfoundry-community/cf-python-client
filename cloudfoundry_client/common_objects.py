@@ -1,5 +1,5 @@
 import json
-from typing import Callable, TypeVar, Generic, List, Union
+from typing import Callable, TypeVar, Generic, List, Optional
 
 
 class Request(dict):
@@ -21,7 +21,7 @@ ENTITY = TypeVar('ENTITY')
 class Pagination(Generic[ENTITY]):
     def __init__(self, first_page: JsonObject,
                  total_result: int,
-                 next_page_loader: Callable[[JsonObject], Union[None, JsonObject]],
+                 next_page_loader: Callable[[JsonObject], Optional[JsonObject]],
                  resources_accessor: Callable[[JsonObject], List[JsonObject]],
                  instance_creator: Callable[[JsonObject], ENTITY]):
         self._first_page = first_page

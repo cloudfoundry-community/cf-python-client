@@ -1,5 +1,5 @@
 from functools import partial, reduce
-from typing import Callable, List, Tuple, Any, Optional, TYPE_CHECKING, Union
+from typing import Callable, List, Tuple, Any, Optional, TYPE_CHECKING
 from urllib.parse import quote
 from requests import Response
 
@@ -68,7 +68,7 @@ class EntityManager(object):
                           lambda page: page["resources"],
                           lambda json_object: current_builder(list(json_object.items())))
 
-    def _next_page(self, current_page: JsonObject) -> Union[None, JsonObject]:
+    def _next_page(self, current_page: JsonObject) -> Optional[JsonObject]:
         next_url = current_page.get("next_url")
         if next_url is None:
             return None

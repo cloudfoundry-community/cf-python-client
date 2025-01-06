@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class OrganizationManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(OrganizationManager, self).__init__(target_endpoint, client, "/v3/organizations")
+        super(OrganizationManager, self).__init__(target_endpoint, client, "/organizations")
 
     def create(
         self, name: str, suspended: bool, meta_labels: Optional[dict] = None, meta_annotations: Optional[dict] = None

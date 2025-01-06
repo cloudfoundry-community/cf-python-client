@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class RoleManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(RoleManager, self).__init__(target_endpoint, client, "/v3/roles")
+        super(RoleManager, self).__init__(target_endpoint, client, "/roles")
 
     def remove(self, role_guid: str, asynchronous: bool = True) -> Optional[str]:
         return super(RoleManager, self)._remove(role_guid, asynchronous)
