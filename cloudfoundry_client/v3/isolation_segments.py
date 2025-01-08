@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class IsolationSegmentManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(IsolationSegmentManager, self).__init__(target_endpoint, client, "/isolation_segments")
+        super(IsolationSegmentManager, self).__init__(target_endpoint, client, "/v3/isolation_segments")
 
     def create(self, name: str, meta_labels: Optional[dict] = None, meta_annotations: Optional[dict] = None) -> Entity:
         data = {"name": name, "metadata": {"labels": meta_labels, "annotations": meta_annotations}}

@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class SpaceManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(SpaceManager, self).__init__(target_endpoint, client, "/spaces")
+        super(SpaceManager, self).__init__(target_endpoint, client, "/v3/spaces")
 
     def create(self, name: str, org_guid: str) -> Entity:
         return super(SpaceManager, self)._create(dict(name=name, relationships=dict(organization=ToOneRelationship(org_guid))))

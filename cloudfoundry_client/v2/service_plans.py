@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class ServicePlanManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServicePlanManager, self).__init__(target_endpoint, client, "/service_plans")
+        super(ServicePlanManager, self).__init__(target_endpoint, client, "/v2/service_plans")
 
     def create_from_resource_file(self, path: str) -> Entity:
         raise NotImplementedError("No creation allowed")

@@ -77,7 +77,7 @@ class AppManager(EntityManager):
 
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super(AppManager, self).__init__(
-            target_endpoint, client, "/apps", lambda pairs: Application(target_endpoint, client, pairs)
+            target_endpoint, client, "/v2/apps", lambda pairs: Application(target_endpoint, client, pairs)
         )
 
     def get_stats(self, application_guid: str) -> Dict[str, JsonObject]:

@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class BuildpackManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(BuildpackManager, self).__init__(target_endpoint, client, "/buildpacks")
+        super(BuildpackManager, self).__init__(target_endpoint, client, "/v3/buildpacks")
 
     def create(
         self,

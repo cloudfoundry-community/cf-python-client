@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class ServiceBrokerManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServiceBrokerManager, self).__init__(target_endpoint, client, "/service_brokers")
+        super(ServiceBrokerManager, self).__init__(target_endpoint, client, "/v2/service_brokers")
 
     def create(
         self, broker_url: str, broker_name: str, auth_username: str, auth_password: str, space_guid: Optional[str] = None

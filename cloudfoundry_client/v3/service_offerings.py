@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class ServiceOfferingsManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServiceOfferingsManager, self).__init__(target_endpoint, client, "/service_offerings")
+        super(ServiceOfferingsManager, self).__init__(target_endpoint, client, "/v3/service_offerings")
 
     def update(self, guid: str, meta_labels: Optional[dict] = None, meta_annotations: Optional[dict] = None) -> Entity:
         payload = dict()
