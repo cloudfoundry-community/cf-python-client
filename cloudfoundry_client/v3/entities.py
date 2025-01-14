@@ -48,7 +48,7 @@ class Entity(JsonObject):
             other_manager = getattr(v3_client, manager_name, default_manager)
             entity_type = other_manager._get_entity_type(entity_name)
             entity = entity_type(other_manager.target_endpoint, other_manager.client, **entity_data)
-            setattr(self, entity_name, lambda: entity)
+            setattr(self, entity_name, functools.partial(lambda e: e, entity))
         self.pop("_included", None)
 
     @staticmethod
