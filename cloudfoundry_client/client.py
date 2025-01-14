@@ -81,7 +81,8 @@ class NetworkingV1External(object):
 
 
 class V2(object):
-    def __init__(self, target_endpoint: str, credential_manager: "CloudFoundryClient"):
+    def __init__(self, cloud_controller_v2_url: str, credential_manager: "CloudFoundryClient"):
+        target_endpoint = cloud_controller_v2_url.removesuffix("/v2")
         self.apps = AppManagerV2(target_endpoint, credential_manager)
         self.buildpacks = BuildpackManagerV2(target_endpoint, credential_manager)
         self.jobs = JobManagerV2(target_endpoint, credential_manager)
@@ -93,24 +94,25 @@ class V2(object):
         self.service_plans = ServicePlanManagerV2(target_endpoint, credential_manager)
         # Default implementations
         self.event = EventManager(target_endpoint, credential_manager)
-        self.organizations = EntityManagerV2(target_endpoint, credential_manager, "/organizations")
-        self.private_domains = EntityManagerV2(target_endpoint, credential_manager, "/private_domains")
+        self.organizations = EntityManagerV2(target_endpoint, credential_manager, "/v2/organizations")
+        self.private_domains = EntityManagerV2(target_endpoint, credential_manager, "/v2/private_domains")
         self.routes = RouteManager(target_endpoint, credential_manager)
-        self.services = EntityManagerV2(target_endpoint, credential_manager, "/services")
-        self.shared_domains = EntityManagerV2(target_endpoint, credential_manager, "/shared_domains")
+        self.services = EntityManagerV2(target_endpoint, credential_manager, "/v2/services")
+        self.shared_domains = EntityManagerV2(target_endpoint, credential_manager, "/v2/shared_domains")
         self.spaces = SpaceManagerV2(target_endpoint, credential_manager)
-        self.stacks = EntityManagerV2(target_endpoint, credential_manager, "/stacks")
+        self.stacks = EntityManagerV2(target_endpoint, credential_manager, "/v2/stacks")
         self.user_provided_service_instances = EntityManagerV2(
-            target_endpoint, credential_manager, "/user_provided_service_instances"
+            target_endpoint, credential_manager, "/v2/user_provided_service_instances"
         )
-        self.security_groups = EntityManagerV2(target_endpoint, credential_manager, "/security_groups")
-        self.users = EntityManagerV2(target_endpoint, credential_manager, "/users")
+        self.security_groups = EntityManagerV2(target_endpoint, credential_manager, "/v2/security_groups")
+        self.users = EntityManagerV2(target_endpoint, credential_manager, "/v2/users")
         # Resources implementation used by push operation
         self.resources = ResourceManager(target_endpoint, credential_manager)
 
 
 class V3(object):
-    def __init__(self, target_endpoint: str, credential_manager: "CloudFoundryClient"):
+    def __init__(self, cloud_controller_v3_url: str, credential_manager: "CloudFoundryClient"):
+        target_endpoint = cloud_controller_v3_url.removesuffix("/v3")
         self.apps = AppManager(target_endpoint, credential_manager)
         self.buildpacks = BuildpackManager(target_endpoint, credential_manager)
         self.domains = DomainManager(target_endpoint, credential_manager)

@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class ServiceInstanceManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServiceInstanceManager, self).__init__(target_endpoint, client, "/service_instances")
+        super(ServiceInstanceManager, self).__init__(target_endpoint, client, "/v3/service_instances")
 
     def create(
         self,

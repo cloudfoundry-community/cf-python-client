@@ -8,4 +8,4 @@ if TYPE_CHECKING:
 
 class ProcessManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ProcessManager, self).__init__(target_endpoint, client, "/processes")
+        super(ProcessManager, self).__init__(target_endpoint, client, "/v3/processes")

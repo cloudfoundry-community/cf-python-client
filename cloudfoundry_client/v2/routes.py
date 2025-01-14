@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class RouteManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(RouteManager, self).__init__(target_endpoint, client, "/routes")
+        super(RouteManager, self).__init__(target_endpoint, client, "/v2/routes")
 
     def create_tcp_route(self, domain_guid: str, space_guid: str, port: Optional[int] = None) -> Entity:
         request = self._request(domain_guid=domain_guid, space_guid=space_guid)

@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class AppManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(AppManager, self).__init__(target_endpoint, client, "/apps")
+        super(AppManager, self).__init__(target_endpoint, client, "/v3/apps")
 
     def restart(self, application_guid: str):
         return super(AppManager, self)._post("%s%s/%s/actions/restart" % (self.target_endpoint,

@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 class ServiceCredentialBindingManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super(ServiceCredentialBindingManager, self).__init__(target_endpoint, client,
-                                                              "/service_credential_bindings")
+                                                              "/v3/service_credential_bindings")
 
     def create(
             self,

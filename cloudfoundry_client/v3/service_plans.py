@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class ServicePlanManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServicePlanManager, self).__init__(target_endpoint, client, "/service_plans")
+        super(ServicePlanManager, self).__init__(target_endpoint, client, "/v3/service_plans")
 
     def update(
         self,

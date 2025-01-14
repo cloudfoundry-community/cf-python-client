@@ -35,7 +35,7 @@ class DomainsQuota:
 
 class OrganizationQuotaManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super().__init__(target_endpoint, client, "/organization_quotas")
+        super().__init__(target_endpoint, client, "/v3/organization_quotas")
 
     def remove(self, guid: str, asynchronous: bool = True) -> Optional[str]:
         return super()._remove(guid, asynchronous)
