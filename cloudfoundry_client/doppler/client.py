@@ -16,7 +16,7 @@ EnvelopeStream = Generator[Envelope, None, None]
 
 
 class DopplerClient(object):
-    def __init__(self, doppler_endpoint: str, proxy: dict, verify_ssl: bool, credentials_manager: CredentialManager):
+    def __init__(self, doppler_endpoint: str, proxy: str, verify_ssl: bool, credentials_manager: CredentialManager):
         self.proxy_host = None
         self.proxy_port = None
         self.ws_doppler_endpoint = doppler_endpoint

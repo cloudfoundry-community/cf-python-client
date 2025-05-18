@@ -13,14 +13,14 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cmetric.proto\x12\x06\x65vents\"8\n\x0bValueMetric\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\x01\x12\x0c\n\x04unit\x18\x03 \x02(\t\":\n\x0c\x43ounterEvent\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\r\n\x05\x64\x65lta\x18\x02 \x02(\x04\x12\r\n\x05total\x18\x03 \x01(\x04\"\xb0\x01\n\x0f\x43ontainerMetric\x12\x15\n\rapplicationId\x18\x01 \x02(\t\x12\x15\n\rinstanceIndex\x18\x02 \x02(\x05\x12\x15\n\rcpuPercentage\x18\x03 \x02(\x01\x12\x13\n\x0bmemoryBytes\x18\x04 \x02(\x04\x12\x11\n\tdiskBytes\x18\x05 \x02(\x04\x12\x18\n\x10memoryBytesQuota\x18\x06 \x01(\x04\x12\x16\n\x0e\x64iskBytesQuota\x18\x07 \x01(\x04\x42\x32\n!org.cloudfoundry.dropsonde.eventsB\rMetricFactory')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cmetric.proto\x12\x06\x65vents\"8\n\x0bValueMetric\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\x01\x12\x0c\n\x04unit\x18\x03 \x02(\t\":\n\x0c\x43ounterEvent\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\r\n\x05\x64\x65lta\x18\x02 \x02(\x04\x12\r\n\x05total\x18\x03 \x01(\x04\"\xb0\x01\n\x0f\x43ontainerMetric\x12\x15\n\rapplicationId\x18\x01 \x02(\t\x12\x15\n\rinstanceIndex\x18\x02 \x02(\x05\x12\x15\n\rcpuPercentage\x18\x03 \x02(\x01\x12\x13\n\x0bmemoryBytes\x18\x04 \x02(\x04\x12\x11\n\tdiskBytes\x18\x05 \x02(\x04\x12\x18\n\x10memoryBytesQuota\x18\x06 \x01(\x04\x12\x16\n\x0e\x64iskBytesQuota\x18\x07 \x01(\x04\x42[\n!org.cloudfoundry.dropsonde.eventsB\rMetricFactoryZ\'github.com/cloudfoundry/sonde-go/events')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'metric_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'\n!org.cloudfoundry.dropsonde.eventsB\rMetricFactory'
+  DESCRIPTOR._serialized_options = b'\n!org.cloudfoundry.dropsonde.eventsB\rMetricFactoryZ\'github.com/cloudfoundry/sonde-go/events'
   _VALUEMETRIC._serialized_start=24
   _VALUEMETRIC._serialized_end=80
   _COUNTEREVENT._serialized_start=82
