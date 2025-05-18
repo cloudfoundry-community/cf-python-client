@@ -38,7 +38,7 @@ To build the library run :
 
 .. code-block:: bash
 
-    $ python setup.py install
+    $ poetry build
 
 
 Run the client
