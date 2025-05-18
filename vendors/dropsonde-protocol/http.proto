@@ -1,18 +1,24 @@
 syntax = "proto2";
+
 package events;
+
+option go_package = "github.com/cloudfoundry/sonde-go/events";
 
 option java_package = "org.cloudfoundry.dropsonde.events";
 option java_outer_classname = "HttpFactory";
 
 import "uuid.proto";
 
-/// Type of peer handling request.
+// Type of peer handling request.
 enum PeerType {
-    Client = 1; /// Request is made by this process.
-    Server = 2; /// Request is received by this process.
+    // Request is made by this process.
+    Client = 1;
+
+    // Request is received by this process.
+    Server = 2;
 }
 
-/// HTTP method.
+// HTTP method.
 enum Method {
     GET = 1;
     POST = 2;
@@ -61,25 +67,54 @@ enum Method {
     VERSION_CONTROL = 44;
 }
 
-/// An HttpStartStop event represents the whole lifecycle of an HTTP request.
+// An HttpStartStop event represents the whole lifecycle of an HTTP request.
 message HttpStartStop {
-    required int64 startTimestamp = 1;  /// UNIX timestamp (in nanoseconds) when the request was sent (by a client) or received (by a server).
-    required int64 stopTimestamp = 2;   /// UNIX timestamp (in nanoseconds) when the request was received.
+    // UNIX timestamp (in nanoseconds) when the request was sent (by a client)
+    // or received (by a server).
+    required int64 startTimestamp = 1;
 
-    required UUID requestId = 3;        /// ID for tracking lifecycle of request.
-    required PeerType peerType = 4;     /// Role of the emitting process in the request cycle.
-    required Method method = 5;         /// Method of the request.
-    required string uri = 6;            /// Destination of the request.
-    required string remoteAddress = 7;  /// Remote address of the request. (For a server, this should be the origin of the request.)
-    required string userAgent = 8;      /// Contents of the UserAgent header on the request.
+    // UNIX timestamp (in nanoseconds) when the request was received.
+    required int64 stopTimestamp = 2;
 
-    required int32 statusCode = 9;      /// Status code returned with the response to the request.
-    required int64 contentLength = 10;  /// Length of response (bytes).
+    // ID for tracking lifecycle of request.
+    required UUID requestId = 3;
 
-    /// 11 used to be ParentRequestID which has been deprecated.
+    // Role of the emitting process in the request cycle.
+    required PeerType peerType = 4;
 
-    optional UUID applicationId = 12;   /// If this request was made in relation to an appliciation, this field should track that application's ID.
-    optional int32 instanceIndex = 13;  /// Index of the application instance.
-    optional string instanceId = 14;    /// ID of the application instance.
-    repeated string forwarded = 15;     /// This contains http forwarded-for [x-forwarded-for] header from the request.
+    // Method of the request.
+    required Method method = 5;
+
+    // Destination of the request.
+    required string uri = 6;
+
+    // Remote address of the request. (For a server, this should be the origin
+    // of the request.)
+    required string remoteAddress = 7;
+
+    // Contents of the UserAgent header on the request.
+    required string userAgent = 8;
+
+    // Status code returned with the response to the request.
+    required int32 statusCode = 9;
+
+    // Length of response (bytes).
+    required int64 contentLength = 10;
+
+    reserved 11;
+    reserved "parentRequestId";
+
+    // If this request was made in relation to an appliciation, this field
+    // should track that application's ID.
+    optional UUID applicationId = 12;
+
+     // Index of the application instance.
+    optional int32 instanceIndex = 13;
+
+    // ID of the application instance.
+    optional string instanceId = 14;
+
+    // This contains http forwarded-for [x-forwarded-for] header from the
+    // request.
+    repeated string forwarded = 15;
 }

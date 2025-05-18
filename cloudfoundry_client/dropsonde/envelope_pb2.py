@@ -11,26 +11,26 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import http_pb2 as http__pb2
-import log_pb2 as log__pb2
-import metric_pb2 as metric__pb2
-import error_pb2 as error__pb2
+import cloudfoundry_client.dropsonde.http_pb2 as http__pb2
+import cloudfoundry_client.dropsonde.log_pb2 as log__pb2
+import cloudfoundry_client.dropsonde.metric_pb2 as metric__pb2
+import cloudfoundry_client.dropsonde.error_pb2 as error__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x65nvelope.proto\x12\x06\x65vents\x1a\nhttp.proto\x1a\tlog.proto\x1a\x0cmetric.proto\x1a\x0b\x65rror.proto\"\xde\x04\n\x08\x45nvelope\x12\x0e\n\x06origin\x18\x01 \x02(\t\x12-\n\teventType\x18\x02 \x02(\x0e\x32\x1a.events.Envelope.EventType\x12\x11\n\ttimestamp\x18\x06 \x01(\x03\x12\x12\n\ndeployment\x18\r \x01(\t\x12\x0b\n\x03job\x18\x0e \x01(\t\x12\r\n\x05index\x18\x0f \x01(\t\x12\n\n\x02ip\x18\x10 \x01(\t\x12(\n\x04tags\x18\x11 \x03(\x0b\x32\x1a.events.Envelope.TagsEntry\x12,\n\rhttpStartStop\x18\x07 \x01(\x0b\x32\x15.events.HttpStartStop\x12&\n\nlogMessage\x18\x08 \x01(\x0b\x32\x12.events.LogMessage\x12(\n\x0bvalueMetric\x18\t \x01(\x0b\x32\x13.events.ValueMetric\x12*\n\x0c\x63ounterEvent\x18\n \x01(\x0b\x32\x14.events.CounterEvent\x12\x1c\n\x05\x65rror\x18\x0b \x01(\x0b\x32\r.events.Error\x12\x30\n\x0f\x63ontainerMetric\x18\x0c \x01(\x0b\x32\x17.events.ContainerMetric\x1a+\n\tTagsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"q\n\tEventType\x12\x11\n\rHttpStartStop\x10\x04\x12\x0e\n\nLogMessage\x10\x05\x12\x0f\n\x0bValueMetric\x10\x06\x12\x10\n\x0c\x43ounterEvent\x10\x07\x12\t\n\x05\x45rror\x10\x08\x12\x13\n\x0f\x43ontainerMetric\x10\tB1\n!org.cloudfoundry.dropsonde.eventsB\x0c\x45ventFactory')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0e\x65nvelope.proto\x12\x06\x65vents\x1a\nhttp.proto\x1a\tlog.proto\x1a\x0cmetric.proto\x1a\x0b\x65rror.proto\"\xab\x05\n\x08\x45nvelope\x12\x0e\n\x06origin\x18\x01 \x02(\t\x12-\n\teventType\x18\x02 \x02(\x0e\x32\x1a.events.Envelope.EventType\x12\x11\n\ttimestamp\x18\x06 \x01(\x03\x12\x12\n\ndeployment\x18\r \x01(\t\x12\x0b\n\x03job\x18\x0e \x01(\t\x12\r\n\x05index\x18\x0f \x01(\t\x12\n\n\x02ip\x18\x10 \x01(\t\x12(\n\x04tags\x18\x11 \x03(\x0b\x32\x1a.events.Envelope.TagsEntry\x12,\n\rhttpStartStop\x18\x07 \x01(\x0b\x32\x15.events.HttpStartStop\x12&\n\nlogMessage\x18\x08 \x01(\x0b\x32\x12.events.LogMessage\x12(\n\x0bvalueMetric\x18\t \x01(\x0b\x32\x13.events.ValueMetric\x12*\n\x0c\x63ounterEvent\x18\n \x01(\x0b\x32\x14.events.CounterEvent\x12\x1c\n\x05\x65rror\x18\x0b \x01(\x0b\x32\r.events.Error\x12\x30\n\x0f\x63ontainerMetric\x18\x0c \x01(\x0b\x32\x17.events.ContainerMetric\x1a+\n\tTagsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x97\x01\n\tEventType\x12\x11\n\rHttpStartStop\x10\x04\x12\x0e\n\nLogMessage\x10\x05\x12\x0f\n\x0bValueMetric\x10\x06\x12\x10\n\x0c\x43ounterEvent\x10\x07\x12\t\n\x05\x45rror\x10\x08\x12\x13\n\x0f\x43ontainerMetric\x10\t\"\x04\x08\x01\x10\x03*\tHeartbeat*\tHttpStart*\x08HttpStopJ\x04\x08\x03\x10\x06R\tHeartbeatR\tHttpStartR\x08HttpStopBZ\n!org.cloudfoundry.dropsonde.eventsB\x0c\x45ventFactoryZ\'github.com/cloudfoundry/sonde-go/events')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'envelope_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'\n!org.cloudfoundry.dropsonde.eventsB\014EventFactory'
+  DESCRIPTOR._serialized_options = b'\n!org.cloudfoundry.dropsonde.eventsB\014EventFactoryZ\'github.com/cloudfoundry/sonde-go/events'
   _ENVELOPE_TAGSENTRY._options = None
   _ENVELOPE_TAGSENTRY._serialized_options = b'8\001'
   _ENVELOPE._serialized_start=77
-  _ENVELOPE._serialized_end=683
+  _ENVELOPE._serialized_end=760
   _ENVELOPE_TAGSENTRY._serialized_start=525
   _ENVELOPE_TAGSENTRY._serialized_end=568
-  _ENVELOPE_EVENTTYPE._serialized_start=570
-  _ENVELOPE_EVENTTYPE._serialized_end=683
+  _ENVELOPE_EVENTTYPE._serialized_start=571
+  _ENVELOPE_EVENTTYPE._serialized_end=722
 # @@protoc_insertion_point(module_scope)
