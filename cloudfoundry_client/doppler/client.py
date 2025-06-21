@@ -19,16 +19,20 @@ class DopplerClient(object):
     def __init__(self, doppler_endpoint: str, proxy: str, verify_ssl: bool, credentials_manager: CredentialManager):
         self.proxy_host = None
         self.proxy_port = None
+        self.proxy_auth = None
         self.ws_doppler_endpoint = doppler_endpoint
         self.http_doppler_endpoint = re.sub("^ws", "http", doppler_endpoint)
         self.verify_ssl = verify_ssl
         self.credentials_manager = credentials_manager
         if proxy is not None and len(proxy) > 0:
-            proxy_domain = urlparse(proxy).netloc
-            idx = proxy_domain.find(":")
-            if 0 < idx < len(proxy_domain) - 2:
-                self.proxy_host = proxy_domain[:idx]
-                self.proxy_port = int(proxy_domain[idx + 1 :])
+            proxy_parsed = urlparse(proxy)
+            self.proxy_host = proxy_parsed.hostname
+            if proxy_parsed.port is not None:
+                self.proxy_port = proxy_parsed.port
+            else:
+                self.proxy_port = 443 if proxy_parsed.scheme == "https" else 80
+            if proxy_parsed.username is not None and proxy_parsed.password is not None:
+                self.proxy_auth = (proxy_parsed.username, proxy_parsed.password)
 
     def recent_logs(self, app_guid: str) -> EnvelopeStream:
         url = "%s/apps/%s/recentlogs" % (self.http_doppler_endpoint, app_guid)
@@ -46,6 +50,7 @@ class DopplerClient(object):
             verify_ssl=self.verify_ssl,
             proxy_host=self.proxy_host,
             proxy_port=self.proxy_port,
+            proxy_auth=self.proxy_auth,
         ) as websocket:
             for message in websocket:
                 yield DopplerClient._parse_envelope(message)
