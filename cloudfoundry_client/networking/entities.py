@@ -116,9 +116,9 @@ class EntityManager(object):
                 for value in value_list:
                     parameters.append("%s=%s" % (parameter_name, str(value)))
             elif isinstance(parameter_value, (list, tuple)):
-                parameters.append("q=%s" % quote("%s IN %s" % (parameter_name, ",".join(parameter_value))))
+                parameters.append("%s=%s" % (parameter_name, quote(",".join(parameter_value))))
             else:
-                parameters.append("q=%s" % quote("%s:%s" % (parameter_name, str(parameter_value))))
+                parameters.append("%s=%s" % (parameter_name, quote(str(parameter_value))))
             return parameters
 
         if len(kwargs) > 0:

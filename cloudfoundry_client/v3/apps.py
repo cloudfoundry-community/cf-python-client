@@ -24,3 +24,6 @@ class AppManager(EntityManager):
 
     def get_routes(self, application_guid: str) -> JsonObject:
         return super(AppManager, self)._get("%s%s/%s/routes" % (self.target_endpoint, self.entity_uri, application_guid))
+
+    def get_manifest(self, application_guid: str) -> str:
+        return self.client.get(url="%s%s/%s/manifest" % (self.target_endpoint, self.entity_uri, application_guid)).text
