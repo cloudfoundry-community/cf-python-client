@@ -1,0 +1,71 @@
+{
+  "guid": "858e2101-ebb3-4c62-af6d-06e26bae744c",
+  "created_at": "2025-07-30T07:57:04Z",
+  "updated_at": "2025-07-30T07:57:05Z",
+  "name": "my-managed-service",
+  "tags": [],
+  "last_operation": {
+    "type": "create",
+    "state": "succeeded",
+    "description": "",
+    "updated_at": "2025-07-30T07:57:05Z",
+    "created_at": "2025-07-30T07:57:05Z"
+  },
+  "type": "managed",
+  "maintenance_info": {},
+  "upgrade_available": false,
+  "dashboard_url": null,
+  "relationships": {
+    "space": {
+      "data": {
+        "guid": "aa3c5cfd-3f75-43f3-aac8-216fec6b3be5"
+      }
+    },
+    "service_plan": {
+      "data": {
+        "guid": "a73e54c2-cc12-4fc5-8f8d-4eec3e6c383c"
+      }
+    }
+  },
+  "metadata": {
+    "labels": {},
+    "annotations": {}
+  },
+  "links": {
+    "self": {
+      "href": "https://somewhere.com/v3/service_instances/858e2101-ebb3-4c62-af6d-06e26bae744c"
+    },
+    "space": {
+      "href": "https://somewhere.com/v3/spaces/aa3c5cfd-3f75-43f3-aac8-216fec6b3be5"
+    },
+    "service_credential_bindings": {
+      "href": "https://somewhere.com/v3/service_credential_bindings?service_instance_guids=858e2101-ebb3-4c62-af6d-06e26bae744c"
+    },
+    "service_route_bindings": {
+      "href": "https://somewhere.com/v3/service_route_bindings?service_instance_guids=858e2101-ebb3-4c62-af6d-06e26bae744c"
+    },
+    "service_plan": {
+      "href": "https://somewhere.com/v3/service_plans/a73e54c2-cc12-4fc5-8f8d-4eec3e6c383c"
+    },
+    "parameters": {
+      "href": "https://somewhere.com/v3/service_instances/858e2101-ebb3-4c62-af6d-06e26bae744c/parameters"
+    },
+    "shared_spaces": {
+      "href": "https://somewhere.com/v3/service_instances/858e2101-ebb3-4c62-af6d-06e26bae744c/relationships/shared_spaces"
+    }
+  },
+  "included": {
+    "spaces": [
+      {
+        "guid": "aa3c5cfd-3f75-43f3-aac8-216fec6b3be5",
+        "name": "my_space"
+      }
+    ],
+    "organizations": [
+      {
+        "guid": "24ae9e5a-3f0c-4347-8d82-610877534c74",
+        "name": "my_organization"
+      }
+    ]
+  }
+}

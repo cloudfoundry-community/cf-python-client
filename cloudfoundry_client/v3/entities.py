@@ -300,6 +300,9 @@ class EntityManager(object):
             parameter_name, parameter_value = args[0], args[1]
             if isinstance(parameter_value, (list, tuple)):
                 parameters.append("%s=%s" % (parameter_name, quote(",".join(parameter_value))))
+            elif isinstance(parameter_value, (dict)) and parameter_name == "fields":
+                for resource, key in parameter_value.items():
+                    parameters.append("%s[%s]=%s" % (parameter_name, resource, ",".join(key)))
             else:
                 parameters.append("%s=%s" % (parameter_name, quote(str(parameter_value))))
             return parameters
