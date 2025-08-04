@@ -101,7 +101,9 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
 
     def test_get_fields_space(self):
         self.client.get.return_value = self.mock_response(
-            "/v3/service_instances/service_instance_id?fields[space]=guid,name,relationships.organization&fields[space.organization]=guid,name",
+            "/v3/service_instances/service_instance_id"
+            "?fields[space]=guid,name,relationships.organization"
+            "&fields[space.organization]=guid,name",
             HTTPStatus.OK,
             None,
             "v3",
@@ -111,7 +113,7 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
         fields = {
             "space": ["guid,name,relationships.organization"],
             "space.organization": ["guid", "name"],
-            }
+        }
         space = self.client.v3.service_instances.get("service_instance_id", fields=fields).space()
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual("my_space", space["name"])
@@ -119,7 +121,9 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
 
     def test_list_fields_space_and_org(self):
         self.client.get.return_value = self.mock_response(
-            "/v3/service_instances?fields[space]=guid,name,relationships.organization&fields[space.organization]=guid,name",
+            "/v3/service_instances"
+            "?fields[space]=guid,name,relationships.organization"
+            "&fields[space.organization]=guid,name",
             HTTPStatus.OK,
             None,
             "v3",
@@ -128,8 +132,8 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
         )
         fields = {
             "space": ["guid,name,relationships.organization"],
-            "space.organization": ["guid","name"]
-            }
+            "space.organization": ["guid", "name"]
+        }
         all_spaces = [app.space() for app in self.client.v3.service_instances.list(fields=fields)]
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(2, len(all_spaces))
