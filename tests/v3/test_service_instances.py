@@ -99,6 +99,57 @@ class TestServiceInstances(unittest.TestCase, AbstractTestCase):
         self.assertEqual("service_instance_id", service_instance["guid"])
         self.assertIsInstance(service_instance, Entity)
 
+    def test_get_fields_space(self):
+        self.client.get.return_value = self.mock_response(
+            "/v3/service_instances/service_instance_id"
+            "?fields[space]=guid,name,relationships.organization"
+            "&fields[space.organization]=guid,name",
+            HTTPStatus.OK,
+            None,
+            "v3",
+            "service_instances",
+            "GET_{id}_response_fields_space.json"
+        )
+        fields = {
+            "space": ["guid,name,relationships.organization"],
+            "space.organization": ["guid", "name"],
+        }
+        space = self.client.v3.service_instances.get("service_instance_id", fields=fields).space()
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+        self.assertEqual("my_space", space["name"])
+        self.assertIsInstance(space, Entity)
+
+    def test_list_fields_space_and_org(self):
+        self.client.get.return_value = self.mock_response(
+            "/v3/service_instances"
+            "?fields[space]=guid,name,relationships.organization"
+            "&fields[space.organization]=guid,name",
+            HTTPStatus.OK,
+            None,
+            "v3",
+            "service_instances",
+            "GET_response_fields_space_and_org.json"
+        )
+        fields = {
+            "space": ["guid,name,relationships.organization"],
+            "space.organization": ["guid", "name"]
+        }
+        all_spaces = [app.space() for app in self.client.v3.service_instances.list(fields=fields)]
+        self.client.get.assert_called_with(self.client.get.return_value.url)
+        self.assertEqual(2, len(all_spaces))
+        space1 = all_spaces[0]
+        self.assertEqual(space1["name"], "my_space")
+        space1_org = space1.organization()
+        self.assertEqual(space1_org["name"], "my_organization")
+        self.assertIsInstance(space1, Entity)
+        self.assertIsInstance(space1_org, Entity)
+        space2 = all_spaces[1]
+        self.assertEqual(space2["name"], "my_space")
+        space2_org = space2.organization()
+        self.assertEqual(space2_org["name"], "my_organization")
+        self.assertIsInstance(space2, Entity)
+        self.assertIsInstance(space2_org, Entity)
+
     def test_get_then_credentials(self):
         get_service_instance = self.mock_response(
             "/v3/service_instances/service_instance_id", HTTPStatus.OK, None, "v3", "service_instances", "GET_{id}_response.json")
