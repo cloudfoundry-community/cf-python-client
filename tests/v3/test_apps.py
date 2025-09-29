@@ -161,12 +161,12 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertEqual(application_route.get("route"), "my-app.example.com")
         self.assertEqual(application_route.get("protocol"), "http1")
 
-    def test_get_revisions(self):
+    def test_list_revisions(self):
         self.client.get.return_value = self.mock_response(
             "/v3/apps/app_guid/revisions", HTTPStatus.OK, {"Content-Type": "application/json"}, "v3", "apps",
             "GET_{id}_revisions_response.json"
         )
-        revisions_response: Pagination[Entity] = self.client.v3.apps.get_revisions("app_guid")
+        revisions_response: Pagination[Entity] = self.client.v3.apps.list_revisions("app_guid")
         revisions: list[dict] = [revision for revision in revisions_response]
         self.assertIsInstance(revisions, list)
         self.assertEqual(len(revisions), 1)
@@ -176,12 +176,12 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertEqual(revision.get("description"), "Initial revision.")
         self.assertEqual(revision.get("deployable"), True)
 
-    def test_get_deployed_revisions(self):
+    def test_list_deployed_revisions(self):
         self.client.get.return_value = self.mock_response(
             "/v3/apps/app_guid/revisions/deployed", HTTPStatus.OK, {"Content-Type": "application/json"}, "v3", "apps",
             "GET_{id}_deployed_revisions_response.json"
         )
-        revisions_response: Pagination[Entity] = self.client.v3.apps.get_deployed_revisions("app_guid")
+        revisions_response: Pagination[Entity] = self.client.v3.apps.list_deployed_revisions("app_guid")
         revisions: list[dict] = [revision for revision in revisions_response]
         self.assertIsInstance(revisions, list)
         self.assertEqual(len(revisions), 1)

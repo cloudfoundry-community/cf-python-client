@@ -28,10 +28,10 @@ class AppManager(EntityManager):
     def get_manifest(self, application_guid: str) -> str:
         return self.client.get(url="%s%s/%s/manifest" % (self.target_endpoint, self.entity_uri, application_guid)).text
 
-    def get_revisions(self, application_guid: str, **kwargs) -> Pagination[Entity]:
+    def list_revisions(self, application_guid: str, **kwargs) -> Pagination[Entity]:
         uri: str = "%s/%s/revisions" % (self.entity_uri, application_guid)
         return super(AppManager, self)._list(requested_path=uri, **kwargs)
 
-    def get_deployed_revisions(self, application_guid: str, **kwargs) -> Pagination[Entity]:
+    def list_deployed_revisions(self, application_guid: str, **kwargs) -> Pagination[Entity]:
         uri: str = "%s/%s/revisions/deployed" % (self.entity_uri, application_guid)
         return super(AppManager, self)._list(requested_path=uri, **kwargs)
