@@ -169,12 +169,12 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         revisions_response: Pagination[Entity] = self.client.v3.apps.get_revisions("app_guid")
         revisions: list[dict] = [revision for revision in revisions_response]
         self.assertIsInstance(revisions, list)
-        self.assertEqual(len(revisions),1)
+        self.assertEqual(len(revisions), 1)
         revision: dict = revisions[0]
-        self.assertIsInstance(revision,dict)
-        self.assertEqual(revision.get("guid"),"885735b5-aea4-4cf5-8e44-961af0e41920")
-        self.assertEqual(revision.get("description"),"Initial revision.")
-        self.assertEqual(revision.get("deployable"),True)
+        self.assertIsInstance(revision, dict)
+        self.assertEqual(revision.get("guid"), "885735b5-aea4-4cf5-8e44-961af0e41920")
+        self.assertEqual(revision.get("description"), "Initial revision.")
+        self.assertEqual(revision.get("deployable"), True)
 
     def test_get_deployed_revisions(self):
         self.client.get.return_value = self.mock_response(
@@ -184,8 +184,8 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         revisions_response: Pagination[Entity] = self.client.v3.apps.get_deployed_revisions("app_guid")
         revisions: list[dict] = [revision for revision in revisions_response]
         self.assertIsInstance(revisions, list)
-        self.assertEqual(len(revisions),1)
+        self.assertEqual(len(revisions), 1)
         revision: dict = revisions[0]
-        self.assertIsInstance(revision,dict)
-        self.assertEqual(revision.get("created_at"),"2017-02-01T01:33:58Z")
-        self.assertEqual(revision.get("version"),1)
+        self.assertIsInstance(revision, dict)
+        self.assertEqual(revision.get("created_at"), "2017-02-01T01:33:58Z")
+        self.assertEqual(revision.get("version"), 1)
