@@ -8,7 +8,7 @@ exclude = '''
 
 [tool.poetry]
 name = "cloudfoundry_client"
-version = "1.39.0"
+version = "1.39.1"
 description = "A client library for CloudFoundry"
 authors = ["Benjamin Einaudi <antechrestos@gmail.com>"]
 readme = "README.rst"
@@ -20,7 +20,7 @@ keywords = ["cloudfoundry", "cf"]
 [tool.poetry.dependencies]
 python = ">=3.9"
 aiohttp = ">=3.8.0"
-protobuf = "6.32.0"
+protobuf = "6.33.0"
 oauth2-client= "1.4.2"
 websocket-client= "~1.8.0"
 PyYAML = ">=6.0"
