@@ -397,4 +397,5 @@ You can run tests by doing so. In the project directory:
     $ export PYTHONPATH=main
     $ python -m unittest discover test
     # or even
-    $ python setup.py test
+    $ poetry install
+    $ poetry run pytest

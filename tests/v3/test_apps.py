@@ -4,7 +4,7 @@ from http import HTTPStatus
 from typing import Optional, List, Union
 
 from abstract_test_case import AbstractTestCase
-from cloudfoundry_client.common_objects import JsonObject
+from cloudfoundry_client.common_objects import JsonObject, Pagination
 from cloudfoundry_client.v3.entities import Entity
 
 
@@ -160,3 +160,32 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(application_route, dict)
         self.assertEqual(application_route.get("route"), "my-app.example.com")
         self.assertEqual(application_route.get("protocol"), "http1")
+
+    def test_list_revisions(self):
+        self.client.get.return_value = self.mock_response(
+            "/v3/apps/app_guid/revisions", HTTPStatus.OK, {"Content-Type": "application/json"}, "v3", "apps",
+            "GET_{id}_revisions_response.json"
+        )
+        revisions_response: Pagination[Entity] = self.client.v3.apps.list_revisions("app_guid")
+        revisions: list[dict] = [revision for revision in revisions_response]
+        self.assertIsInstance(revisions, list)
+        self.assertEqual(len(revisions), 1)
+        revision: dict = revisions[0]
+        self.assertIsInstance(revision, dict)
+        self.assertEqual(revision.get("guid"), "885735b5-aea4-4cf5-8e44-961af0e41920")
+        self.assertEqual(revision.get("description"), "Initial revision.")
+        self.assertEqual(revision.get("deployable"), True)
+
+    def test_list_deployed_revisions(self):
+        self.client.get.return_value = self.mock_response(
+            "/v3/apps/app_guid/revisions/deployed", HTTPStatus.OK, {"Content-Type": "application/json"}, "v3", "apps",
+            "GET_{id}_deployed_revisions_response.json"
+        )
+        revisions_response: Pagination[Entity] = self.client.v3.apps.list_deployed_revisions("app_guid")
+        revisions: list[dict] = [revision for revision in revisions_response]
+        self.assertIsInstance(revisions, list)
+        self.assertEqual(len(revisions), 1)
+        revision: dict = revisions[0]
+        self.assertIsInstance(revision, dict)
+        self.assertEqual(revision.get("created_at"), "2017-02-01T01:33:58Z")
+        self.assertEqual(revision.get("version"), 1)
