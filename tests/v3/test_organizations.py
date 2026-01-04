@@ -35,14 +35,38 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
         self.assertEqual("my-organization", organization["name"])
         self.assertIsInstance(organization, Entity)
 
-    def test_update(self):
+    def test_update_without_optional_parameters(self):
         self.client.patch.return_value = self.mock_response(
             "/v3/organizations/organization_id", HTTPStatus.OK, None, "v3", "organizations", "PATCH_{id}_response.json"
         )
-        result = self.client.v3.organizations.update("organization_id", "my-organization", suspended=True)
+        result = self.client.v3.organizations.update("organization_id", "my-organization")
         self.client.patch.assert_called_with(
             self.client.patch.return_value.url,
-            json={"suspended": True, "name": "my-organization", "metadata": {"labels": None, "annotations": None}},
+            json={"name": "my-organization"},
+        )
+        self.assertIsNotNone(result)
+
+    def test_update_with_optional_parameters(self):
+        self.client.patch.return_value = self.mock_response(
+            "/v3/organizations/organization_id", HTTPStatus.OK, None, "v3", "organizations", "PATCH_{id}_response.json"
+        )
+        result = self.client.v3.organizations.update(
+            "organization_id",
+            "my-organization",
+            suspended=True,
+            meta_labels={"label_name": "label_value"},
+            meta_annotations={"annotation_name": "annotation_value"}
+        )
+        self.client.patch.assert_called_with(
+            self.client.patch.return_value.url,
+            json={
+                "suspended": True,
+                "name": "my-organization",
+                "metadata": {
+                    "labels": {"label_name": "label_value"},
+                    "annotations": {"annotation_name": "annotation_value"}
+                }
+            },
         )
         self.assertIsNotNone(result)
 
