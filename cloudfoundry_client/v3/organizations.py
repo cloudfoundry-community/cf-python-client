@@ -20,11 +20,20 @@ class OrganizationManager(EntityManager):
         self,
         guid: str,
         name: str,
-        suspended: Optional[bool],
+        suspended: Optional[bool] = None,
         meta_labels: Optional[dict] = None,
         meta_annotations: Optional[dict] = None,
     ) -> Entity:
-        data = {"name": name, "suspended": suspended, "metadata": {"labels": meta_labels, "annotations": meta_annotations}}
+        data = {"name": name}
+        if suspended is not None:
+            data["suspended"] = suspended
+        metadata = {}
+        if meta_labels is not None:
+            metadata["labels"] = meta_labels
+        if meta_annotations is not None:
+            metadata["annotations"] = meta_annotations
+        if len(metadata) > 0:
+            data["metadata"] = metadata
         return super(OrganizationManager, self)._update(guid, data)
 
     def remove(self, guid: str, asynchronous: bool = True) -> Optional[str]:
