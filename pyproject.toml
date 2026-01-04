@@ -18,7 +18,7 @@ repository = "https://github.com/cloudfoundry-community/cf-python-client"
 keywords = ["cloudfoundry", "cf"]
 
 [tool.poetry.dependencies]
-python = ">=3.9"
+python = ">=3.10"
 aiohttp = ">=3.8.0"
 protobuf = "6.33.2"
 oauth2-client= "1.4.2"
