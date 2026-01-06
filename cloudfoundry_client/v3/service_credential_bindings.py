@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.v3.entities import EntityManager, Entity, ToOneRelationship
 
@@ -21,7 +21,7 @@ class ServiceCredentialBindingManager(EntityManager):
             meta_labels: dict | None,
             meta_annotations: dict | None,
             asynchronous: bool = True,
-    ) -> Union[str, Entity, None]:
+    ) -> str | Entity | None:
         data = {
             "name": name,
             "type": service_credential_binding_type,

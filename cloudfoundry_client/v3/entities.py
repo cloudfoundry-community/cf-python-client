@@ -1,6 +1,6 @@
 import functools
 from json import JSONDecodeError
-from typing import Any, List, Tuple, Union, TypeVar, TYPE_CHECKING, Callable, Type
+from typing import Any, List, Tuple, TypeVar, TYPE_CHECKING, Callable, Type
 from urllib.parse import quote, urlparse
 
 from requests import Response
@@ -171,7 +171,7 @@ class EntityManager(object):
         return self._pagination(response_json, entity_type)
 
     def _attempt_to_paginate(self, url_requested: str, entity_type: ENTITY_TYPE | None = None) \
-            -> Union[Pagination[Entity], Entity]:
+            -> Pagination[Entity] | Entity:
         response_json = self._read_response(self.client.get(url_requested), JsonObject)
         if "resources" in response_json:
             return self._pagination(response_json, entity_type)
@@ -246,7 +246,7 @@ class EntityManager(object):
             requested_path = "%s%s/%s/%s" % (self.target_endpoint, self.entity_uri, entity_id, "/".join(extra_paths))
         return self._get(requested_path, **kwargs)
 
-    def _read_response(self, response: Response, entity_type: ENTITY_TYPE | None) -> Union[JsonObject, Entity]:
+    def _read_response(self, response: Response, entity_type: ENTITY_TYPE | None) -> JsonObject | Entity:
         try:
             result = response.json(object_pairs_hook=JsonObject)
         except JSONDecodeError:
@@ -288,7 +288,7 @@ class EntityManager(object):
     def _get_entity_type(entity_name: str) -> Type[ENTITY_TYPE]:
         return Entity
 
-    def _entity(self, result: JsonObject, entity_type: ENTITY_TYPE | None) -> Union[JsonObject, Entity]:
+    def _entity(self, result: JsonObject, entity_type: ENTITY_TYPE | None) -> JsonObject | Entity:
         if "guid" in result or ("links" in result and "job" in result["links"]):
             return (entity_type or self.entity_type)(self.target_endpoint, self.client, **result)
         else:
