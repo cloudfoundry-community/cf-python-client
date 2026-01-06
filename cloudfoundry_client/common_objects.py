@@ -1,5 +1,5 @@
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from typing import TypeVar, Generic
 
 
@@ -19,7 +19,7 @@ class JsonObject(dict):
 ENTITY = TypeVar('ENTITY')
 
 
-class Pagination(Generic[ENTITY]):
+class Pagination(Generic[ENTITY], Generator[ENTITY, None, None]):
     def __init__(self, first_page: JsonObject,
                  total_result: int,
                  next_page_loader: Callable[[JsonObject], JsonObject | None],
@@ -37,10 +37,7 @@ class Pagination(Generic[ENTITY]):
     def total_results(self) -> int:
         return self._total_results
 
-    def __iter__(self):
-        return self
-
-    def __next__(self) -> ENTITY:
+    def send(self, value) -> ENTITY:
         try:
             if self._cursor is None:
                 self._current_page = self._first_page
@@ -52,3 +49,15 @@ class Pagination(Generic[ENTITY]):
                 raise
             self._cursor = self._resources_accessor(self._current_page).__iter__()
             return self._instance_creator(self._cursor.__next__())
+
+    def throw(self, typ, val=None, tb=None):
+        super().throw(typ, val, tb)
+
+    def close(self):
+        super().close()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self) -> ENTITY:
+        return self.send(None)

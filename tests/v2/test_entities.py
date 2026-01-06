@@ -14,7 +14,7 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
         entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/anyone")
 
         client.get.return_value = self.mock_response(
-            "/fake/anyone/any-id", HTTPStatus.OK, None, "fake", "GET_invalid_entity_without_entity.json"
+            "/fake/anyone/any-id", HTTPStatus.OK, None, "v2", "fake", "GET_invalid_entity_without_entity.json"
         )
 
         self.assertRaises(InvalidEntity, lambda: entity_manager["any-id"])
@@ -24,7 +24,7 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
         entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/anyone")
 
         client.get.return_value = self.mock_response(
-            "/fake/anyone/any-id", HTTPStatus.OK, None, "fake", "GET_invalid_entity_with_null_entity.json"
+            "/fake/anyone/any-id", HTTPStatus.OK, None, "v2", "fake", "GET_invalid_entity_with_null_entity.json"
         )
 
         self.assertRaises(InvalidEntity, lambda: entity_manager["any-id"])
@@ -34,7 +34,7 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
         entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/anyone")
 
         client.get.return_value = self.mock_response(
-            "/fake/anyone/any-id", HTTPStatus.OK, None, "fake", "GET_invalid_entity_with_invalid_entity_type.json"
+            "/fake/anyone/any-id", HTTPStatus.OK, None, "v2", "fake", "GET_invalid_entity_with_invalid_entity_type.json"
         )
 
         self.assertRaises(InvalidEntity, lambda: entity_manager["any-id"])
@@ -79,25 +79,29 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
             "/fake/first?order-direction=asc&page=1&results-per-page=20&q=space_guid%3Asome-id",
             HTTPStatus.OK,
             None,
-            "fake",
+            "v2", "fake",
             "GET_multi_page_0_response.json",
         )
         second_response = self.mock_response(
             "/fake/next?order-direction=asc&page=2&results-per-page=50",
             HTTPStatus.OK,
             None,
-            "fake",
+            "v2", "fake",
             "GET_multi_page_1_response.json",
         )
 
         client.get.side_effect = [first_response, second_response]
-        cpt = reduce(
-            lambda increment, _: increment + 1,
+        guids = reduce(
+            lambda c, entity: c.append(entity["metadata"]["guid"]) or c,
             entity_manager.list(**{"results-per-page": 20, "order-direction": "asc", "page": 1, "space_guid": "some-id"}),
-            0,
+            [],
         )
         client.get.assert_has_calls([call(first_response.url), call(second_response.url)], any_order=False)
-        self.assertEqual(cpt, 3)
+        self.assertEqual(guids, [
+            "6fa7a340-9bda-43bf-bd5e-4e588c292679",
+            "7002efa8-3f54-4338-8884-117e98f21566",
+            "774a9f7e-895d-4825-84fc-222c1522a9a7"
+        ])
 
     def test_elements_are_entities(self):
         client = MagicMock()
@@ -107,14 +111,14 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
             "/fake/first?order-direction=asc&page=1&results-per-page=20&q=space_guid%3Asome-id",
             HTTPStatus.OK,
             None,
-            "fake",
+            "v2", "fake",
             "GET_multi_page_0_response.json",
         )
         second_response = self.mock_response(
             "/fake/next?order-direction=asc&page=2&results-per-page=50",
             HTTPStatus.OK,
             None,
-            "fake",
+            "v2", "fake",
             "GET_multi_page_1_response.json",
         )
         client.get.side_effect = [first_response, second_response]
@@ -129,7 +133,7 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
         client = MagicMock()
         entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/something")
 
-        client.get.return_value = self.mock_response("/fake/something", HTTPStatus.OK, None, "fake", "GET_response.json")
+        client.get.return_value = self.mock_response("/fake/something", HTTPStatus.OK, None, "v2", "fake", "GET_response.json")
         cpt = reduce(lambda increment, _: increment + 1, entity_manager, 0)
         client.get.assert_called_with(client.get.return_value.url)
 
@@ -140,7 +144,7 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
         entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/something")
 
         client.get.return_value = self.mock_response(
-            "/fake/something/with-id", HTTPStatus.OK, None, "fake", "GET_{id}_response.json"
+            "/fake/something/with-id", HTTPStatus.OK, None, "v2", "fake", "GET_{id}_response.json"
         )
         entity = entity_manager["with-id"]
         client.get.assert_called_with(client.get.return_value.url)
@@ -151,7 +155,7 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
         client = MagicMock()
         entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/something")
         client.get.return_value = self.mock_response(
-            "/fake/something/with-id", HTTPStatus.OK, None, "fake", "GET_{id}_response.json"
+            "/fake/something/with-id", HTTPStatus.OK, None, "v2", "fake", "GET_{id}_response.json"
         )
 
         self.assertIsNotNone(getattr(entity_manager, "__iter__", None))
@@ -164,7 +168,7 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
         client = MagicMock()
         entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/something")
         client.get.return_value = self.mock_response(
-            "/fake/something/with-id", HTTPStatus.OK, None, "fake", "GET_{id}_response.json"
+            "/fake/something/with-id", HTTPStatus.OK, None, "v2", "fake", "GET_{id}_response.json"
         )
 
         generator = entity_manager.list()
@@ -175,7 +179,7 @@ class TestEntities(unittest.TestCase, AbstractTestCase):
     def test_total_results(self):
         client = MagicMock()
         entity_manager = EntityManager(self.TARGET_ENDPOINT, client, "/fake/something")
-        client.get.return_value = self.mock_response("/fake/something", HTTPStatus.OK, None, "fake", "GET_response.json")
+        client.get.return_value = self.mock_response("/fake/something", HTTPStatus.OK, None, "v2", "fake", "GET_response.json")
 
         cpt = entity_manager.list().total_results
 

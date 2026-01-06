@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Generator
+from collections.abc import Generator
 from urllib.parse import urlparse
 
 from oauth2_client.credentials_manager import CredentialManager

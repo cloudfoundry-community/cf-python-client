@@ -1,4 +1,5 @@
-from typing import Generator, TYPE_CHECKING
+from collections.abc import Generator
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.v2.entities import EntityManager, Entity
 
