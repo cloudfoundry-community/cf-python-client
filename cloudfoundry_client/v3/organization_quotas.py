@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from dataclasses import dataclass, asdict
 
 from cloudfoundry_client.v3.entities import Entity, EntityManager, ToManyRelationship
@@ -37,17 +37,17 @@ class OrganizationQuotaManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super().__init__(target_endpoint, client, "/v3/organization_quotas")
 
-    def remove(self, guid: str, asynchronous: bool = True) -> Optional[str]:
+    def remove(self, guid: str, asynchronous: bool = True) -> str | None:
         return super()._remove(guid, asynchronous)
 
     def create(
         self,
         name: str,
-        apps_quota: Optional[AppsQuota] = None,
-        services_quota: Optional[ServicesQuota] = None,
-        routes_quota: Optional[RoutesQuota] = None,
-        domains_quota: Optional[DomainsQuota] = None,
-        assigned_organizations: Optional[ToManyRelationship] = None,
+        apps_quota: AppsQuota | None = None,
+        services_quota: ServicesQuota | None = None,
+        routes_quota: RoutesQuota | None = None,
+        domains_quota: DomainsQuota | None = None,
+        assigned_organizations: ToManyRelationship | None = None,
     ) -> Entity:
         data = self._asdict(name, apps_quota, services_quota, routes_quota, domains_quota, assigned_organizations)
         return super()._create(data)
@@ -56,10 +56,10 @@ class OrganizationQuotaManager(EntityManager):
         self,
         guid: str,
         name: str,
-        apps_quota: Optional[AppsQuota] = None,
-        services_quota: Optional[ServicesQuota] = None,
-        routes_quota: Optional[RoutesQuota] = None,
-        domains_quota: Optional[DomainsQuota] = None,
+        apps_quota: AppsQuota | None = None,
+        services_quota: ServicesQuota | None = None,
+        routes_quota: RoutesQuota | None = None,
+        domains_quota: DomainsQuota | None = None,
     ) -> Entity:
         data = self._asdict(name, apps_quota, services_quota, routes_quota, domains_quota)
         return super()._update(guid, data)
@@ -74,11 +74,11 @@ class OrganizationQuotaManager(EntityManager):
     def _asdict(
         self,
         name: str,
-        apps_quota: Optional[AppsQuota] = None,
-        services_quota: Optional[ServicesQuota] = None,
-        routes_quota: Optional[RoutesQuota] = None,
-        domains_quota: Optional[DomainsQuota] = None,
-        assigned_organizations: Optional[ToManyRelationship] = None,
+        apps_quota: AppsQuota | None = None,
+        services_quota: ServicesQuota | None = None,
+        routes_quota: RoutesQuota | None = None,
+        domains_quota: DomainsQuota | None = None,
+        assigned_organizations: ToManyRelationship | None = None,
     ):
         data = {"name": name}
         if apps_quota:

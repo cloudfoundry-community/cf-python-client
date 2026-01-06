@@ -1,5 +1,5 @@
 import ssl
-from typing import Callable, Optional, Tuple
+from typing import Callable, Tuple
 
 import websocket
 
@@ -10,9 +10,9 @@ class WebsocketFrameReader(object):
         url,
         access_token_provider: Callable[[], str],
         verify_ssl: bool = True,
-        proxy_host: Optional[str] = None,
-        proxy_port: Optional[int] = None,
-        proxy_auth: Optional[Tuple[str, str]] = None,
+        proxy_host: str | None = None,
+        proxy_port: int | None = None,
+        proxy_auth: Tuple[str, str] | None = None,
     ):
         if not verify_ssl:
             self._ws = websocket.WebSocket(sslopt=dict(cert_reqs=ssl.CERT_NONE))

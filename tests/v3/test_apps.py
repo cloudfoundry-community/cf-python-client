@@ -1,7 +1,7 @@
 import unittest
 import yaml
 from http import HTTPStatus
-from typing import Optional, List, Union
+from typing import List, Union
 
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.common_objects import JsonObject, Pagination
@@ -143,17 +143,17 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         manifest_response: str = self.client.v3.apps.get_manifest("app_id")
         self.assertIsInstance(manifest_response, str)
         manifest: dict = yaml.safe_load(manifest_response)
-        applications: Optional[list[dict]] = manifest.get("applications")
+        applications: list[dict] | None = manifest.get("applications")
         self.assertIsInstance(applications, list)
         self.assertEqual(len(applications), 1)
         application: dict = applications[0]
         self.assertEqual(application.get("name"), "my-app")
         self.assertEqual(application.get("stack"), "cflinuxfs4")
-        application_services: Optional[list[str]] = application.get("services")
+        application_services: list[str] | None = application.get("services")
         self.assertIsInstance(application_services, list)
         self.assertEqual(len(application_services), 1)
         self.assertEqual(application_services[0], "my-service")
-        application_routes: Optional[List[Union[dict, str]]] = application.get("routes")
+        application_routes: List[Union[dict, str]] | None = application.get("routes")
         self.assertIsInstance(application_routes, list)
         self.assertEqual(len(application_routes), 1)
         application_route: dict = application_routes[0]

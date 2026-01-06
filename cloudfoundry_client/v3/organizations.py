@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.v3.entities import EntityManager, Entity, ToOneRelationship
 
@@ -11,7 +11,7 @@ class OrganizationManager(EntityManager):
         super(OrganizationManager, self).__init__(target_endpoint, client, "/v3/organizations")
 
     def create(
-        self, name: str, suspended: bool, meta_labels: Optional[dict] = None, meta_annotations: Optional[dict] = None
+        self, name: str, suspended: bool, meta_labels: dict | None = None, meta_annotations: dict | None = None
     ) -> Entity:
         data = {"name": name, "suspended": suspended, "metadata": {"labels": meta_labels, "annotations": meta_annotations}}
         return super(OrganizationManager, self)._create(data)
@@ -20,9 +20,9 @@ class OrganizationManager(EntityManager):
         self,
         guid: str,
         name: str,
-        suspended: Optional[bool] = None,
-        meta_labels: Optional[dict] = None,
-        meta_annotations: Optional[dict] = None,
+        suspended: bool | None = None,
+        meta_labels: dict | None = None,
+        meta_annotations: dict | None = None,
     ) -> Entity:
         data = {"name": name}
         if suspended is not None:
@@ -36,7 +36,7 @@ class OrganizationManager(EntityManager):
             data["metadata"] = metadata
         return super(OrganizationManager, self)._update(guid, data)
 
-    def remove(self, guid: str, asynchronous: bool = True) -> Optional[str]:
+    def remove(self, guid: str, asynchronous: bool = True) -> str | None:
         return super(OrganizationManager, self)._remove(guid, asynchronous)
 
     def assign_default_isolation_segment(self, org_guid: str, iso_seg_guid: str) -> Entity:

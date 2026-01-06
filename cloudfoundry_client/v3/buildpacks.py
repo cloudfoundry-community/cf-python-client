@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.v3.entities import EntityManager, Entity
 
@@ -13,12 +13,12 @@ class BuildpackManager(EntityManager):
     def create(
         self,
         name: str,
-        position: Optional[int] = 0,
-        enabled: Optional[bool] = True,
-        locked: Optional[bool] = False,
-        stack: Optional[str] = None,
-        meta_labels: Optional[dict] = None,
-        meta_annotations: Optional[dict] = None,
+        position: int | None = 0,
+        enabled: bool | None = True,
+        locked: bool | None = False,
+        stack: str | None = None,
+        meta_labels: dict | None = None,
+        meta_annotations: dict | None = None,
     ) -> Entity:
         data = {
             "name": name,
@@ -30,19 +30,19 @@ class BuildpackManager(EntityManager):
         }
         return super(BuildpackManager, self)._create(data)
 
-    def remove(self, buildpack_guid: str, asynchronous: bool = True) -> Optional[str]:
+    def remove(self, buildpack_guid: str, asynchronous: bool = True) -> str | None:
         return super(BuildpackManager, self)._remove(buildpack_guid, asynchronous)
 
     def update(
         self,
         buildpack_guid: str,
         name: str,
-        position: Optional[int] = 0,
-        enabled: Optional[bool] = True,
-        locked: Optional[bool] = False,
-        stack: Optional[str] = None,
-        meta_labels: Optional[dict] = None,
-        meta_annotations: Optional[dict] = None,
+        position: int | None = 0,
+        enabled: bool | None = True,
+        locked: bool | None = False,
+        stack: str | None = None,
+        meta_labels: dict | None = None,
+        meta_annotations: dict | None = None,
     ) -> Entity:
         data = {
             "name": name,

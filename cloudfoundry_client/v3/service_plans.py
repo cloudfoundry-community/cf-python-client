@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import Dict, List, TYPE_CHECKING
 
 from cloudfoundry_client.v3.entities import EntityManager, Entity
 
@@ -13,8 +13,8 @@ class ServicePlanManager(EntityManager):
     def update(
         self,
         guid: str,
-        meta_labels: Optional[dict] = None,
-        meta_annotations: Optional[dict] = None,
+        meta_labels: dict | None = None,
+        meta_annotations: dict | None = None,
     ) -> Entity:
         payload = {"metadata": {}}
 
@@ -32,7 +32,7 @@ class ServicePlanManager(EntityManager):
 
     # Updates a service plan visibility. It behaves similar to the POST service plan visibility endpoint but
     # this endpoint will REPLACE the existing list of organizations when the service plan is organization visible.
-    def update_visibility(self, service_plan_guid: str, type: str, organizations: Optional[List[dict]] = None) -> Dict:
+    def update_visibility(self, service_plan_guid: str, type: str, organizations: List[dict] | None = None) -> Dict:
         payload = {"type": type}
         if organizations:
             payload["organizations"] = organizations

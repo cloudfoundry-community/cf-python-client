@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.v3.entities import EntityManager, ToOneRelationship, Entity
 
@@ -23,7 +23,7 @@ class SpaceManager(EntityManager):
             )
         )
 
-    def assign_isolation_segment(self, space_guid: str, isolation_segment_guid: Optional[str]) -> ToOneRelationship:
+    def assign_isolation_segment(self, space_guid: str, isolation_segment_guid: str | None) -> ToOneRelationship:
         return ToOneRelationship.from_json_object(
             super(SpaceManager, self)._patch(
                 "%s%s/%s/relationships/isolation_segment" % (self.target_endpoint, self.entity_uri, space_guid),

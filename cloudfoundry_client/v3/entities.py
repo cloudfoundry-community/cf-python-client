@@ -1,6 +1,6 @@
 import functools
 from json import JSONDecodeError
-from typing import Any, Optional, List, Tuple, Union, TypeVar, TYPE_CHECKING, Callable, Type
+from typing import Any, List, Tuple, Union, TypeVar, TYPE_CHECKING, Callable, Type
 from urllib.parse import quote, urlparse
 
 from requests import Response
@@ -63,7 +63,7 @@ class Entity(JsonObject):
         return default_method
 
     @staticmethod
-    def _manager_method(link_name: str, link_method: str) -> Optional[str]:
+    def _manager_method(link_name: str, link_method: str) -> str | None:
         if link_method == "get":
             if link_name.endswith("s"):
                 return "_attempt_to_paginate"
@@ -79,7 +79,7 @@ class Entity(JsonObject):
 
 
 class Relationship(JsonObject):
-    def __init__(self, guid: Optional[str]):
+    def __init__(self, guid: str | None):
         super(Relationship, self).__init__(guid=guid)
 
 
@@ -93,7 +93,7 @@ class ToOneRelationship(JsonObject):
         result.update(to_one_relationship)
         return result
 
-    def __init__(self, guid: Optional[str]):
+    def __init__(self, guid: str | None):
         super(ToOneRelationship, self).__init__(data=Relationship(guid))
         self.guid = guid
 
@@ -120,24 +120,24 @@ class EntityManager(object):
         self.client = client
         self.entity_type = entity_type
 
-    def _post(self, url: str, data: Optional[dict] = None, files: Any = None, entity_type: ENTITY_TYPE = None) -> Entity:
+    def _post(self, url: str, data: dict | None = None, files: Any = None, entity_type: ENTITY_TYPE = None) -> Entity:
         response = self.client.post(url, json=data, files=files)
         return self._read_response(response, entity_type)
 
-    def _get(self, url: str, entity_type: Optional[ENTITY_TYPE] = None, **kwargs) -> Entity:
+    def _get(self, url: str, entity_type: ENTITY_TYPE | None = None, **kwargs) -> Entity:
         url_requested = EntityManager._get_url_with_encoded_params(url, **kwargs)
         response = self.client.get(url_requested)
         return self._read_response(response, entity_type)
 
-    def _put(self, url: str, data: dict, entity_type: Optional[ENTITY_TYPE] = None) -> Entity:
+    def _put(self, url: str, data: dict, entity_type: ENTITY_TYPE | None = None) -> Entity:
         response = self.client.put(url, json=data)
         return self._read_response(response, entity_type)
 
-    def _patch(self, url: str, data: dict, entity_type: Optional[ENTITY_TYPE] = None) -> Entity:
+    def _patch(self, url: str, data: dict, entity_type: ENTITY_TYPE | None = None) -> Entity:
         response = self.client.patch(url, json=data)
         return self._read_response(response, entity_type)
 
-    def _delete(self, url: str) -> Optional[str]:
+    def _delete(self, url: str) -> str | None:
         response = self.client.delete(url)
         return self._location(response)
 
@@ -148,7 +148,7 @@ class EntityManager(object):
         except (AttributeError, KeyError):
             return None
 
-    def _remove(self, resource_id: str, asynchronous: bool = True) -> Optional[str]:
+    def _remove(self, resource_id: str, asynchronous: bool = True) -> str | None:
         url = "%s%s/%s" % (self.target_endpoint, self.entity_uri, resource_id)
         job_location = self._delete(url)
         if job_location is not None:
@@ -165,12 +165,12 @@ class EntityManager(object):
         job_guid = job_url.path.rsplit("/", 1)[-1]
         return job_guid
 
-    def _list(self, requested_path: str, entity_type: Optional[ENTITY_TYPE] = None, **kwargs) -> Pagination[Entity]:
+    def _list(self, requested_path: str, entity_type: ENTITY_TYPE | None = None, **kwargs) -> Pagination[Entity]:
         url_requested = EntityManager._get_url_with_encoded_params("%s%s" % (self.target_endpoint, requested_path), **kwargs)
         response_json = self._read_response(self.client.get(url_requested), JsonObject)
         return self._pagination(response_json, entity_type)
 
-    def _attempt_to_paginate(self, url_requested: str, entity_type: Optional[ENTITY_TYPE] = None) \
+    def _attempt_to_paginate(self, url_requested: str, entity_type: ENTITY_TYPE | None = None) \
             -> Union[Pagination[Entity], Entity]:
         response_json = self._read_response(self.client.get(url_requested), JsonObject)
         if "resources" in response_json:
@@ -178,7 +178,7 @@ class EntityManager(object):
         else:
             return response_json
 
-    def _pagination(self, page: JsonObject, entity_type: Optional[ENTITY_TYPE] = None) -> Pagination[Entity]:
+    def _pagination(self, page: JsonObject, entity_type: ENTITY_TYPE | None = None) -> Pagination[Entity]:
         def _entity(json_object: JsonObject) -> Entity:
             return self._entity(json_object, entity_type)
 
@@ -188,7 +188,7 @@ class EntityManager(object):
                           lambda p: p["resources"],
                           _entity)
 
-    def _next_page(self, current_page: JsonObject) -> Optional[JsonObject]:
+    def _next_page(self, current_page: JsonObject) -> JsonObject | None:
         pagination = current_page.get("pagination")
         if (
                 pagination is None
@@ -233,7 +233,7 @@ class EntityManager(object):
     def list(self, **kwargs) -> Pagination[Entity]:
         return self._list(self.entity_uri, **kwargs)
 
-    def get_first(self, **kwargs) -> Optional[Entity]:
+    def get_first(self, **kwargs) -> Entity | None:
         kwargs.setdefault("per_page", 1)
         for entity in self._list(self.entity_uri, **kwargs):
             return entity
@@ -246,7 +246,7 @@ class EntityManager(object):
             requested_path = "%s%s/%s/%s" % (self.target_endpoint, self.entity_uri, entity_id, "/".join(extra_paths))
         return self._get(requested_path, **kwargs)
 
-    def _read_response(self, response: Response, entity_type: Optional[ENTITY_TYPE]) -> Union[JsonObject, Entity]:
+    def _read_response(self, response: Response, entity_type: ENTITY_TYPE | None) -> Union[JsonObject, Entity]:
         try:
             result = response.json(object_pairs_hook=JsonObject)
         except JSONDecodeError:
@@ -288,7 +288,7 @@ class EntityManager(object):
     def _get_entity_type(entity_name: str) -> Type[ENTITY_TYPE]:
         return Entity
 
-    def _entity(self, result: JsonObject, entity_type: Optional[ENTITY_TYPE]) -> Union[JsonObject, Entity]:
+    def _entity(self, result: JsonObject, entity_type: ENTITY_TYPE | None) -> Union[JsonObject, Entity]:
         if "guid" in result or ("links" in result and "job" in result["links"]):
             return (entity_type or self.entity_type)(self.target_endpoint, self.client, **result)
         else:

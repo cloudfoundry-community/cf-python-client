@@ -1,6 +1,6 @@
 import logging
 from functools import reduce
-from typing import Callable, List, Tuple, Any, Optional, Generator, TYPE_CHECKING
+from typing import Callable, List, Tuple, Any, Generator, TYPE_CHECKING
 from urllib.parse import quote
 
 from requests import Response
@@ -40,7 +40,7 @@ class EntityManager(object):
     list_multi_parameters = ["order-by"]
 
     def __init__(
-        self, target_endpoint: str, client: "CloudFoundryClient", entity_uri: str, entity_builder: Optional[EntityBuilder] = None
+        self, target_endpoint: str, client: "CloudFoundryClient", entity_uri: str, entity_builder: EntityBuilder | None = None
     ):
         self.target_endpoint = target_endpoint
         self.entity_uri = entity_uri
@@ -50,7 +50,7 @@ class EntityManager(object):
         )
 
     def _list(
-        self, requested_path: str, entity_builder: Optional[EntityBuilder] = None, **kwargs
+        self, requested_path: str, entity_builder: EntityBuilder | None = None, **kwargs
     ) -> Generator[Entity, None, None]:
         url_requested = self._get_url_filtered("%s%s" % (self.target_endpoint, requested_path), **kwargs)
         response = self.client.get(url_requested)
@@ -68,7 +68,7 @@ class EntityManager(object):
         url = "%s%s/%s" % (self.target_endpoint, self.entity_uri, resource_id)
         self._delete(url, **kwargs)
 
-    def _post(self, url: str, data: Optional[dict] = None, **kwargs):
+    def _post(self, url: str, data: dict | None = None, **kwargs):
         response = self.client.post(url, json=data, **kwargs)
         _logger.debug("POST - %s - %s", url, response.text)
         return self._read_response(response)
@@ -83,13 +83,13 @@ class EntityManager(object):
     def list(self, **kwargs) -> Generator[Entity, None, None]:
         return self._list(self.entity_uri, **kwargs)
 
-    def get_first(self, **kwargs) -> Optional[Entity]:
+    def get_first(self, **kwargs) -> Entity | None:
         kwargs.setdefault("results-per-page", 1)
         for entity in self._list(self.entity_uri, **kwargs):
             return entity
         return None
 
-    def _read_response(self, response: Response, other_entity_builder: Optional[EntityBuilder] = None):
+    def _read_response(self, response: Response, other_entity_builder: EntityBuilder | None = None):
         entity_builder = self._get_entity_builder(other_entity_builder)
         result = response.json(object_pairs_hook=JsonObject)
         return entity_builder(list(result.items()))
@@ -98,7 +98,7 @@ class EntityManager(object):
     def _request(**mandatory_parameters) -> Request:
         return Request(**mandatory_parameters)
 
-    def _get_entity_builder(self, entity_builder: Optional[EntityBuilder]) -> EntityBuilder:
+    def _get_entity_builder(self, entity_builder: EntityBuilder | None) -> EntityBuilder:
         if entity_builder is None:
             return self.entity_builder
         else:

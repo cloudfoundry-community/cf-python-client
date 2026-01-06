@@ -3,7 +3,7 @@ import logging
 import os
 from http import HTTPStatus
 from time import sleep
-from typing import Optional, Dict, TYPE_CHECKING
+from typing import Dict, TYPE_CHECKING
 
 from cloudfoundry_client.doppler.client import EnvelopeStream
 from cloudfoundry_client.errors import InvalidStatusCode
@@ -107,9 +107,9 @@ class AppManager(EntityManager):
     def start(
         self,
         application_guid: str,
-        check_time: Optional[float] = 0.5,
-        timeout: Optional[float] = 300.0,
-        asynchronous: Optional[bool] = False,
+        check_time: float | None = 0.5,
+        timeout: float | None = 300.0,
+        asynchronous: bool | None = False,
     ) -> Application:
         result = super(AppManager, self)._update(application_guid, dict(state="STARTED"))
         if asynchronous:
@@ -122,9 +122,9 @@ class AppManager(EntityManager):
     def stop(
         self,
         application_guid: str,
-        check_time: Optional[float] = 0.5,
-        timeout: Optional[float] = 500.0,
-        asynchronous: Optional[bool] = False,
+        check_time: float | None = 0.5,
+        timeout: float | None = 500.0,
+        asynchronous: bool | None = False,
     ) -> Application:
         result = super(AppManager, self)._update(application_guid, dict(state="STOPPED"))
         if asynchronous:
@@ -152,7 +152,7 @@ class AppManager(EntityManager):
     def remove(self, application_guid: str):
         super(AppManager, self)._remove(application_guid)
 
-    def upload(self, application_guid: str, resources, application: str, asynchronous: Optional[bool] = False):
+    def upload(self, application_guid: str, resources, application: str, asynchronous: bool | None = False):
         application_size = os.path.getsize(application)
         with open(application, "rb") as binary_file:
             return self.client.put(

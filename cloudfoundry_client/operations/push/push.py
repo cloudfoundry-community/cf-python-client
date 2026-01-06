@@ -5,7 +5,7 @@ import re
 import shutil
 import tempfile
 import time
-from typing import Tuple, List, Dict, Optional
+from typing import Tuple, List, Dict
 
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.operations.push.cf_ignore import CfIgnore
@@ -96,7 +96,7 @@ class PushOperation(object):
         return request
 
     @staticmethod
-    def _merge_environment(app: Optional[Entity], app_manifest: dict) -> dict:
+    def _merge_environment(app: Entity | None, app_manifest: dict) -> dict:
         environment = dict()
         if app is not None and "environment_json" in app["entity"]:
             environment.update(app["entity"]["environment_json"])
