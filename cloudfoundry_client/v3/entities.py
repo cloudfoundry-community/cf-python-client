@@ -1,6 +1,7 @@
 import functools
+from collections.abc import Callable
 from json import JSONDecodeError
-from typing import Any, Tuple, TypeVar, TYPE_CHECKING, Callable, Type
+from typing import Any, TypeVar, TYPE_CHECKING, Type
 from urllib.parse import quote, urlparse
 
 from requests import Response
@@ -296,7 +297,7 @@ class EntityManager(object):
 
     @staticmethod
     def _get_url_with_encoded_params(url: str, **kwargs) -> str:
-        def _append_encoded_parameter(parameters: list[str], args: Tuple[str, Any]) -> list[str]:
+        def _append_encoded_parameter(parameters: list[str], args: tuple[str, Any]) -> list[str]:
             parameter_name, parameter_value = args[0], args[1]
             if isinstance(parameter_value, (list, tuple)):
                 parameters.append("%s=%s" % (parameter_name, quote(",".join(parameter_value))))

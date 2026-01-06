@@ -1,5 +1,5 @@
 from argparse import _SubParsersAction, Namespace
-from typing import Callable
+from collections.abc import Callable
 
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.main.command_domain import CommandDomain, Command

@@ -5,7 +5,6 @@ import re
 import shutil
 import tempfile
 import time
-from typing import Tuple
 
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.operations.push.cf_ignore import CfIgnore
@@ -32,7 +31,7 @@ class PushOperation(object):
             if "path" in app_manifest or "docker" in app_manifest:
                 self._push_application(organization, space, app_manifest, restart)
 
-    def _retrieve_space_and_organization(self, space_id: str) -> Tuple[Entity, Entity]:
+    def _retrieve_space_and_organization(self, space_id: str) -> tuple[Entity, Entity]:
         space = self.client.v2.spaces.get(space_id)
         organization = space.organization()
         return organization, space
@@ -211,7 +210,7 @@ class PushOperation(object):
         return existing_route
 
     @staticmethod
-    def _split_route(requested_route: dict[str, str]) -> Tuple[str, int, str]:
+    def _split_route(requested_route: dict[str, str]) -> tuple[str, int, str]:
         route_splitted = PushOperation.SPLIT_ROUTE_PATTERN.match(requested_route["route"])
         if route_splitted is None:
             raise AssertionError("Invalid route: %s" % requested_route["route"])
@@ -223,7 +222,7 @@ class PushOperation(object):
     @staticmethod
     def _resolve_domain(
         route: str, private_domains: dict[str, Entity], shared_domains: dict[str, Entity]
-    ) -> Tuple[str, str, Entity]:
+    ) -> tuple[str, str, Entity]:
         for domains in [private_domains, shared_domains]:
             if route in domains:
                 return "", route, domains[route]

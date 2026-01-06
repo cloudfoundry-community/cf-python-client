@@ -5,8 +5,9 @@ import logging
 import os
 import re
 import sys
+from collections.abc import Callable
 from http import HTTPStatus
-from typing import Tuple, Callable, Any
+from typing import Any
 
 from requests.exceptions import ConnectionError
 
@@ -152,7 +153,7 @@ def _get_v2_client_domain(client: CloudFoundryClient, domain: str) -> Any:
     return getattr(client.v2, "%ss" % domain)
 
 
-def generate_oauth_token_command() -> Tuple[Command, str]:
+def generate_oauth_token_command() -> tuple[Command, str]:
     entry = "oauth-token"
 
     def generate_parser(parser: argparse._SubParsersAction):

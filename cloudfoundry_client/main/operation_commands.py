@@ -1,12 +1,11 @@
 from argparse import _SubParsersAction, Namespace
-from typing import Tuple
 
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.main.command_domain import Command
 from cloudfoundry_client.operations.push.push import PushOperation
 
 
-def generate_push_command() -> Tuple[Command, str]:
+def generate_push_command() -> tuple[Command, str]:
     entry = "push_app"
 
     def generate_parser(parser: _SubParsersAction):
