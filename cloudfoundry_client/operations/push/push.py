@@ -5,7 +5,7 @@ import re
 import shutil
 import tempfile
 import time
-from typing import Tuple, Dict
+from typing import Tuple
 
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.operations.push.cf_ignore import CfIgnore
@@ -211,7 +211,7 @@ class PushOperation(object):
         return existing_route
 
     @staticmethod
-    def _split_route(requested_route: Dict[str, str]) -> Tuple[str, int, str]:
+    def _split_route(requested_route: dict[str, str]) -> Tuple[str, int, str]:
         route_splitted = PushOperation.SPLIT_ROUTE_PATTERN.match(requested_route["route"])
         if route_splitted is None:
             raise AssertionError("Invalid route: %s" % requested_route["route"])
@@ -222,7 +222,7 @@ class PushOperation(object):
 
     @staticmethod
     def _resolve_domain(
-        route: str, private_domains: Dict[str, Entity], shared_domains: Dict[str, Entity]
+        route: str, private_domains: dict[str, Entity], shared_domains: dict[str, Entity]
     ) -> Tuple[str, str, Entity]:
         for domains in [private_domains, shared_domains]:
             if route in domains:

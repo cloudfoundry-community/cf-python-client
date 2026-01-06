@@ -1,4 +1,4 @@
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.v2.entities import EntityManager, Entity
 
@@ -44,7 +44,7 @@ class ServiceInstanceManager(EntityManager):
         params = None if not accepts_incomplete else dict(accepts_incomplete="true")
         return super(ServiceInstanceManager, self)._update(instance_guid, request, params=params)
 
-    def list_permissions(self, instance_guid: str) -> Dict[str, bool]:
+    def list_permissions(self, instance_guid: str) -> dict[str, bool]:
         return super(ServiceInstanceManager, self)._get("%s/%s/permissions" % (self.entity_uri, instance_guid), dict)
 
     def remove(self, instance_guid: str, accepts_incomplete: bool | None = False, purge: bool | None = False):
