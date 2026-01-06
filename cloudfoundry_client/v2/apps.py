@@ -3,7 +3,7 @@ import logging
 import os
 from http import HTTPStatus
 from time import sleep
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.doppler.client import EnvelopeStream
 from cloudfoundry_client.errors import InvalidStatusCode
@@ -17,7 +17,7 @@ _logger = logging.getLogger(__name__)
 
 
 class Application(Entity):
-    def instances(self) -> Dict[str, JsonObject]:
+    def instances(self) -> dict[str, JsonObject]:
         return self.client.v2.apps.get_instances(self["metadata"]["guid"])
 
     def start(self) -> "Application":
@@ -29,10 +29,10 @@ class Application(Entity):
     def restart_instance(self, instance_id: int):
         return self.client.v2.apps.restart_instance(self["metadata"]["guid"], instance_id)
 
-    def stats(self) -> Dict[str, JsonObject]:
+    def stats(self) -> dict[str, JsonObject]:
         return self.client.v2.apps.get_stats(self["metadata"]["guid"])
 
-    def env(self) -> Dict[str, JsonObject]:
+    def env(self) -> dict[str, JsonObject]:
         return self.client.v2.apps.get_env(self["metadata"]["guid"])
 
     def summary(self) -> JsonObject:
@@ -80,13 +80,13 @@ class AppManager(EntityManager):
             target_endpoint, client, "/v2/apps", lambda pairs: Application(target_endpoint, client, pairs)
         )
 
-    def get_stats(self, application_guid: str) -> Dict[str, JsonObject]:
+    def get_stats(self, application_guid: str) -> dict[str, JsonObject]:
         return self._get("%s/%s/stats" % (self.entity_uri, application_guid), JsonObject)
 
-    def get_instances(self, application_guid: str) -> Dict[str, JsonObject]:
+    def get_instances(self, application_guid: str) -> dict[str, JsonObject]:
         return self._get("%s/%s/instances" % (self.entity_uri, application_guid), JsonObject)
 
-    def get_env(self, application_guid: str) -> Dict[str, JsonObject]:
+    def get_env(self, application_guid: str) -> dict[str, JsonObject]:
         return self._get("%s/%s/env" % (self.entity_uri, application_guid), JsonObject)
 
     def get_summary(self, application_guid: str) -> JsonObject:
@@ -195,7 +195,7 @@ class AppManager(EntityManager):
                 sleep(check_time)
                 sum_waiting += check_time
 
-    def _safe_get_instances(self, application_guid: str) -> Dict[str, JsonObject]:
+    def _safe_get_instances(self, application_guid: str) -> dict[str, JsonObject]:
         try:
             return self.get_instances(application_guid)
         except InvalidStatusCode as ex:
