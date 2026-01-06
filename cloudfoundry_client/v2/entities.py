@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from functools import partial, reduce
-from typing import Callable, Tuple, Any, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 from urllib.parse import quote
 from requests import Response
 
@@ -39,7 +40,7 @@ class Entity(JsonObject):
             raise InvalidEntity(**self)
 
 
-EntityBuilder = Callable[[list[Tuple[str, Any]]], Entity]
+EntityBuilder = Callable[[list[tuple[str, Any]]], Entity]
 
 
 class EntityManager(object):
@@ -141,7 +142,7 @@ class EntityManager(object):
             return entity_builder
 
     def _get_url_filtered(self, url: str, **kwargs) -> str:
-        def _append_encoded_parameter(parameters: list[str], args: Tuple[str, Any]) -> list[str]:
+        def _append_encoded_parameter(parameters: list[str], args: tuple[str, Any]) -> list[str]:
             parameter_name, parameter_value = args[0], args[1]
             if parameter_name in self.list_query_parameters:
                 parameters.append("%s=%s" % (parameter_name, str(parameter_value)))

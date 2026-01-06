@@ -4,8 +4,9 @@ import os
 import re
 from argparse import _SubParsersAction, Namespace
 from collections import OrderedDict
+from collections.abc import Callable
 from http import HTTPStatus
-from typing import Callable, Any
+from typing import Any
 
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.errors import InvalidStatusCode

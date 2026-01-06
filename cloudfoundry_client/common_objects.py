@@ -1,5 +1,6 @@
 import json
-from typing import Callable, TypeVar, Generic
+from collections.abc import Callable
+from typing import TypeVar, Generic
 
 
 class Request(dict):
