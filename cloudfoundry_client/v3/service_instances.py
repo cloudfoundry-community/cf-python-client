@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List
 
 from cloudfoundry_client.common_objects import JsonObject
 from cloudfoundry_client.v3.entities import Entity, EntityManager, ToOneRelationship
@@ -16,10 +16,10 @@ class ServiceInstanceManager(EntityManager):
         name: str,
         space_guid: str,
         service_plan_guid: str,
-        meta_labels: Optional[dict] = None,
-        meta_annotations: Optional[dict] = None,
-        parameters: Optional[dict] = None,
-        tags: Optional[List[str]] = None,
+        meta_labels: dict | None = None,
+        meta_annotations: dict | None = None,
+        parameters: dict | None = None,
+        tags: List[str] | None = None,
     ) -> Entity:
         data = {
             "name": name,
@@ -42,13 +42,13 @@ class ServiceInstanceManager(EntityManager):
     def update(
             self,
             instance_guid: str,
-            name: Optional[str] = None,
-            parameters: Optional[dict] = None,
-            service_plan: Optional[str] = None,
-            maintenance_info: Optional[str] = None,
-            meta_labels: Optional[dict] = None,
-            meta_annotations: Optional[dict] = None,
-            tags: Optional[List[str]] = None
+            name: str | None = None,
+            parameters: dict | None = None,
+            service_plan: str | None = None,
+            maintenance_info: str | None = None,
+            meta_labels: dict | None = None,
+            meta_annotations: dict | None = None,
+            tags: List[str] | None = None
     ) -> Entity:
         data = {}
         if name:

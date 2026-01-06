@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.v2.entities import EntityManager, Entity
 
@@ -11,7 +11,7 @@ class ServiceBrokerManager(EntityManager):
         super(ServiceBrokerManager, self).__init__(target_endpoint, client, "/v2/service_brokers")
 
     def create(
-        self, broker_url: str, broker_name: str, auth_username: str, auth_password: str, space_guid: Optional[str] = None
+        self, broker_url: str, broker_name: str, auth_username: str, auth_password: str, space_guid: str | None = None
     ) -> Entity:
         request = self._request(broker_url=broker_url, name=broker_name, auth_username=auth_username, auth_password=auth_password)
         request["space_guid"] = space_guid
@@ -20,10 +20,10 @@ class ServiceBrokerManager(EntityManager):
     def update(
         self,
         broker_guid: str,
-        broker_url: Optional[str] = None,
-        broker_name: Optional[str] = None,
-        auth_username: Optional[str] = None,
-        auth_password: Optional[str] = None,
+        broker_url: str | None = None,
+        broker_name: str | None = None,
+        auth_username: str | None = None,
+        auth_password: str | None = None,
     ) -> Entity:
         request = self._request()
         request["broker_url"] = broker_url

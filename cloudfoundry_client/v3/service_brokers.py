@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.v3.entities import EntityManager, Entity, ToOneRelationship
 
@@ -16,9 +16,9 @@ class ServiceBrokerManager(EntityManager):
         url: str,
         auth_username: str,
         auth_password: str,
-        space_guid: Optional[str] = None,
-        meta_labels: Optional[dict] = None,
-        meta_annotations: Optional[dict] = None,
+        space_guid: str | None = None,
+        meta_labels: dict | None = None,
+        meta_annotations: dict | None = None,
     ) -> Entity:
         credentials = {"type": "basic", "credentials": {"username": auth_username, "password": auth_password}}
         payload = dict(name=name, url=url, authentication=credentials)
@@ -36,12 +36,12 @@ class ServiceBrokerManager(EntityManager):
     def update(
         self,
         guid: str,
-        name: Optional[str] = None,
-        url: Optional[str] = None,
-        auth_username: Optional[str] = None,
-        auth_password: Optional[str] = None,
-        meta_labels: Optional[dict] = None,
-        meta_annotations: Optional[dict] = None,
+        name: str | None = None,
+        url: str | None = None,
+        auth_username: str | None = None,
+        auth_password: str | None = None,
+        meta_labels: dict | None = None,
+        meta_annotations: dict | None = None,
     ) -> Entity:
         payload = dict()
         if name:
@@ -59,5 +59,5 @@ class ServiceBrokerManager(EntityManager):
             payload["metadata"] = metadata
         return super(ServiceBrokerManager, self)._update(guid, payload)
 
-    def remove(self, guid: str, asynchronous: bool = True) -> Optional[str]:
+    def remove(self, guid: str, asynchronous: bool = True) -> str | None:
         return super(ServiceBrokerManager, self)._remove(guid, asynchronous)

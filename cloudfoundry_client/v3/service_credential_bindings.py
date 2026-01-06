@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Union
 
 from cloudfoundry_client.v3.entities import EntityManager, Entity, ToOneRelationship
 
@@ -16,10 +16,10 @@ class ServiceCredentialBindingManager(EntityManager):
             name: str,
             service_credential_binding_type: str,
             service_instance_guid: str,
-            application_guid: Optional[str],
-            parameters: Optional[dict],
-            meta_labels: Optional[dict],
-            meta_annotations: Optional[dict],
+            application_guid: str | None,
+            parameters: dict | None,
+            meta_labels: dict | None,
+            meta_annotations: dict | None,
             asynchronous: bool = True,
     ) -> Union[str, Entity, None]:
         data = {

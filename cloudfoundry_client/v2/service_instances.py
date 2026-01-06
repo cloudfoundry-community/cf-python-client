@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict, TYPE_CHECKING
+from typing import List, Dict, TYPE_CHECKING
 
 from cloudfoundry_client.v2.entities import EntityManager, Entity
 
@@ -17,9 +17,9 @@ class ServiceInstanceManager(EntityManager):
         space_guid: str,
         instance_name: str,
         plan_guid: str,
-        parameters: Optional[dict] = None,
+        parameters: dict | None = None,
         tags: List[str] = None,
-        accepts_incomplete: Optional[bool] = False,
+        accepts_incomplete: bool | None = False,
     ) -> Entity:
         request = self._request(name=instance_name, space_guid=space_guid, service_plan_guid=plan_guid)
         request["parameters"] = parameters
@@ -30,11 +30,11 @@ class ServiceInstanceManager(EntityManager):
     def update(
         self,
         instance_guid: str,
-        instance_name: Optional[str] = None,
-        plan_guid: Optional[str] = None,
-        parameters: Optional[dict] = None,
+        instance_name: str | None = None,
+        plan_guid: str | None = None,
+        parameters: dict | None = None,
         tags: List[str] = None,
-        accepts_incomplete: Optional[bool] = False,
+        accepts_incomplete: bool | None = False,
     ) -> Entity:
         request = self._request()
         request["name"] = instance_name
@@ -47,7 +47,7 @@ class ServiceInstanceManager(EntityManager):
     def list_permissions(self, instance_guid: str) -> Dict[str, bool]:
         return super(ServiceInstanceManager, self)._get("%s/%s/permissions" % (self.entity_uri, instance_guid), dict)
 
-    def remove(self, instance_guid: str, accepts_incomplete: Optional[bool] = False, purge: Optional[bool] = False):
+    def remove(self, instance_guid: str, accepts_incomplete: bool | None = False, purge: bool | None = False):
         parameters = {}
         if accepts_incomplete:
             parameters["accepts_incomplete"] = "true"

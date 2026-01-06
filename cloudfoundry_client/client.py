@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 import json
 from http import HTTPStatus
-from typing import Optional
 
 import requests
 from oauth2_client.credentials_manager import CredentialManager, ServiceInformation
@@ -56,8 +55,8 @@ class Info:
         api_v3_url: str,
         authorization_endpoint: str,
         api_endpoint: str,
-        doppler_endpoint: Optional[str],
-        log_stream_endpoint: Optional[str],
+        doppler_endpoint: str | None,
+        log_stream_endpoint: str | None,
     ):
         self._api_v2_url = api_v2_url
         self._api_v3_url = api_v3_url
@@ -67,11 +66,11 @@ class Info:
         self.log_stream_endpoint = log_stream_endpoint
 
     @property
-    def api_v2_url(self) -> Optional[str]:
+    def api_v2_url(self) -> str | None:
         return self._api_v2_url
 
     @property
-    def api_v3_url(self) -> Optional[str]:
+    def api_v3_url(self) -> str | None:
         return self._api_v3_url
 
 
@@ -226,7 +225,7 @@ class CloudFoundryClient(CredentialManager):
         else:
             return self._rlpgateway
 
-    def _get_info(self, target_endpoint: str, proxy: Optional[dict] = None, verify: bool = True) -> Info:
+    def _get_info(self, target_endpoint: str, proxy: dict | None = None, verify: bool = True) -> Info:
         root_response = CloudFoundryClient._check_response(
             requests.get("%s/" % target_endpoint, proxies=proxy if proxy is not None else dict(http="", https=""), verify=verify)
         )
@@ -247,7 +246,7 @@ class CloudFoundryClient(CredentialManager):
         )
 
     @staticmethod
-    def build_from_cf_config(config_path: Optional[str] = None, **kwargs) -> 'CloudFoundryClient':
+    def build_from_cf_config(config_path: str | None = None, **kwargs) -> 'CloudFoundryClient':
         config = Path(config_path) if config_path else Path.home() / '.cf/config.json'
         try:
             with open(config) as f:
@@ -318,7 +317,7 @@ class CloudFoundryClient(CredentialManager):
             client_secret=self.service_information.client_secret,
         )
 
-    def get(self, url: str, params: Optional[dict] = None, **kwargs) -> Response:
+    def get(self, url: str, params: dict | None = None, **kwargs) -> Response:
         response = super(CloudFoundryClient, self).get(url, params, **kwargs)
         CloudFoundryClient._log_request("GET", url, response)
         return CloudFoundryClient._check_response(response)

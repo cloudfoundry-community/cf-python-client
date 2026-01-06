@@ -1,6 +1,6 @@
 from dataclasses import dataclass, asdict
 from enum import Enum, auto
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, List
 
 from cloudfoundry_client.v3.entities import EntityManager, ToManyRelationship, Entity, ToOneRelationship
 
@@ -22,17 +22,17 @@ class RuleProtocol(Enum):
 class Rule:
     protocol: RuleProtocol
     destination: str
-    ports: Optional[str] = None
-    type: Optional[int] = None
-    code: Optional[int] = None
-    description: Optional[str] = None
-    log: Optional[bool] = None
+    ports: str | None = None
+    type: int | None = None
+    code: int | None = None
+    description: str | None = None
+    log: bool | None = None
 
 
 @dataclass
 class GloballyEnabled:
-    running: Optional[bool] = None
-    staging: Optional[bool] = None
+    running: bool | None = None
+    staging: bool | None = None
 
 
 class SecurityGroupManager(EntityManager):
@@ -41,24 +41,24 @@ class SecurityGroupManager(EntityManager):
 
     def create(self,
                name: str,
-               rules: Optional[List[Rule]] = None,
-               globally_enabled: Optional[GloballyEnabled] = None,
-               staging_spaces: Optional[ToManyRelationship] = None,
-               running_spaces: Optional[ToManyRelationship] = None) -> Entity:
+               rules: List[Rule] | None = None,
+               globally_enabled: GloballyEnabled | None = None,
+               staging_spaces: ToManyRelationship | None = None,
+               running_spaces: ToManyRelationship | None = None) -> Entity:
         payload = self._generate_payload(name, rules, globally_enabled, staging_spaces, running_spaces)
         return super()._create(payload)
 
     def update(self,
                security_group_id: str,
-               name: Optional[str] = None,
-               rules: Optional[List[Rule]] = None,
-               globally_enabled: Optional[GloballyEnabled] = None,
-               staging_spaces: Optional[ToManyRelationship] = None,
-               running_spaces: Optional[ToManyRelationship] = None) -> Entity:
+               name: str | None = None,
+               rules: List[Rule] | None = None,
+               globally_enabled: GloballyEnabled | None = None,
+               staging_spaces: ToManyRelationship | None = None,
+               running_spaces: ToManyRelationship | None = None) -> Entity:
         payload = self._generate_payload(name, rules, globally_enabled, staging_spaces, running_spaces)
         return super()._update(security_group_id, payload)
 
-    def remove(self, security_group_id: str, asynchronous: bool = True) -> Optional[str]:
+    def remove(self, security_group_id: str, asynchronous: bool = True) -> str | None:
         return super()._remove(security_group_id, asynchronous)
 
     def bind_running_security_group_to_spaces(self, security_group_id: str, space_guids: ToManyRelationship) \
@@ -90,11 +90,11 @@ class SecurityGroupManager(EntityManager):
         super()._delete(url)
 
     @staticmethod
-    def _generate_payload(name: Optional[str],
-                          rules: Optional[List[Rule]],
-                          globally_enabled: Optional[GloballyEnabled],
-                          staging_spaces: Optional[ToManyRelationship],
-                          running_spaces: Optional[ToManyRelationship]):
+    def _generate_payload(name: str | None,
+                          rules: List[Rule] | None,
+                          globally_enabled: GloballyEnabled | None,
+                          staging_spaces: ToManyRelationship | None,
+                          running_spaces: ToManyRelationship | None):
         payload = {}
         if name:
             payload["name"] = name

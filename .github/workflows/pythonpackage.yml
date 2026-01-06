@@ -34,8 +34,8 @@ jobs:
     - name: Install project
       run: poetry install --no-interaction
 
-    - name: Launch tests
-      run: poetry run pytest
-
-    - name: Launch Linting
+    - name: Linting
       run: poetry run flake8 --show-source --statistics
+
+    - name: Tests
+      run: poetry run pytest

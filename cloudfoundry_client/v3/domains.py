@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.common_objects import Pagination
 from cloudfoundry_client.v3.entities import EntityManager, ToOneRelationship, ToManyRelationship, Entity
@@ -26,11 +26,11 @@ class DomainManager(EntityManager):
     def create(
         self,
         name: str,
-        internal: Optional[bool] = False,
-        organization: Optional[ToOneRelationship] = None,
-        shared_organizations: Optional[ToManyRelationship] = None,
-        meta_labels: Optional[dict] = None,
-        meta_annotations: Optional[dict] = None,
+        internal: bool | None = False,
+        organization: ToOneRelationship | None = None,
+        shared_organizations: ToManyRelationship | None = None,
+        meta_labels: dict | None = None,
+        meta_annotations: dict | None = None,
     ) -> Domain:
         data = {
             "name": name,
@@ -47,11 +47,11 @@ class DomainManager(EntityManager):
         uri = "/v3/organizations/{guid}/domains".format(guid=org_guid)
         return self._list(uri, **kwargs)
 
-    def update(self, domain_guid: str, meta_labels: Optional[dict] = None, meta_annotations: Optional[dict] = None) -> Domain:
+    def update(self, domain_guid: str, meta_labels: dict | None = None, meta_annotations: dict | None = None) -> Domain:
         data = {"metadata": {"labels": meta_labels, "annotations": meta_annotations}}
         return super(DomainManager, self)._update(domain_guid, data)
 
-    def remove(self, domain_guid: str, asynchronous: bool = True) -> Optional[str]:
+    def remove(self, domain_guid: str, asynchronous: bool = True) -> str | None:
         return super(DomainManager, self)._remove(domain_guid, asynchronous)
 
     def __create_shared_domain_url(self, domain_guid: str) -> str:

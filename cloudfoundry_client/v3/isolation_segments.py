@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.v3.entities import EntityManager, Entity, ToManyRelationship
 
@@ -10,12 +10,12 @@ class IsolationSegmentManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super(IsolationSegmentManager, self).__init__(target_endpoint, client, "/v3/isolation_segments")
 
-    def create(self, name: str, meta_labels: Optional[dict] = None, meta_annotations: Optional[dict] = None) -> Entity:
+    def create(self, name: str, meta_labels: dict | None = None, meta_annotations: dict | None = None) -> Entity:
         data = {"name": name, "metadata": {"labels": meta_labels, "annotations": meta_annotations}}
         return super(IsolationSegmentManager, self)._create(data)
 
     def update(
-        self, isolation_segment_guid: str, name: str, meta_labels: Optional[dict] = None, meta_annotations: Optional[dict] = None
+        self, isolation_segment_guid: str, name: str, meta_labels: dict | None = None, meta_annotations: dict | None = None
     ) -> Entity:
         data = {"name": name, "metadata": {"labels": meta_labels, "annotations": meta_annotations}}
         return super(IsolationSegmentManager, self)._update(isolation_segment_guid, data)

@@ -1,7 +1,6 @@
 import json
 import os
 from http import HTTPStatus
-from typing import Optional
 from unittest.mock import MagicMock, patch
 
 from oauth2_client.credentials_manager import CredentialManager
@@ -83,7 +82,7 @@ class AbstractTestCase(object):
         return os.path.join(os.path.dirname(__file__), "fixtures", *paths)
 
     @staticmethod
-    def mock_response(uri: str, status_code: HTTPStatus, headers: Optional[dict], *path_parts: str):
+    def mock_response(uri: str, status_code: HTTPStatus, headers: dict | None, *path_parts: str):
         if len(path_parts) > 0:
             file_name = path_parts[len(path_parts) - 1]
             extension_idx = file_name.rfind(".")
