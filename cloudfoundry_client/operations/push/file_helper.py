@@ -2,7 +2,7 @@ import hashlib
 import os
 import stat
 import zipfile
-from typing import Callable, Generator, Tuple, List
+from typing import Callable, Generator, Tuple
 
 
 class FileHelper(object):
@@ -32,7 +32,7 @@ class FileHelper(object):
                     zip_ref.extract(entry, tmp_dir)
 
     @staticmethod
-    def walk(path: str) -> Generator[Tuple[str, List[str]], None, None]:
+    def walk(path: str) -> Generator[Tuple[str, list[str]], None, None]:
         for dir_path, _, files in os.walk(path, topdown=True):
             yield dir_path[len(path) :].lstrip("/"), files
 
