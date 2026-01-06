@@ -30,13 +30,7 @@ class ServiceInstanceManager(EntityManager):
             data["parameters"] = parameters
         if tags:
             data["tags"] = tags
-        if meta_labels or meta_annotations:
-            metadata = dict()
-            if meta_labels:
-                metadata["labels"] = meta_labels
-            if meta_annotations:
-                metadata["annotations"] = meta_annotations
-            data["metadata"] = metadata
+        self._metadata(data, meta_labels, meta_annotations)
         return super(ServiceInstanceManager, self)._create(data)
 
     def update(
@@ -62,17 +56,11 @@ class ServiceInstanceManager(EntityManager):
             data["maintenance_info"] = {"version": maintenance_info}
         if tags:
             data["tags"] = tags
-        if meta_labels or meta_annotations:
-            metadata = dict()
-            if meta_labels:
-                metadata["labels"] = meta_labels
-            if meta_annotations:
-                metadata["annotations"] = meta_annotations
-            data["metadata"] = metadata
-        return super(ServiceInstanceManager, self)._update(instance_guid, data)
+        super()._metadata(data, meta_labels, meta_annotations)
+        return super()._update(instance_guid, data)
 
     def remove(self, guid: str, asynchronous: bool = True):
-        super(ServiceInstanceManager, self)._remove(guid, asynchronous)
+        super()._remove(guid, asynchronous)
 
     def get_permissions(self, instance_guid: str) -> JsonObject:
         return super(ServiceInstanceManager, self)._get(

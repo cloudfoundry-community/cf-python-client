@@ -26,8 +26,8 @@ class BuildpackManager(EntityManager):
             "enabled": enabled,
             "locked": locked,
             "stack": stack,
-            "metadata": {"labels": meta_labels, "annotations": meta_annotations},
         }
+        self._metadata(data, meta_labels, meta_annotations)
         return super(BuildpackManager, self)._create(data)
 
     def remove(self, buildpack_guid: str, asynchronous: bool = True) -> str | None:
@@ -50,8 +50,8 @@ class BuildpackManager(EntityManager):
             "enabled": enabled,
             "locked": locked,
             "stack": stack,
-            "metadata": {"labels": meta_labels, "annotations": meta_annotations},
         }
+        self._metadata(data, meta_labels, meta_annotations)
         return super(BuildpackManager, self)._update(buildpack_guid, data)
 
     def upload(self, buildpack_guid: str, buildpack_zip: str, asynchronous: bool = False) -> Entity:

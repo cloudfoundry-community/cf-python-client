@@ -51,7 +51,7 @@ class TestIsolationSegments(unittest.TestCase, AbstractTestCase):
         result = self.client.v3.isolation_segments.update("isolation_segment_id", "new-name", meta_labels=dict(key="value"))
         self.client.patch.assert_called_with(
             self.client.patch.return_value.url,
-            json={"name": "new-name", "metadata": {"labels": {"key": "value"}, "annotations": None}},
+            json={"name": "new-name", "metadata": {"labels": {"key": "value"}}},
         )
         self.assertIsNotNone(result)
         self.assertIsInstance(result, Entity)

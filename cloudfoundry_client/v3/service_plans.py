@@ -17,11 +17,7 @@ class ServicePlanManager(EntityManager):
         meta_annotations: dict | None = None,
     ) -> Entity:
         payload = {"metadata": {}}
-
-        if meta_labels:
-            payload["metadata"]["labels"] = meta_labels
-        if meta_annotations:
-            payload["metadata"]["annotations"] = meta_annotations
+        self._metadata(payload, meta_labels, meta_annotations)
         return super(ServicePlanManager, self)._update(guid, payload)
 
     def remove(self, guid: str):

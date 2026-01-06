@@ -78,7 +78,7 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
         self.client.post.assert_called_with(
             self.client.post.return_value.url,
             files=None,
-            json={"name": "my-organization", "suspended": False, "metadata": {"labels": None, "annotations": None}},
+            json={"name": "my-organization", "suspended": False},
         )
         self.assertIsNotNone(result)
 

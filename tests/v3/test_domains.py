@@ -76,7 +76,6 @@ class TestDomains(unittest.TestCase, AbstractTestCase):
                         ]
                     },
                 },
-                "metadata": {"labels": None, "annotations": None},
             },
         )
         self.assertIsNotNone(result)
