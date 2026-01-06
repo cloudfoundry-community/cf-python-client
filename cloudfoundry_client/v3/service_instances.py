@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.common_objects import JsonObject
 from cloudfoundry_client.v3.entities import Entity, EntityManager, ToOneRelationship
@@ -19,7 +19,7 @@ class ServiceInstanceManager(EntityManager):
         meta_labels: dict | None = None,
         meta_annotations: dict | None = None,
         parameters: dict | None = None,
-        tags: List[str] | None = None,
+        tags: list[str] | None = None,
     ) -> Entity:
         data = {
             "name": name,
@@ -48,7 +48,7 @@ class ServiceInstanceManager(EntityManager):
             maintenance_info: str | None = None,
             meta_labels: dict | None = None,
             meta_annotations: dict | None = None,
-            tags: List[str] | None = None
+            tags: list[str] | None = None
     ) -> Entity:
         data = {}
         if name:

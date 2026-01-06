@@ -1,4 +1,4 @@
-from typing import List, Dict, TYPE_CHECKING
+from typing import Dict, TYPE_CHECKING
 
 from cloudfoundry_client.v2.entities import EntityManager, Entity
 
@@ -18,7 +18,7 @@ class ServiceInstanceManager(EntityManager):
         instance_name: str,
         plan_guid: str,
         parameters: dict | None = None,
-        tags: List[str] = None,
+        tags: list[str] = None,
         accepts_incomplete: bool | None = False,
     ) -> Entity:
         request = self._request(name=instance_name, space_guid=space_guid, service_plan_guid=plan_guid)
@@ -33,7 +33,7 @@ class ServiceInstanceManager(EntityManager):
         instance_name: str | None = None,
         plan_guid: str | None = None,
         parameters: dict | None = None,
-        tags: List[str] = None,
+        tags: list[str] = None,
         accepts_incomplete: bool | None = False,
     ) -> Entity:
         request = self._request()

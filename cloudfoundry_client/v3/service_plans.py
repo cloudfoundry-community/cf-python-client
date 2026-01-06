@@ -1,4 +1,4 @@
-from typing import Dict, List, TYPE_CHECKING
+from typing import Dict, TYPE_CHECKING
 
 from cloudfoundry_client.v3.entities import EntityManager, Entity
 
@@ -32,7 +32,7 @@ class ServicePlanManager(EntityManager):
 
     # Updates a service plan visibility. It behaves similar to the POST service plan visibility endpoint but
     # this endpoint will REPLACE the existing list of organizations when the service plan is organization visible.
-    def update_visibility(self, service_plan_guid: str, type: str, organizations: List[dict] | None = None) -> Dict:
+    def update_visibility(self, service_plan_guid: str, type: str, organizations: list[dict] | None = None) -> Dict:
         payload = {"type": type}
         if organizations:
             payload["organizations"] = organizations
@@ -42,7 +42,7 @@ class ServicePlanManager(EntityManager):
 
     # Applies a service plan visibility. It behaves similar to the PATCH service plan visibility endpoint but
     # this endpoint will APPEND to the existing list of organizations when the service plan is organization visible.
-    def apply_visibility_to_extra_orgs(self, service_plan_guid: str, organizations: List[dict]) -> Dict:
+    def apply_visibility_to_extra_orgs(self, service_plan_guid: str, organizations: list[dict]) -> Dict:
         payload = {"type": "organization", "organizations": organizations}
         return super(ServicePlanManager, self)._post(
             url=f"{self.target_endpoint}{self.entity_uri}/{service_plan_guid}/visibility", data=payload, files=None

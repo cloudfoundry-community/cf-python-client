@@ -1,7 +1,6 @@
 import unittest
 import yaml
 from http import HTTPStatus
-from typing import List
 
 from abstract_test_case import AbstractTestCase
 from cloudfoundry_client.common_objects import JsonObject, Pagination
@@ -153,7 +152,7 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(application_services, list)
         self.assertEqual(len(application_services), 1)
         self.assertEqual(application_services[0], "my-service")
-        application_routes: List[dict | str] | None = application.get("routes")
+        application_routes: list[dict | str] | None = application.get("routes")
         self.assertIsInstance(application_routes, list)
         self.assertEqual(len(application_routes), 1)
         application_route: dict = application_routes[0]

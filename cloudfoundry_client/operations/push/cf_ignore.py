@@ -1,7 +1,6 @@
 import fnmatch
 import logging
 import os
-from typing import List
 
 _logger = logging.getLogger(__name__)
 
@@ -26,7 +25,7 @@ class CfIgnore(object):
         return any([is_relative_file_ignored(ignore_item) for ignore_item in self.ignore_items])
 
     @staticmethod
-    def _pattern(pattern: str) -> List[str]:
+    def _pattern(pattern: str) -> list[str]:
         if pattern.find("/") < 0:
             return [pattern, os.path.join("**", pattern)]
         elif pattern.endswith("/"):

@@ -1,4 +1,4 @@
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.common_objects import JsonObject
 
@@ -11,6 +11,6 @@ class ResourceManager(object):
         self.target_endpoint = target_endpoint
         self.client = client
 
-    def match(self, items: List[dict]) -> List[JsonObject]:
+    def match(self, items: list[dict]) -> list[JsonObject]:
         response = self.client.put("%s/v2/resource_match" % self.client.info.api_endpoint, json=items)
         return response.json(object_pairs_hook=JsonObject)

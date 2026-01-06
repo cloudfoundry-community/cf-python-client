@@ -1,6 +1,6 @@
 from dataclasses import dataclass, asdict
 from enum import Enum, auto
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from cloudfoundry_client.v3.entities import EntityManager, ToManyRelationship, Entity, ToOneRelationship
 
@@ -41,7 +41,7 @@ class SecurityGroupManager(EntityManager):
 
     def create(self,
                name: str,
-               rules: List[Rule] | None = None,
+               rules: list[Rule] | None = None,
                globally_enabled: GloballyEnabled | None = None,
                staging_spaces: ToManyRelationship | None = None,
                running_spaces: ToManyRelationship | None = None) -> Entity:
@@ -51,7 +51,7 @@ class SecurityGroupManager(EntityManager):
     def update(self,
                security_group_id: str,
                name: str | None = None,
-               rules: List[Rule] | None = None,
+               rules: list[Rule] | None = None,
                globally_enabled: GloballyEnabled | None = None,
                staging_spaces: ToManyRelationship | None = None,
                running_spaces: ToManyRelationship | None = None) -> Entity:
@@ -91,7 +91,7 @@ class SecurityGroupManager(EntityManager):
 
     @staticmethod
     def _generate_payload(name: str | None,
-                          rules: List[Rule] | None,
+                          rules: list[Rule] | None,
                           globally_enabled: GloballyEnabled | None,
                           staging_spaces: ToManyRelationship | None,
                           running_spaces: ToManyRelationship | None):

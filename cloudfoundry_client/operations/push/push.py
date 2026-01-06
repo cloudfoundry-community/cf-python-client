@@ -5,7 +5,7 @@ import re
 import shutil
 import tempfile
 import time
-from typing import Tuple, List, Dict
+from typing import Tuple, Dict
 
 from cloudfoundry_client.client import CloudFoundryClient
 from cloudfoundry_client.operations.push.cf_ignore import CfIgnore
@@ -105,7 +105,7 @@ class PushOperation(object):
         return environment
 
     def _route_application(
-        self, organization: Entity, space: Entity, app: Entity, no_route: bool, routes: List[str], random_route: bool
+        self, organization: Entity, space: Entity, app: Entity, no_route: bool, routes: list[str], random_route: bool
     ):
         existing_routes = [route for route in app.routes()]
         if no_route:
@@ -115,7 +115,7 @@ class PushOperation(object):
         else:
             self._build_new_requested_routes(organization, space, app, existing_routes, routes)
 
-    def _remove_all_routes(self, app: Entity, routes: List[Entity]):
+    def _remove_all_routes(self, app: Entity, routes: list[Entity]):
         for route in routes:
             self.client.v2.apps.remove_route(app["metadata"]["guid"], route["metadata"]["guid"])
 
@@ -142,7 +142,7 @@ class PushOperation(object):
         self.client.v2.apps.associate_route(app["metadata"]["guid"], route["metadata"]["guid"])
 
     def _build_new_requested_routes(
-        self, organization: Entity, space: Entity, app: Entity, existing_routes: List[Entity], requested_routes: List[str]
+        self, organization: Entity, space: Entity, app: Entity, existing_routes: list[Entity], requested_routes: list[str]
     ):
         private_domains = {domain["entity"]["name"]: domain for domain in organization.private_domains()}
         shared_domains = {domain["entity"]["name"]: domain for domain in self.client.v2.shared_domains.list()}
@@ -310,7 +310,7 @@ class PushOperation(object):
                     )
         return application_items
 
-    def _bind_services(self, space: Entity, app: Entity, services: List[str]):
+    def _bind_services(self, space: Entity, app: Entity, services: list[str]):
         service_instances = [
             service_instance for service_instance in space.service_instances(return_user_provided_service_instances="true")
         ]

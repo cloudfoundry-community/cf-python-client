@@ -1,6 +1,5 @@
 import logging
 from cloudfoundry_client.networking.entities import EntityManager
-from typing import List
 
 _logger = logging.getLogger(__name__)
 
@@ -45,7 +44,7 @@ class PolicyManager(EntityManager):
     def __init__(self, target_endpoint, client):
         super(PolicyManager, self).__init__(target_endpoint, client, "/networking/v1/external/policies")
 
-    def create(self, policies: List[Policy]):
+    def create(self, policies: list[Policy]):
         """create a new network policy
 
         Responses:
@@ -62,7 +61,7 @@ class PolicyManager(EntityManager):
             data.append(policy.dump())
         return super(PolicyManager, self)._create({"policies": data})
 
-    def delete(self, policies: List[Policy]):
+    def delete(self, policies: list[Policy]):
         """remove a new network policy
 
         Responses:
