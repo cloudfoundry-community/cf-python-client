@@ -2,8 +2,7 @@ import hashlib
 import os
 import stat
 import zipfile
-from collections.abc import Callable
-from typing import Generator
+from collections.abc import Callable, Generator
 
 
 class FileHelper(object):

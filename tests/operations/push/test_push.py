@@ -46,7 +46,13 @@ class TestPushOperation(TestCase, AbstractTestCase):
     @patch.object(
         sys,
         "argv",
-        ["main", "push_app", AbstractTestCase.get_fixtures_path("fake", "manifest_main.yml"), "-space_guid", "space_id"],
+        [
+            "main",
+            "push_app",
+            AbstractTestCase.get_fixtures_path("fake", "operations", "manifest_main.yml"),
+            "-space_guid",
+            "space_id"
+        ],
     )
     def test_main_push(self):
         class FakeOperation(object):
@@ -59,4 +65,4 @@ class TestPushOperation(TestCase, AbstractTestCase):
             "cloudfoundry_client.main.operation_commands.PushOperation", new=lambda c: push_operation
         ):
             main.main()
-            push_operation.push.assert_called_with("space_id", self.get_fixtures_path("fake", "manifest_main.yml"))
+            push_operation.push.assert_called_with("space_id", self.get_fixtures_path("fake", "operations", "manifest_main.yml"))

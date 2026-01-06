@@ -1,7 +1,7 @@
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from functools import reduce
-from typing import Any, Generator, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 from urllib.parse import quote
 
 from requests import Response
