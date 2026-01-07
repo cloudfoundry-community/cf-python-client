@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 import json
 from http import HTTPStatus
@@ -247,7 +248,21 @@ class CloudFoundryClient(CredentialManager):
 
     @staticmethod
     def build_from_cf_config(config_path: str | None = None, **kwargs) -> 'CloudFoundryClient':
-        config = Path(config_path) if config_path else Path.home() / '.cf/config.json'
+        cf_home = "CF_HOME"
+        config_file = "config.json"
+        config_dir = ".cf"
+        # handles config path provided or defaults to CF_HOME or HOME
+        if config_path is not None:
+            config = Path(config_path)
+            if config.is_dir():
+                if config.name == config_dir:
+                    config = config / config_file
+                else:
+                    config = config / config_dir / config_file
+        elif os.environ.get(cf_home):
+            config = Path(os.environ.get(cf_home)) / config_dir / config_file
+        else:
+            config = Path.home() / config_dir / config_file
         try:
             with open(config) as f:
                 cf_config = json.load(f)
