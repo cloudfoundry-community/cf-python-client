@@ -13,7 +13,7 @@ class JobTimeout(Exception):
     pass
 
 
-class JobManager(EntityManager):
+class JobManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super(JobManager, self).__init__(target_endpoint, client, "/v3/jobs")
 

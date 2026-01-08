@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING
 
-from cloudfoundry_client.v3.entities import EntityManager
+from cloudfoundry_client.v3.entities import EntityManager, Entity
 
 if TYPE_CHECKING:
     from cloudfoundry_client.client import CloudFoundryClient
 
 
-class RoleManager(EntityManager):
+class RoleManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super(RoleManager, self).__init__(target_endpoint, client, "/v3/roles")
 

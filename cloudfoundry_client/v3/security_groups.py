@@ -35,7 +35,7 @@ class GloballyEnabled:
     staging: bool | None = None
 
 
-class SecurityGroupManager(EntityManager):
+class SecurityGroupManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super(SecurityGroupManager, self).__init__(target_endpoint, client, "/v3/security_groups")
 
@@ -82,7 +82,7 @@ class SecurityGroupManager(EntityManager):
     def _bind_spaces(self, security_group_id: str, space_guids: ToManyRelationship, relationship: str) \
             -> ToManyRelationship:
         url = "%s%s/%s/relationships/%s" % (self.target_endpoint, self.entity_uri, security_group_id, relationship)
-        return ToManyRelationship.from_json_object(super()._post(url, space_guids))
+        return ToManyRelationship.from_json_object(super()._post(url, data=space_guids))
 
     def _unbind_space(self, security_group_id: str, space_guid: ToOneRelationship, relationship: str):
         url = "%s%s/%s/relationships/%s/%s" \
