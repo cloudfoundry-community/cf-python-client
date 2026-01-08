@@ -12,13 +12,7 @@ class ServiceOfferingsManager(EntityManager):
 
     def update(self, guid: str, meta_labels: dict | None = None, meta_annotations: dict | None = None) -> Entity:
         payload = dict()
-        if meta_labels or meta_annotations:
-            metadata = dict()
-            if meta_labels:
-                metadata["labels"] = meta_labels
-            if meta_annotations:
-                metadata["annotations"] = meta_annotations
-            payload["metadata"] = metadata
+        self._metadata(payload, meta_labels, meta_annotations)
         return super(ServiceOfferingsManager, self)._update(guid, payload)
 
     def remove(self, guid: str, purge: bool = False) -> None:

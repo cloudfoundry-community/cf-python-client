@@ -312,3 +312,12 @@ class EntityManager(object):
             return "%s?%s" % (url, "&".join(functools.reduce(_append_encoded_parameter, sorted(list(kwargs.items())), [])))
         else:
             return url
+
+    def _metadata(self, data, meta_labels, meta_annotations):
+        if meta_labels or meta_annotations:
+            metadata = dict()
+            if meta_labels:
+                metadata["labels"] = meta_labels
+            if meta_annotations:
+                metadata["annotations"] = meta_annotations
+            data["metadata"] = metadata

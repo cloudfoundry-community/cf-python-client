@@ -11,13 +11,15 @@ class IsolationSegmentManager(EntityManager):
         super(IsolationSegmentManager, self).__init__(target_endpoint, client, "/v3/isolation_segments")
 
     def create(self, name: str, meta_labels: dict | None = None, meta_annotations: dict | None = None) -> Entity:
-        data = {"name": name, "metadata": {"labels": meta_labels, "annotations": meta_annotations}}
+        data = {"name": name}
+        self._metadata(data, meta_labels, meta_annotations)
         return super(IsolationSegmentManager, self)._create(data)
 
     def update(
         self, isolation_segment_guid: str, name: str, meta_labels: dict | None = None, meta_annotations: dict | None = None
     ) -> Entity:
-        data = {"name": name, "metadata": {"labels": meta_labels, "annotations": meta_annotations}}
+        data = {"name": name}
+        self._metadata(data, meta_labels, meta_annotations)
         return super(IsolationSegmentManager, self)._update(isolation_segment_guid, data)
 
     def entitle_organizations(self, isolation_segment_guid: str, *org_guids: str) -> ToManyRelationship:

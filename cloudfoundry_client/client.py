@@ -45,6 +45,7 @@ from cloudfoundry_client.v3.service_plans import ServicePlanManager
 from cloudfoundry_client.v3.spaces import SpaceManager
 from cloudfoundry_client.v3.tasks import TaskManager
 from cloudfoundry_client.v3.jobs import JobManager
+from cloudfoundry_client.v3.users import UserManager
 
 _logger = logging.getLogger(__name__)
 
@@ -131,6 +132,7 @@ class V3(object):
         self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
         self.spaces = SpaceManager(target_endpoint, credential_manager)
         self.tasks = TaskManager(target_endpoint, credential_manager)
+        self.users = UserManager(target_endpoint, credential_manager)
 
 
 class CloudFoundryClient(CredentialManager):

@@ -47,7 +47,6 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
                 "enabled": True,
                 "position": 42,
                 "stack": "windows64",
-                "metadata": {"labels": None, "annotations": None},
             },
         )
         self.assertIsNotNone(result)
@@ -66,7 +65,6 @@ class TestBuildpacks(unittest.TestCase, AbstractTestCase):
                 "enabled": True,
                 "position": 42,
                 "stack": "windows64",
-                "metadata": {"labels": None, "annotations": None},
             },
         )
         self.assertIsNotNone(result)

@@ -39,8 +39,8 @@ class DomainManager(EntityManager):
                 "organization": organization,
                 "shared_organizations": shared_organizations,
             },
-            "metadata": {"labels": meta_labels, "annotations": meta_annotations},
         }
+        self._metadata(data, meta_labels, meta_annotations)
         return super(DomainManager, self)._create(data)
 
     def list_domains_for_org(self, org_guid: str, **kwargs) -> Pagination[Entity]:

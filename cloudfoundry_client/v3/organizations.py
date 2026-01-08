@@ -13,7 +13,8 @@ class OrganizationManager(EntityManager):
     def create(
         self, name: str, suspended: bool, meta_labels: dict | None = None, meta_annotations: dict | None = None
     ) -> Entity:
-        data = {"name": name, "suspended": suspended, "metadata": {"labels": meta_labels, "annotations": meta_annotations}}
+        data = {"name": name, "suspended": suspended}
+        self._metadata(data, meta_labels, meta_annotations)
         return super(OrganizationManager, self)._create(data)
 
     def update(
@@ -27,13 +28,7 @@ class OrganizationManager(EntityManager):
         data = {"name": name}
         if suspended is not None:
             data["suspended"] = suspended
-        metadata = {}
-        if meta_labels is not None:
-            metadata["labels"] = meta_labels
-        if meta_annotations is not None:
-            metadata["annotations"] = meta_annotations
-        if len(metadata) > 0:
-            data["metadata"] = metadata
+        self._metadata(data, meta_labels, meta_annotations)
         return super(OrganizationManager, self)._update(guid, data)
 
     def remove(self, guid: str, asynchronous: bool = True) -> str | None:
