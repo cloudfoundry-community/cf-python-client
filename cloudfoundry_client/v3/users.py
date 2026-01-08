@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from cloudfoundry_client.client import CloudFoundryClient
 
 
-class UserManager(EntityManager):
+class UserManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super(UserManager, self).__init__(target_endpoint, client, "/v3/users")
 

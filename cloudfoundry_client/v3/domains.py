@@ -19,7 +19,7 @@ class Domain(Entity):
             )
 
 
-class DomainManager(EntityManager):
+class DomainManager(EntityManager[Domain]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super(DomainManager, self).__init__(target_endpoint, client, "/v3/domains", Domain)
 

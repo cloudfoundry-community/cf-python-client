@@ -33,7 +33,7 @@ class DomainsQuota:
     total_domains: int
 
 
-class OrganizationQuotaManager(EntityManager):
+class OrganizationQuotaManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super().__init__(target_endpoint, client, "/v3/organization_quotas")
 
