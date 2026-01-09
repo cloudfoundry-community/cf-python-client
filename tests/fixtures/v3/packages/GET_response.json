@@ -1,0 +1,88 @@
+{
+  "pagination": {
+    "total_results": 2,
+    "total_pages": 1,
+    "first": {
+      "href": "https://api.example.org/v3/packages?types=bits%2Cdocker&page=1&per_page=2"
+    },
+    "last": {
+      "href": "https://api.example.org/v3/packages?types=bits%2Cdocker&page=1&per_page=2"
+    },
+    "next": null,
+    "previous": null
+  },
+  "resources": [
+    {
+      "guid": "a57fd932-85db-483a-a27e-b00efbb3b0a4",
+      "type": "bits",
+      "data": {
+        "checksum": {
+          "type": "sha256",
+          "value": null
+        },
+        "error": null
+      },
+      "state": "AWAITING_UPLOAD",
+      "created_at": "2015-11-03T00:53:54Z",
+      "updated_at": "2016-06-08T16:41:26Z",
+      "relationships": {
+        "app": {
+          "data": {
+            "guid": "fa3558ce-1c4d-46fc-9776-54b9c8021745"
+          }
+        }
+      },
+      "links": {
+        "self": {
+          "href": "https://api.example.org/v3/packages/a57fd932-85db-483a-a27e-b00efbb3b0a4"
+        },
+        "upload": {
+          "href": "https://api.example.org/v3/packages/a57fd932-85db-483a-a27e-b00efbb3b0a4/upload",
+          "method": "POST"
+        },
+        "download": {
+          "href": "https://api.example.org/v3/packages/a57fd932-85db-483a-a27e-b00efbb3b0a4/download",
+          "method": "GET"
+        },
+        "app": {
+          "href": "https://api.example.org/v3/apps/fa3558ce-1c4d-46fc-9776-54b9c8021745"
+        }
+      },
+      "metadata": {
+        "labels": {},
+        "annotations": {}
+      }
+    },
+    {
+      "guid": "8f1f294d-cef8-4c11-9f0b-3bcdc0bd2691",
+      "type": "docker",
+      "data": {
+        "image": "registry/image:latest",
+        "username": "username",
+        "password": "***"
+      },
+      "state": "READY",
+      "created_at": "2015-11-03T00:53:54Z",
+      "updated_at": "2016-06-08T16:41:26Z",
+      "relationships": {
+        "app": {
+          "data": {
+            "guid": "fa3558ce-1c4d-46fc-9776-54b9c8021745"
+          }
+        }
+      },
+      "links": {
+        "self": {
+          "href": "https://api.example.org/v3/packages/8f1f294d-cef8-4c11-9f0b-3bcdc0bd2691"
+        },
+        "app": {
+          "href": "https://api.example.org/v3/apps/fa3558ce-1c4d-46fc-9776-54b9c8021745"
+        }
+      },
+      "metadata": {
+        "labels": {},
+        "annotations": {}
+      }
+    }
+  ]
+}

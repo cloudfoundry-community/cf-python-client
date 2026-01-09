@@ -55,30 +55,6 @@ class TestRoutes(unittest.TestCase, AbstractTestCase):
             },
             files=None,
         )
-        self.client.post.assert_called_with(
-            self.client.post.return_value.url,
-            files=None,
-            json={
-                "host": "a-hostname",
-                "path": "/some_path",
-                "port": 6666,
-                "relationships": {
-                    "domain": {
-                        "data": {"guid": "domain-guid"}
-                    },
-                    "space": {
-                        "data": {"guid": "space-guid"}
-                    }
-                },
-                "options": {
-                    "loadbalancing": "round-robin"
-                },
-                "metadata": {
-                    "labels": {"key": "value"},
-                    "annotations": {"note": "detailed information"}
-                }
-            },
-        )
         self.assertIsNotNone(result)
         self.assertIsInstance(result, Entity)
 

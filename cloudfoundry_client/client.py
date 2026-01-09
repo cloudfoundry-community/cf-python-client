@@ -30,9 +30,11 @@ from cloudfoundry_client.v2.spaces import SpaceManager as SpaceManagerV2
 from cloudfoundry_client.v3.apps import AppManager
 from cloudfoundry_client.v3.buildpacks import BuildpackManager
 from cloudfoundry_client.v3.domains import DomainManager
+from cloudfoundry_client.v3.droplets import DropletManager
 from cloudfoundry_client.v3.feature_flags import FeatureFlagManager
 from cloudfoundry_client.v3.isolation_segments import IsolationSegmentManager
 from cloudfoundry_client.v3.organization_quotas import OrganizationQuotaManager
+from cloudfoundry_client.v3.packages import PackageManager
 from cloudfoundry_client.v3.processes import ProcessManager
 from cloudfoundry_client.v3.organizations import OrganizationManager
 from cloudfoundry_client.v3.roles import RoleManager
@@ -118,11 +120,13 @@ class V3(object):
         self.apps = AppManager(target_endpoint, credential_manager)
         self.buildpacks = BuildpackManager(target_endpoint, credential_manager)
         self.domains = DomainManager(target_endpoint, credential_manager)
+        self.droplets = DropletManager(target_endpoint, credential_manager)
         self.feature_flags = FeatureFlagManager(target_endpoint, credential_manager)
         self.isolation_segments = IsolationSegmentManager(target_endpoint, credential_manager)
         self.jobs = JobManager(target_endpoint, credential_manager)
         self.organizations = OrganizationManager(target_endpoint, credential_manager)
         self.organization_quotas = OrganizationQuotaManager(target_endpoint, credential_manager)
+        self.packages = PackageManager(target_endpoint, credential_manager)
         self.processes = ProcessManager(target_endpoint, credential_manager)
         self.roles = RoleManager(target_endpoint, credential_manager)
         self.routes = RouteManager(target_endpoint, credential_manager)

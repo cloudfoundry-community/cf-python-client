@@ -135,11 +135,16 @@ class EntityManager(Generic[ENTITY_TYPE]):
     def _post(
             self,
             url: str,
-            data: dict | None = None,
             entity_type: type[ENTITY_TYPE] | None = None,
+            data: dict | None = None,
+            params: dict | None = None,
             files: Any = None
     ) -> ENTITY_TYPE:
-        response = self.client.post(url, json=data, files=files)
+        response = self.client.post(
+            url if params is None else EntityManager._get_url_with_encoded_params(url, **params),
+            json=data,
+            files=files
+        )
         return self._read_response(response, entity_type)
 
     def _put(self, url: str, data: dict, entity_type: type[ENTITY_TYPE] | None = None) -> ENTITY_TYPE:
