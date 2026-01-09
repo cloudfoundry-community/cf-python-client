@@ -18,7 +18,7 @@ from cloudfoundry_client.v2.entities import EntityManager as EntityManagerV2
 from cloudfoundry_client.v2.events import EventManager
 from cloudfoundry_client.v2.jobs import JobManager as JobManagerV2
 from cloudfoundry_client.v2.resources import ResourceManager
-from cloudfoundry_client.v2.routes import RouteManager
+from cloudfoundry_client.v2.routes import RouteManager as RouteManagerV2
 from cloudfoundry_client.v2.service_bindings import ServiceBindingManager
 from cloudfoundry_client.v2.service_brokers import ServiceBrokerManager as ServiceBrokerManagerV2
 from cloudfoundry_client.v2.service_instances import ServiceInstanceManager as ServiceInstanceManagerV2
@@ -36,6 +36,7 @@ from cloudfoundry_client.v3.organization_quotas import OrganizationQuotaManager
 from cloudfoundry_client.v3.processes import ProcessManager
 from cloudfoundry_client.v3.organizations import OrganizationManager
 from cloudfoundry_client.v3.roles import RoleManager
+from cloudfoundry_client.v3.routes import RouteManager
 from cloudfoundry_client.v3.security_groups import SecurityGroupManager
 from cloudfoundry_client.v3.service_brokers import ServiceBrokerManager
 from cloudfoundry_client.v3.service_credential_bindings import ServiceCredentialBindingManager
@@ -97,7 +98,7 @@ class V2(object):
         self.event = EventManager(target_endpoint, credential_manager)
         self.organizations = EntityManagerV2(target_endpoint, credential_manager, "/v2/organizations")
         self.private_domains = EntityManagerV2(target_endpoint, credential_manager, "/v2/private_domains")
-        self.routes = RouteManager(target_endpoint, credential_manager)
+        self.routes = RouteManagerV2(target_endpoint, credential_manager)
         self.services = EntityManagerV2(target_endpoint, credential_manager, "/v2/services")
         self.shared_domains = EntityManagerV2(target_endpoint, credential_manager, "/v2/shared_domains")
         self.spaces = SpaceManagerV2(target_endpoint, credential_manager)
@@ -124,6 +125,7 @@ class V3(object):
         self.organization_quotas = OrganizationQuotaManager(target_endpoint, credential_manager)
         self.processes = ProcessManager(target_endpoint, credential_manager)
         self.roles = RoleManager(target_endpoint, credential_manager)
+        self.routes = RouteManager(target_endpoint, credential_manager)
         self.security_groups = SecurityGroupManager(target_endpoint, credential_manager)
         self.service_brokers = ServiceBrokerManager(target_endpoint, credential_manager)
         self.service_credential_bindings = ServiceCredentialBindingManager(target_endpoint, credential_manager)
