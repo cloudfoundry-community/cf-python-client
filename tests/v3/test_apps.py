@@ -97,6 +97,22 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertIsInstance(env, JsonObject)
         self.assertEqual(env["application_env_json"]["VCAP_APPLICATION"]["limits"]["fds"], 16384)
 
+    def test_list_droplets(self):
+        self.client.get.return_value = self.mock_response(
+            "/v3/apps/app_id/droplets", HTTPStatus.OK, None, "v3", "apps", "GET_{id}_droplets_response.json"
+        )
+        droplets: list[dict] = [revision for revision in self.client.v3.apps.list_droplets("app_id")]
+        self.assertEqual(2, len(droplets))
+        self.assertEqual(droplets[0]["state"], "STAGED")
+
+    def test_list_packages(self):
+        self.client.get.return_value = self.mock_response(
+            "/v3/apps/app_id/packages", HTTPStatus.OK, None, "v3", "apps", "GET_{id}_packages_response.json"
+        )
+        packages: list[dict] = [package for package in self.client.v3.apps.list_packages("app_id")]
+        self.assertEqual(1, len(packages))
+        self.assertEqual(packages[0]["type"], "bits")
+
     def test_list_routes(self):
         self.client.get.return_value = self.mock_response(
             "/v3/apps/app_id/routes", HTTPStatus.OK, None, "v3", "apps", "GET_{id}_routes_response.json"
@@ -105,14 +121,6 @@ class TestApps(unittest.TestCase, AbstractTestCase):
         self.assertEqual(1, len(routes))
 
         self.assertEqual(routes[0]["destinations"][0]["guid"], "385bf117-17f5-4689-8c5c-08c6cc821fed")
-
-    def test_list_droplets(self):
-        self.client.get.return_value = self.mock_response(
-            "/v3/apps/app_id/droplets", HTTPStatus.OK, None, "v3", "apps", "GET_{id}_droplets_response.json"
-        )
-        droplets: list[dict] = [revision for revision in self.client.v3.apps.list_droplets("app_id")]
-        self.assertEqual(2, len(droplets))
-        self.assertEqual(droplets[0]["state"], "STAGED")
 
     def test_get_include_space_and_org(self):
         self.client.get.return_value = self.mock_response(
