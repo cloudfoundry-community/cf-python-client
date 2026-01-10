@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class ServicePlanManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServicePlanManager, self).__init__(target_endpoint, client, "/v3/service_plans")
+        super().__init__(target_endpoint, client, "/v3/service_plans")
 
     def update(
         self,
@@ -18,13 +18,13 @@ class ServicePlanManager(EntityManager[Entity]):
     ) -> Entity:
         payload = {"metadata": {}}
         self._metadata(payload, meta_labels, meta_annotations)
-        return super(ServicePlanManager, self)._update(guid, payload)
+        return super()._update(guid, payload)
 
     def remove(self, guid: str):
-        super(ServicePlanManager, self)._remove(guid)
+        super()._remove(guid)
 
     def get_visibility(self, service_plan_guid: str) -> dict:
-        return super(ServicePlanManager, self)._get(f"{self.target_endpoint}{self.entity_uri}/{service_plan_guid}/visibility")
+        return super()._get(f"{self.target_endpoint}{self.entity_uri}/{service_plan_guid}/visibility")
 
     # Updates a service plan visibility. It behaves similar to the POST service plan visibility endpoint but
     # this endpoint will REPLACE the existing list of organizations when the service plan is organization visible.
@@ -32,7 +32,7 @@ class ServicePlanManager(EntityManager[Entity]):
         payload = {"type": type}
         if organizations:
             payload["organizations"] = organizations
-        return super(ServicePlanManager, self)._patch(
+        return super()._patch(
             url=f"{self.target_endpoint}{self.entity_uri}/{service_plan_guid}/visibility", data=payload
         )
 
@@ -40,11 +40,11 @@ class ServicePlanManager(EntityManager[Entity]):
     # this endpoint will APPEND to the existing list of organizations when the service plan is organization visible.
     def apply_visibility_to_extra_orgs(self, service_plan_guid: str, organizations: list[dict]) -> dict:
         payload = {"type": "organization", "organizations": organizations}
-        return super(ServicePlanManager, self)._post(
+        return super()._post(
             url=f"{self.target_endpoint}{self.entity_uri}/{service_plan_guid}/visibility", data=payload, files=None
         )
 
     def remove_org_from_service_plan_visibility(self, service_plan_guid: str, org_guid: str):
-        super(ServicePlanManager, self)._delete(
+        super()._delete(
             url=f"{self.target_endpoint}{self.entity_uri}/{service_plan_guid}/visibility/{org_guid}"
         )

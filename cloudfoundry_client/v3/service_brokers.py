@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class ServiceBrokerManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServiceBrokerManager, self).__init__(target_endpoint, client, "/v3/service_brokers")
+        super().__init__(target_endpoint, client, "/v3/service_brokers")
 
     def create(
         self,
@@ -25,7 +25,7 @@ class ServiceBrokerManager(EntityManager[Entity]):
         self._metadata(payload, meta_labels, meta_annotations)
         if space_guid:
             payload["relationships"] = dict(space=ToOneRelationship(space_guid))
-        return super(ServiceBrokerManager, self)._create(payload)
+        return super()._create(payload)
 
     def update(
         self,
@@ -45,7 +45,7 @@ class ServiceBrokerManager(EntityManager[Entity]):
         if auth_username and auth_password:
             payload["authentication"] = {"type": "basic", "credentials": {"username": auth_username, "password": auth_password}}
         self._metadata(payload, meta_labels, meta_annotations)
-        return super(ServiceBrokerManager, self)._update(guid, payload)
+        return super()._update(guid, payload)
 
     def remove(self, guid: str, asynchronous: bool = True) -> str | None:
-        return super(ServiceBrokerManager, self)._remove(guid, asynchronous)
+        return super()._remove(guid, asynchronous)

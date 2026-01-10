@@ -8,14 +8,14 @@ if TYPE_CHECKING:
 
 class OrganizationManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(OrganizationManager, self).__init__(target_endpoint, client, "/v3/organizations")
+        super().__init__(target_endpoint, client, "/v3/organizations")
 
     def create(
         self, name: str, suspended: bool, meta_labels: dict | None = None, meta_annotations: dict | None = None
     ) -> Entity:
         data = {"name": name, "suspended": suspended}
         self._metadata(data, meta_labels, meta_annotations)
-        return super(OrganizationManager, self)._create(data)
+        return super()._create(data)
 
     def update(
         self,
@@ -29,7 +29,7 @@ class OrganizationManager(EntityManager[Entity]):
         if suspended is not None:
             data["suspended"] = suspended
         self._metadata(data, meta_labels, meta_annotations)
-        return super(OrganizationManager, self)._update(guid, data)
+        return super()._update(guid, data)
 
     def remove(self, guid: str, asynchronous: bool = True) -> str | None:
         return super(OrganizationManager, self)._remove(guid, asynchronous)

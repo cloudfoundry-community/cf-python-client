@@ -76,7 +76,7 @@ class AppManager(EntityManager):
     ]
 
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(AppManager, self).__init__(
+        super().__init__(
             target_endpoint, client, "/v2/apps", lambda pairs: Application(target_endpoint, client, pairs)
         )
 
@@ -111,7 +111,7 @@ class AppManager(EntityManager):
         timeout: float | None = 300.0,
         asynchronous: bool | None = False,
     ) -> Application:
-        result = super(AppManager, self)._update(application_guid, dict(state="STARTED"))
+        result = super()._update(application_guid, dict(state="STARTED"))
         if asynchronous:
             return result
         else:
@@ -126,7 +126,7 @@ class AppManager(EntityManager):
         timeout: float | None = 500.0,
         asynchronous: bool | None = False,
     ) -> Application:
-        result = super(AppManager, self)._update(application_guid, dict(state="STOPPED"))
+        result = super()._update(application_guid, dict(state="STOPPED"))
         if asynchronous:
             return result
         else:
@@ -143,11 +143,11 @@ class AppManager(EntityManager):
         if kwargs.get("name") is None or kwargs.get("space_guid") is None:
             raise AssertionError("Please provide a name and a space_guid")
         request = AppManager._generate_application_update_request(**kwargs)
-        return super(AppManager, self)._create(request)
+        return super()._create(request)
 
     def update(self, application_guid: str, **kwargs) -> Application:
         request = AppManager._generate_application_update_request(**kwargs)
-        return super(AppManager, self)._update(application_guid, request)
+        return super()._update(application_guid, request)
 
     def remove(self, application_guid: str):
         super(AppManager, self)._remove(application_guid)

@@ -25,7 +25,7 @@ class InvalidStatusCode(Exception):
 
 class InvalidEntity(Exception):
     def __init__(self, **kwargs):
-        super(InvalidEntity, self).__init__()
+        super().__init__()
         self.raw_entity = dict(**kwargs)
 
     def __str__(self):

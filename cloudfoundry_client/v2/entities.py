@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 class Entity(JsonObject):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient", *args, **kwargs):
-        super(Entity, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.target_endpoint = target_endpoint
         self.client = client
         try:

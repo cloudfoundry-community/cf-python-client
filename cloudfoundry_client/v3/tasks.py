@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class TaskManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(TaskManager, self).__init__(target_endpoint, client, "/v3/tasks")
+        super().__init__(target_endpoint, client, "/v3/tasks")
 
     def create(
         self,

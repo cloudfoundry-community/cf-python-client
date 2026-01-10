@@ -9,15 +9,13 @@ if TYPE_CHECKING:
 
 class AppManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(AppManager, self).__init__(target_endpoint, client, "/v3/apps")
+        super().__init__(target_endpoint, client, "/v3/apps")
 
     def restart(self, application_guid: str):
-        return super(AppManager, self)._post("%s%s/%s/actions/restart" % (self.target_endpoint,
-                                                                          self.entity_uri,
-                                                                          application_guid))
+        return super()._post("%s%s/%s/actions/restart" % (self.target_endpoint, self.entity_uri, application_guid))
 
     def remove(self, application_guid: str, asynchronous: bool = True) -> str | None:
-        return super(AppManager, self)._remove(application_guid, asynchronous)
+        return super()._remove(application_guid, asynchronous)
 
     def get_env(self, application_guid: str) -> JsonObject:
         return super(AppManager, self)._get("%s%s/%s/env" % (self.target_endpoint, self.entity_uri, application_guid))

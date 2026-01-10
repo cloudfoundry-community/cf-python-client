@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class BuildpackManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(BuildpackManager, self).__init__(target_endpoint, client, "/v3/buildpacks")
+        super().__init__(target_endpoint, client, "/v3/buildpacks")
 
     def create(
         self,
@@ -28,10 +28,10 @@ class BuildpackManager(EntityManager[Entity]):
             "stack": stack,
         }
         self._metadata(data, meta_labels, meta_annotations)
-        return super(BuildpackManager, self)._create(data)
+        return super()._create(data)
 
     def remove(self, buildpack_guid: str, asynchronous: bool = True) -> str | None:
-        return super(BuildpackManager, self)._remove(buildpack_guid, asynchronous)
+        return super()._remove(buildpack_guid, asynchronous)
 
     def update(
         self,
@@ -52,13 +52,13 @@ class BuildpackManager(EntityManager[Entity]):
             "stack": stack,
         }
         self._metadata(data, meta_labels, meta_annotations)
-        return super(BuildpackManager, self)._update(buildpack_guid, data)
+        return super()._update(buildpack_guid, data)
 
     def upload(self, buildpack_guid: str, buildpack_zip: str, asynchronous: bool = False) -> Entity:
-        buildpack = super(BuildpackManager, self)._upload_bits(buildpack_guid, buildpack_zip)
+        buildpack = super()._upload_bits(buildpack_guid, buildpack_zip)
         if not asynchronous:
             self.client.v3.jobs.wait_for_job_completion(buildpack.job()["guid"])
-            buildpack_after_job = super(BuildpackManager, self).get(buildpack["guid"])
+            buildpack_after_job = super().get(buildpack["guid"])
             buildpack_after_job["links"]["job"] = buildpack["links"]["job"]
             buildpack_after_job.job = buildpack.job
             return buildpack_after_job

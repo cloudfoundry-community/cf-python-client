@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class ServiceInstanceManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServiceInstanceManager, self).__init__(target_endpoint, client, "/v3/service_instances")
+        super().__init__(target_endpoint, client, "/v3/service_instances")
 
     def create(
         self,
@@ -31,7 +31,7 @@ class ServiceInstanceManager(EntityManager[Entity]):
         if tags:
             data["tags"] = tags
         self._metadata(data, meta_labels, meta_annotations)
-        return super(ServiceInstanceManager, self)._create(data)
+        return super()._create(data)
 
     def update(
             self,
@@ -63,6 +63,6 @@ class ServiceInstanceManager(EntityManager[Entity]):
         super()._remove(guid, asynchronous)
 
     def get_permissions(self, instance_guid: str) -> JsonObject:
-        return super(ServiceInstanceManager, self)._get(
+        return super()._get(
             "%s%s/%s/permissions" % (self.target_endpoint, self.entity_uri, instance_guid)
         )

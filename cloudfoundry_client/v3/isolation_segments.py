@@ -8,24 +8,24 @@ if TYPE_CHECKING:
 
 class IsolationSegmentManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(IsolationSegmentManager, self).__init__(target_endpoint, client, "/v3/isolation_segments")
+        super().__init__(target_endpoint, client, "/v3/isolation_segments")
 
     def create(self, name: str, meta_labels: dict | None = None, meta_annotations: dict | None = None) -> Entity:
         data = {"name": name}
         self._metadata(data, meta_labels, meta_annotations)
-        return super(IsolationSegmentManager, self)._create(data)
+        return super()._create(data)
 
     def update(
         self, isolation_segment_guid: str, name: str, meta_labels: dict | None = None, meta_annotations: dict | None = None
     ) -> Entity:
         data = {"name": name}
         self._metadata(data, meta_labels, meta_annotations)
-        return super(IsolationSegmentManager, self)._update(isolation_segment_guid, data)
+        return super()._update(isolation_segment_guid, data)
 
     def entitle_organizations(self, isolation_segment_guid: str, *org_guids: str) -> ToManyRelationship:
         data = ToManyRelationship(*org_guids)
         return ToManyRelationship.from_json_object(
-            super(IsolationSegmentManager, self)._post(
+            super()._post(
                 "%s%s/%s/relationships/organizations" % (self.target_endpoint, self.entity_uri, isolation_segment_guid), data=data
             )
         )
@@ -35,7 +35,7 @@ class IsolationSegmentManager(EntityManager[Entity]):
         isolation_segment_guid: str,
     ) -> ToManyRelationship:
         return ToManyRelationship.from_json_object(
-            super(IsolationSegmentManager, self)._get(
+            super()._get(
                 "%s%s/%s/relationships/organizations" % (self.target_endpoint, self.entity_uri, isolation_segment_guid)
             )
         )
@@ -45,7 +45,7 @@ class IsolationSegmentManager(EntityManager[Entity]):
         isolation_segment_guid: str,
     ) -> ToManyRelationship:
         return ToManyRelationship.from_json_object(
-            super(IsolationSegmentManager, self)._get(
+            super()._get(
                 "%s%s/%s/relationships/spaces" % (self.target_endpoint, self.entity_uri, isolation_segment_guid)
             )
         )

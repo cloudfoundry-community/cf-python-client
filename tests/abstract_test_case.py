@@ -15,7 +15,7 @@ def mock_cloudfoundry_client_class():
 
         class MockClass(CredentialManager):
             def __init__(self, *args, **kwargs):
-                super(MockClass, self).__init__(*args, **kwargs)
+                super().__init__(*args, **kwargs)
                 for attribute in mocked_attributes:
                     setattr(self, attribute, MagicMock())
 
