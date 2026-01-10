@@ -46,6 +46,7 @@ from cloudfoundry_client.v3.service_instances import ServiceInstanceManager
 from cloudfoundry_client.v3.service_offerings import ServiceOfferingsManager
 from cloudfoundry_client.v3.service_plans import ServicePlanManager
 from cloudfoundry_client.v3.spaces import SpaceManager
+from cloudfoundry_client.v3.stacks import StackMananager
 from cloudfoundry_client.v3.tasks import TaskManager
 from cloudfoundry_client.v3.jobs import JobManager
 from cloudfoundry_client.v3.users import UserManager
@@ -137,6 +138,7 @@ class V3(object):
         self.service_offerings = ServiceOfferingsManager(target_endpoint, credential_manager)
         self.service_plans = ServicePlanManager(target_endpoint, credential_manager)
         self.spaces = SpaceManager(target_endpoint, credential_manager)
+        self.stacks = StackMananager(target_endpoint, credential_manager)
         self.tasks = TaskManager(target_endpoint, credential_manager)
         self.users = UserManager(target_endpoint, credential_manager)
 
