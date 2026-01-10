@@ -9,7 +9,7 @@ from cloudfoundry_client.main.command_domain import CommandDomain, Command
 
 class TaskCommandDomain(CommandDomain):
     def __init__(self):
-        super(TaskCommandDomain, self).__init__(
+        super().__init__(
             display_name="Tasks",
             entity_name="task",
             filter_list_parameters=["names", "app_guids", "space_guids", "organization_guids"],

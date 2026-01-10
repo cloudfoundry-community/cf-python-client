@@ -6,12 +6,12 @@ from typing import TypeVar, Generic
 class Request(dict):
     def __setitem__(self, key, value):
         if value is not None:
-            super(Request, self).__setitem__(key, value)
+            super().__setitem__(key, value)
 
 
 class JsonObject(dict):
     def __init__(self, *args, **kwargs):
-        super(JsonObject, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     json = json.dumps
 

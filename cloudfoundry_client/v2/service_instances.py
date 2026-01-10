@@ -10,7 +10,7 @@ class ServiceInstanceManager(EntityManager):
     list_query_parameters = ["page", "results-per-page", "order-direction", "return_user_provided_service_instances"]
 
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServiceInstanceManager, self).__init__(target_endpoint, client, "/v2/service_instances")
+        super().__init__(target_endpoint, client, "/v2/service_instances")
 
     def create(
         self,
@@ -25,7 +25,7 @@ class ServiceInstanceManager(EntityManager):
         request["parameters"] = parameters
         request["tags"] = tags
         params = None if not accepts_incomplete else dict(accepts_incomplete="true")
-        return super(ServiceInstanceManager, self)._create(request, params=params)
+        return super()._create(request, params=params)
 
     def update(
         self,
@@ -42,10 +42,10 @@ class ServiceInstanceManager(EntityManager):
         request["parameters"] = parameters
         request["tags"] = tags
         params = None if not accepts_incomplete else dict(accepts_incomplete="true")
-        return super(ServiceInstanceManager, self)._update(instance_guid, request, params=params)
+        return super()._update(instance_guid, request, params=params)
 
     def list_permissions(self, instance_guid: str) -> dict[str, bool]:
-        return super(ServiceInstanceManager, self)._get("%s/%s/permissions" % (self.entity_uri, instance_guid), dict)
+        return super()._get("%s/%s/permissions" % (self.entity_uri, instance_guid), dict)
 
     def remove(self, instance_guid: str, accepts_incomplete: bool | None = False, purge: bool | None = False):
         parameters = {}
@@ -53,4 +53,4 @@ class ServiceInstanceManager(EntityManager):
             parameters["accepts_incomplete"] = "true"
         if purge:
             parameters["purge"] = "true"
-        super(ServiceInstanceManager, self)._remove(instance_guid, params=parameters)
+        super()._remove(instance_guid, params=parameters)

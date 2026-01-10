@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class Domain(Entity):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient", **kwargs):
-        super(Domain, self).__init__(target_endpoint, client, **kwargs)
+        super().__init__(target_endpoint, client, **kwargs)
         relationships = self["relationships"]
         if "organization" in relationships:
             self["relationships"]["organization"] = ToOneRelationship.from_json_object(relationships["organization"])
@@ -21,7 +21,7 @@ class Domain(Entity):
 
 class DomainManager(EntityManager[Domain]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(DomainManager, self).__init__(target_endpoint, client, "/v3/domains", Domain)
+        super().__init__(target_endpoint, client, "/v3/domains", Domain)
 
     def create(
         self,
@@ -41,7 +41,7 @@ class DomainManager(EntityManager[Domain]):
             },
         }
         self._metadata(data, meta_labels, meta_annotations)
-        return super(DomainManager, self)._create(data)
+        return super()._create(data)
 
     def list_domains_for_org(self, org_guid: str, **kwargs) -> Pagination[Entity]:
         uri = "/v3/organizations/{guid}/domains".format(guid=org_guid)
@@ -49,10 +49,10 @@ class DomainManager(EntityManager[Domain]):
 
     def update(self, domain_guid: str, meta_labels: dict | None = None, meta_annotations: dict | None = None) -> Domain:
         data = {"metadata": {"labels": meta_labels, "annotations": meta_annotations}}
-        return super(DomainManager, self)._update(domain_guid, data)
+        return super()._update(domain_guid, data)
 
     def remove(self, domain_guid: str, asynchronous: bool = True) -> str | None:
-        return super(DomainManager, self)._remove(domain_guid, asynchronous)
+        return super()._remove(domain_guid, asynchronous)
 
     def __create_shared_domain_url(self, domain_guid: str) -> str:
         # TODO use url parser for this
@@ -62,8 +62,8 @@ class DomainManager(EntityManager[Domain]):
 
     def share_domain(self, domain_guid: str, organization_guids: ToManyRelationship) -> ToManyRelationship:
         url = self.__create_shared_domain_url(domain_guid)
-        return ToManyRelationship.from_json_object(super(DomainManager, self)._post(url, data=organization_guids))
+        return ToManyRelationship.from_json_object(super()._post(url, data=organization_guids))
 
     def unshare_domain(self, domain_guid: str, org_guid: str):
         url = "{uri}/{org}".format(uri=self.__create_shared_domain_url(domain_guid), org=org_guid)
-        super(DomainManager, self)._delete(url)
+        super()._delete(url)

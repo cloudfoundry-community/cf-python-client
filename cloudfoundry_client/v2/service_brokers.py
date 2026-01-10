@@ -8,14 +8,14 @@ if TYPE_CHECKING:
 
 class ServiceBrokerManager(EntityManager):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(ServiceBrokerManager, self).__init__(target_endpoint, client, "/v2/service_brokers")
+        super().__init__(target_endpoint, client, "/v2/service_brokers")
 
     def create(
         self, broker_url: str, broker_name: str, auth_username: str, auth_password: str, space_guid: str | None = None
     ) -> Entity:
         request = self._request(broker_url=broker_url, name=broker_name, auth_username=auth_username, auth_password=auth_password)
         request["space_guid"] = space_guid
-        return super(ServiceBrokerManager, self)._create(request)
+        return super()._create(request)
 
     def update(
         self,
@@ -30,7 +30,7 @@ class ServiceBrokerManager(EntityManager):
         request["name"] = broker_name
         request["auth_username"] = auth_username
         request["auth_password"] = auth_password
-        return super(ServiceBrokerManager, self)._update(broker_guid, request)
+        return super()._update(broker_guid, request)
 
     def remove(self, broker_guid):
-        super(ServiceBrokerManager, self)._remove(broker_guid)
+        super()._remove(broker_guid)
