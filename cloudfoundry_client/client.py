@@ -28,6 +28,7 @@ from cloudfoundry_client.v2.service_plans import ServicePlanManager as ServicePl
 from cloudfoundry_client.v2.spaces import SpaceManager as SpaceManagerV2
 
 from cloudfoundry_client.v3.apps import AppManager
+from cloudfoundry_client.v3.audit_events import AuditEventManager
 from cloudfoundry_client.v3.buildpacks import BuildpackManager
 from cloudfoundry_client.v3.domains import DomainManager
 from cloudfoundry_client.v3.droplets import DropletManager
@@ -119,6 +120,7 @@ class V3(object):
     def __init__(self, cloud_controller_v3_url: str, credential_manager: "CloudFoundryClient"):
         target_endpoint = cloud_controller_v3_url.removesuffix("/v3")
         self.apps = AppManager(target_endpoint, credential_manager)
+        self.audit_events = AuditEventManager(target_endpoint, credential_manager)
         self.buildpacks = BuildpackManager(target_endpoint, credential_manager)
         self.domains = DomainManager(target_endpoint, credential_manager)
         self.droplets = DropletManager(target_endpoint, credential_manager)
