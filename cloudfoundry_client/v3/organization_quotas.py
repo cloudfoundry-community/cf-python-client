@@ -37,9 +37,6 @@ class OrganizationQuotaManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
         super().__init__(target_endpoint, client, "/v3/organization_quotas")
 
-    def remove(self, guid: str, asynchronous: bool = True) -> str | None:
-        return super()._remove(guid, asynchronous)
-
     def create(
         self,
         name: str,
@@ -70,6 +67,9 @@ class OrganizationQuotaManager(EntityManager[Entity]):
                 "%s%s/%s/relationships/organizations" % (self.target_endpoint, self.entity_uri, guid), data=organizations
             )
         )
+
+    def remove(self, guid: str, asynchronous: bool = True) -> str | None:
+        return super()._remove(guid, asynchronous)
 
     def _asdict(
         self,
