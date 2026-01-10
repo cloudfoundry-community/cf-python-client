@@ -42,7 +42,7 @@ class Policy:
 
 class PolicyManager(EntityManager):
     def __init__(self, target_endpoint, client):
-        super(PolicyManager, self).__init__(target_endpoint, client, "/networking/v1/external/policies")
+        super().__init__(target_endpoint, client, "/networking/v1/external/policies")
 
     def create(self, policies: list[Policy]):
         """create a new network policy
@@ -59,7 +59,7 @@ class PolicyManager(EntityManager):
             if not isinstance(policy, Policy):
                 raise TypeError
             data.append(policy.dump())
-        return super(PolicyManager, self)._create({"policies": data})
+        return super()._create({"policies": data})
 
     def delete(self, policies: list[Policy]):
         """remove a new network policy
@@ -76,4 +76,4 @@ class PolicyManager(EntityManager):
             if not isinstance(policy, Policy):
                 raise TypeError
             data.append(policy.dump())
-        return super(PolicyManager, self)._delete({"policies": data})
+        return super()._delete({"policies": data})

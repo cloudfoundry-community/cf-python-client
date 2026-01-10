@@ -32,11 +32,11 @@ class OrganizationManager(EntityManager[Entity]):
         return super()._update(guid, data)
 
     def remove(self, guid: str, asynchronous: bool = True) -> str | None:
-        return super(OrganizationManager, self)._remove(guid, asynchronous)
+        return super()._remove(guid, asynchronous)
 
     def assign_default_isolation_segment(self, org_guid: str, iso_seg_guid: str) -> Entity:
         return ToOneRelationship.from_json_object(
-            super(OrganizationManager, self)._patch(
+            super()._patch(
                 "%s%s/%s/relationships/default_isolation_segment" % (self.target_endpoint, self.entity_uri, org_guid),
                 data=ToOneRelationship(iso_seg_guid),
             )
@@ -44,11 +44,11 @@ class OrganizationManager(EntityManager[Entity]):
 
     def get_default_isolation_segment(self, guid: str) -> ToOneRelationship:
         return ToOneRelationship.from_json_object(
-            super(OrganizationManager, self).get(guid, "relationships", "default_isolation_segment")
+            super().get(guid, "relationships", "default_isolation_segment")
         )
 
     def get_default_domain(self, guid: str) -> Entity:
-        return super(OrganizationManager, self).get(guid, "domains", "default")
+        return super().get(guid, "domains", "default")
 
     def get_usage_summary(self, guid: str) -> Entity:
-        return super(OrganizationManager, self).get(guid, "usage_summary")
+        return super().get(guid, "usage_summary")

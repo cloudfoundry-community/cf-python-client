@@ -51,9 +51,9 @@ class IsolationSegmentManager(EntityManager[Entity]):
         )
 
     def revoke_organization(self, isolation_segment_guid: str, org_guid: str):
-        super(IsolationSegmentManager, self)._delete(
+        super()._delete(
             "%s%s/%s/relationships/organizations/%s" % (self.target_endpoint, self.entity_uri, isolation_segment_guid, org_guid)
         )
 
     def remove(self, isolation_segment_guid: str):
-        super(IsolationSegmentManager, self)._remove(isolation_segment_guid)
+        super()._remove(isolation_segment_guid)

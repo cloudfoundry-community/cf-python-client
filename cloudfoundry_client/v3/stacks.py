@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 class StackMananager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(StackMananager, self).__init__(target_endpoint, client, "/v3/stacks")
+        super().__init__(target_endpoint, client, "/v3/stacks")
 
     def create(
             self,
@@ -22,7 +22,7 @@ class StackMananager(EntityManager[Entity]):
         if description is not None:
             data["description"] = description
         self._metadata(data, meta_labels, meta_annotations)
-        return super(StackMananager, self)._create(data)
+        return super()._create(data)
 
     def update(
             self,
@@ -32,11 +32,11 @@ class StackMananager(EntityManager[Entity]):
     ) -> Entity:
         data = {}
         self._metadata(data, meta_labels, meta_annotations)
-        return super(StackMananager, self)._update(stack_guid, data)
+        return super()._update(stack_guid, data)
 
     def list_apps(self, stack_guid: str, **kwargs) -> Pagination[Entity]:
         uri: str = "%s/%s/apps" % (self.entity_uri, stack_guid)
-        return super(StackMananager, self)._list(requested_path=uri, **kwargs)
+        return super()._list(requested_path=uri, **kwargs)
 
     def remove(self, stack_guid: str):
-        super(StackMananager, self)._remove(stack_guid)
+        super()._remove(stack_guid)

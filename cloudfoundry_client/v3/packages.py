@@ -15,7 +15,7 @@ class PackageType(Enum):
 
 class PackageManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(PackageManager, self).__init__(target_endpoint, client, "/v3/packages")
+        super().__init__(target_endpoint, client, "/v3/packages")
 
     def create(self,
                app_guid: str,
@@ -30,7 +30,7 @@ class PackageManager(EntityManager[Entity]):
             },
         }
         self._metadata(data, meta_labels, meta_annotations)
-        return super(PackageManager, self)._create(data)
+        return super()._create(data)
 
     def copy(self,
              package_guid: str,
@@ -52,4 +52,4 @@ class PackageManager(EntityManager[Entity]):
 
     def list_droplets(self, package_guid: str, **kwargs) -> Pagination[Entity]:
         uri: str = "%s/%s/droplets" % (self.entity_uri, package_guid)
-        return super(PackageManager, self)._list(requested_path=uri, **kwargs)
+        return super()._list(requested_path=uri, **kwargs)

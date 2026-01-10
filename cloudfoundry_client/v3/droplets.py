@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class DropletManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(DropletManager, self).__init__(target_endpoint, client, "/v3/droplets")
+        super().__init__(target_endpoint, client, "/v3/droplets")
 
     def create(self,
                app_guid: str,
@@ -24,7 +24,7 @@ class DropletManager(EntityManager[Entity]):
         if process_types is not None:
             data["process_types"] = process_types
         self._metadata(data, meta_labels, meta_annotations)
-        return super(DropletManager, self)._create(data)
+        return super()._create(data)
 
     def copy(self,
              droplet_guid: str,
@@ -51,7 +51,7 @@ class DropletManager(EntityManager[Entity]):
                ) -> Entity:
         data: dict[str, Any] = {}
         self._metadata(data, meta_labels, meta_annotations)
-        return super(DropletManager, self)._update(droplet_gid, data)
+        return super()._update(droplet_gid, data)
 
     def remove(self, route_gid: str):
-        return super(DropletManager, self)._remove(route_gid)
+        return super()._remove(route_gid)

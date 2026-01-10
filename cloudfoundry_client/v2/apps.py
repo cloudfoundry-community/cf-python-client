@@ -150,7 +150,7 @@ class AppManager(EntityManager):
         return super()._update(application_guid, request)
 
     def remove(self, application_guid: str):
-        super(AppManager, self)._remove(application_guid)
+        super()._remove(application_guid)
 
     def upload(self, application_guid: str, resources, application: str, asynchronous: bool | None = False):
         application_size = os.path.getsize(application)

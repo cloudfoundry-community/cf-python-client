@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 class UserManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(UserManager, self).__init__(target_endpoint, client, "/v3/users")
+        super().__init__(target_endpoint, client, "/v3/users")
 
     def create(
         self,
@@ -24,7 +24,7 @@ class UserManager(EntityManager[Entity]):
             data["username"] = username
             data["origin"] = origin
         self._metadata(data, meta_labels, meta_annotations)
-        return super(UserManager, self)._create(data)
+        return super()._create(data)
 
     def update(
             self,
@@ -34,7 +34,7 @@ class UserManager(EntityManager[Entity]):
     ) -> Entity:
         data = {}
         self._metadata(data, meta_labels, meta_annotations)
-        return super(UserManager, self)._update(guid, data)
+        return super()._update(guid, data)
 
     def remove(self, guid: str) -> str | None:
-        return super(UserManager, self)._remove(guid)
+        return super()._remove(guid)

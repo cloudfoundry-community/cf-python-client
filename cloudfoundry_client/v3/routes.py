@@ -14,7 +14,7 @@ class LoadBalancing(Enum):
 
 class RouteManager(EntityManager[Entity]):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient"):
-        super(RouteManager, self).__init__(target_endpoint, client, "/v3/routes")
+        super().__init__(target_endpoint, client, "/v3/routes")
 
     def create(self,
                space_guid: str,
@@ -40,7 +40,7 @@ class RouteManager(EntityManager[Entity]):
         if load_balancing is not None:
             data["options"] = {"loadbalancing": load_balancing.value}
         self._metadata(data, meta_labels, meta_annotations)
-        return super(RouteManager, self)._create(data)
+        return super()._create(data)
 
     def update(self,
                route_gid: str,
@@ -52,7 +52,7 @@ class RouteManager(EntityManager[Entity]):
         if load_balancing is not None:
             data["options"] = {"loadbalancing": load_balancing.value}
         self._metadata(data, meta_labels, meta_annotations)
-        return super(RouteManager, self)._update(route_gid, data)
+        return super()._update(route_gid, data)
 
     def remove(self, route_gid: str):
-        return super(RouteManager, self)._remove(route_gid)
+        return super()._remove(route_gid)

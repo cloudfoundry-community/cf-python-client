@@ -19,7 +19,7 @@ def plural(name: str) -> str:
 
 class Entity(JsonObject):
     def __init__(self, target_endpoint: str, client: "CloudFoundryClient", **kwargs):
-        super(Entity, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         default_manager = self._default_manager(target_endpoint, client)
         self._create_navigable_links(client.v3, default_manager)
         self._create_navigable_included_entities(client.v3, default_manager)
@@ -81,7 +81,7 @@ class Entity(JsonObject):
 
 class Relationship(JsonObject):
     def __init__(self, guid: str | None):
-        super(Relationship, self).__init__(guid=guid)
+        super().__init__(guid=guid)
 
 
 class ToOneRelationship(JsonObject):
@@ -95,7 +95,7 @@ class ToOneRelationship(JsonObject):
         return result
 
     def __init__(self, guid: str | None):
-        super(ToOneRelationship, self).__init__(data=Relationship(guid))
+        super().__init__(data=Relationship(guid))
         self.guid = guid
 
 
@@ -107,7 +107,7 @@ class ToManyRelationship(JsonObject):
         return result
 
     def __init__(self, *guids: str):
-        super(ToManyRelationship, self).__init__(data=[Relationship(guid) for guid in guids])
+        super().__init__(data=[Relationship(guid) for guid in guids])
         self.guids = list(guids)
 
 

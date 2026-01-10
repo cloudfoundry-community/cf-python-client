@@ -25,11 +25,11 @@ class SpaceManager(EntityManager[Entity]):
 
     def assign_isolation_segment(self, space_guid: str, isolation_segment_guid: str | None) -> ToOneRelationship:
         return ToOneRelationship.from_json_object(
-            super(SpaceManager, self)._patch(
+            super()._patch(
                 "%s%s/%s/relationships/isolation_segment" % (self.target_endpoint, self.entity_uri, space_guid),
                 dict(data=None) if isolation_segment_guid is None else ToOneRelationship(isolation_segment_guid),
             )
         )
 
     def remove(self, space_guid: str):
-        super(SpaceManager, self)._remove(space_guid)
+        super()._remove(space_guid)

@@ -321,7 +321,7 @@ class CloudFoundryClient(CredentialManager):
             raise AttributeError("type '%s' has no attribute '%s'" % (type(self).__name__, item))
 
     def _grant_password_request(self, login: str, password: str) -> dict:
-        request = super(CloudFoundryClient, self)._grant_password_request(login, password)
+        request = super()._grant_password_request(login, password)
         if self.token_format is not None:
             request["token_format"] = self.token_format
         if self.login_hint is not None:
@@ -329,7 +329,7 @@ class CloudFoundryClient(CredentialManager):
         return request
 
     def _grant_refresh_token_request(self, refresh_token: str) -> dict:
-        request = super(CloudFoundryClient, self)._grant_refresh_token_request(refresh_token)
+        request = super()._grant_refresh_token_request(refresh_token)
         if self.token_format is not None:
             request["token_format"] = self.token_format
         return request
@@ -343,27 +343,27 @@ class CloudFoundryClient(CredentialManager):
         )
 
     def get(self, url: str, params: dict | None = None, **kwargs) -> Response:
-        response = super(CloudFoundryClient, self).get(url, params, **kwargs)
+        response = super().get(url, params, **kwargs)
         CloudFoundryClient._log_request("GET", url, response)
         return CloudFoundryClient._check_response(response)
 
     def post(self, url: str, data=None, json=None, **kwargs) -> Response:
-        response = super(CloudFoundryClient, self).post(url, data, json, **kwargs)
+        response = super().post(url, data, json, **kwargs)
         CloudFoundryClient._log_request("POST", url, response)
         return CloudFoundryClient._check_response(response)
 
     def put(self, url: str, data=None, json=None, **kwargs) -> Response:
-        response = super(CloudFoundryClient, self).put(url, data, json, **kwargs)
+        response = super().put(url, data, json, **kwargs)
         CloudFoundryClient._log_request("PUT", url, response)
         return CloudFoundryClient._check_response(response)
 
     def patch(self, url: str, data=None, json=None, **kwargs) -> Response:
-        response = super(CloudFoundryClient, self).patch(url, data, json, **kwargs)
+        response = super().patch(url, data, json, **kwargs)
         CloudFoundryClient._log_request("PATCH", url, response)
         return CloudFoundryClient._check_response(response)
 
     def delete(self, url: str, **kwargs) -> Response:
-        response = super(CloudFoundryClient, self).delete(url, **kwargs)
+        response = super().delete(url, **kwargs)
         CloudFoundryClient._log_request("DELETE", url, response)
         return CloudFoundryClient._check_response(response)
 
