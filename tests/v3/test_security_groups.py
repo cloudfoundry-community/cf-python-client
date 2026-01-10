@@ -42,7 +42,7 @@ class TestSecurityGroups(unittest.TestCase, AbstractTestCase):
         self.client.get.return_value = self.mock_response(
             "/v3/security_groups", HTTPStatus.OK, None, "v3", "security_groups", "GET_response.json"
         )
-        all_security_groups = [service_broker for service_broker in self.client.v3.security_groups.list()]
+        all_security_groups = [security_group for security_group in self.client.v3.security_groups.list()]
         self.client.get.assert_called_with(self.client.get.return_value.url)
         self.assertEqual(2, len(all_security_groups))
         self.assertEqual(all_security_groups[0]["name"], "my-group0")
