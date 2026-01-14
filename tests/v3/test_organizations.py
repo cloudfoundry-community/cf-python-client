@@ -5,6 +5,8 @@ from unittest.mock import patch
 
 import cloudfoundry_client.main.main as main
 from abstract_test_case import AbstractTestCase
+
+from cloudfoundry_client.common_objects import Pagination
 from cloudfoundry_client.v3.entities import Entity, ToOneRelationship
 
 
@@ -143,6 +145,25 @@ class TestOrganizations(unittest.TestCase, AbstractTestCase):
         )
         self.client.v3.organizations.get_usage_summary("organization_id")
         self.client.get.assert_called_with(self.client.get.return_value.url)
+
+    def test_get_domains(self):
+        self.client.get.return_value = self.mock_response(
+            "/v3/organizations/organization_id/domains",
+            HTTPStatus.OK,
+            {"Content-Type": "application/json"},
+            "v3",
+            "organizations",
+            "GET_{id}_domains_response.json",
+        )
+        organization_domains_response: Pagination[Entity] = self.client.v3.organizations.list_domains("organization_id")
+        domains: list[dict] = [domain for domain in organization_domains_response]
+        print(domains)
+        self.assertIsInstance(domains, list)
+        self.assertEqual(len(domains), 1)
+        domain: dict = domains[0]
+        self.assertIsInstance(domain, dict)
+        self.assertEqual(domain.get("guid"), "3a5d3d89-3f89-4f05-8188-8a2b298c79d5")
+        self.assertEqual(domain.get("name"), "test-domain.com")
 
     @patch.object(sys, "argv", ["main", "list_organizations"])
     def test_main_list_organizations(self):
