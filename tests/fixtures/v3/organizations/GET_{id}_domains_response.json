@@ -1,0 +1,48 @@
+{
+  "pagination": {
+    "total_results": 1,
+    "total_pages": 1,
+    "first": {
+      "href": "https://api.example.org/v3/organizations/016b770b-b447-4a12-800a-1b4c69406a9f/domains?page=1&per_page=50"
+    },
+    "last": {
+      "href": "https://api.example.org/v3/organizations/016b770b-b447-4a12-800a-1b4c69406a9f/domains?page=1&per_page=50"
+    },
+    "next": null,
+    "previous": null
+  },
+  "resources": [
+    {
+      "guid": "3a5d3d89-3f89-4f05-8188-8a2b298c79d5",
+      "created_at": "2019-03-08T01:06:19Z",
+      "updated_at": "2019-03-08T01:06:19Z",
+      "name": "test-domain.com",
+      "internal": false,
+      "router_group": { "guid": "5806148f-cce6-4d86-7fbd-aa269e3f6f3f" },
+      "supported_protocols": ["tcp"],
+      "metadata": {
+        "labels": {},
+        "annotations": {}
+      },
+      "relationships": {
+        "organization": {
+          "data": null
+        },
+        "shared_organizations": {
+          "data": []
+        }
+      },
+      "links": {
+        "self": {
+          "href": "https://api.example.org/v3/domains/016b770b-b447-4a12-800a-1b4c69406a9f"
+        },
+        "route_reservations": {
+          "href": "https://api.example.org/v3/domains/016b770b-b447-4a12-800a-1b4c69406a9f/route_reservations"
+        },
+        "router_group": {
+          "href": "https://api.example.org/routing/v1/router_groups/5806148f-cce6-4d86-7fbd-aa269e3f6f3f"
+        }
+      }
+    }
+  ]
+}

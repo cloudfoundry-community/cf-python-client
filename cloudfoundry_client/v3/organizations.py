@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from cloudfoundry_client.common_objects import Pagination
 from cloudfoundry_client.v3.entities import EntityManager, Entity, ToOneRelationship
 
 if TYPE_CHECKING:
@@ -46,6 +47,10 @@ class OrganizationManager(EntityManager[Entity]):
         return ToOneRelationship.from_json_object(
             super().get(guid, "relationships", "default_isolation_segment")
         )
+
+    def list_domains(self, guid: str, **kwargs) -> Pagination[Entity]:
+        uri: str = "%s/%s/domains" % (self.entity_uri, guid)
+        return super()._list(requested_path=uri, **kwargs)
 
     def get_default_domain(self, guid: str) -> Entity:
         return super().get(guid, "domains", "default")
