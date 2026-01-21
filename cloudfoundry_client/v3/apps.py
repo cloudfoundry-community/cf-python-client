@@ -1,4 +1,10 @@
 from typing import TYPE_CHECKING
+import sys
+
+if sys.version_info < (3, 13):
+    from typing_extensions import deprecated
+else:
+    from warnings import deprecated
 
 from cloudfoundry_client.common_objects import JsonObject, Pagination
 from cloudfoundry_client.v3.entities import EntityManager, Entity
@@ -19,6 +25,11 @@ class AppManager(EntityManager[Entity]):
 
     def get_env(self, application_guid: str) -> JsonObject:
         return super()._get("%s%s/%s/env" % (self.target_endpoint, self.entity_uri, application_guid))
+
+    @deprecated("use list_routes instead")
+    def get_routes(self, application_guid: str) -> JsonObject:
+        return super()._get(
+            "%s%s/%s/routes" % (self.target_endpoint, self.entity_uri, application_guid))
 
     def list_routes(self, application_guid: str, **kwargs) -> Pagination[Entity]:
         uri: str = "%s/%s/routes" % (self.entity_uri, application_guid)
