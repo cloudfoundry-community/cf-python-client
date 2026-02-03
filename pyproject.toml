@@ -20,7 +20,7 @@ keywords = ["cloudfoundry", "cf"]
 [tool.poetry.dependencies]
 python = ">=3.10"
 aiohttp = ">=3.8.0"
-protobuf = "6.33.2"
+protobuf = "6.33.5"
 oauth2-client= "1.4.2"
 websocket-client= "~1.9.0"
 PyYAML = ">=6.0"
