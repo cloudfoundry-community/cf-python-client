@@ -56,6 +56,13 @@ def get_config_file() -> str:
     return os.path.join(get_user_directory(), ".cf_client_python.json")
 
 
+def _write_config_file(config_file: str, data: dict):
+    fd = os.open(config_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(json.dumps(data, indent=2))
+    os.chmod(config_file, 0o600)
+
+
 def import_from_clf_cli():
     user_directory = get_user_directory()
     cf_cli_dir = os.path.join(user_directory, ".cf")
@@ -68,12 +75,10 @@ def import_from_clf_cli():
         cf_cli_data = json.load(cf_cli_file)
         if cf_cli_data["RefreshToken"] is None or cf_cli_data["Target"] is None:
             raise IOError("Could not load informations from cf cli configuration")
-        with open(get_config_file(), "w") as f:
-            f.write(
-                json.dumps(
-                    dict(target_endpoint=cf_cli_data["Target"], verify=False, refresh_token=cf_cli_data["RefreshToken"]), indent=2
-                )
-            )
+        _write_config_file(
+            get_config_file(),
+            dict(target_endpoint=cf_cli_data["Target"], verify=False, refresh_token=cf_cli_data["RefreshToken"]),
+        )
 
 
 def build_client_from_configuration(previous_configuration: dict = None) -> CloudFoundryClient:
@@ -95,12 +100,10 @@ def build_client_from_configuration(previous_configuration: dict = None) -> Clou
         password = _read_value_from_user("Please enter your password")
         client = CloudFoundryClient(target_endpoint, verify=(verify == "true"))
         client.init_with_user_credentials(login, password)
-        with open(config_file, "w") as f:
-            f.write(
-                json.dumps(
-                    dict(target_endpoint=target_endpoint, verify=(verify == "true"), refresh_token=client.refresh_token), indent=2
-                )
-            )
+        _write_config_file(
+            config_file,
+            dict(target_endpoint=target_endpoint, verify=(verify == "true"), refresh_token=client.refresh_token),
+        )
         return client
     else:
         try:
