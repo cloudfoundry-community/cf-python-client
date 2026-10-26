@@ -71,7 +71,12 @@ def import_from_clf_cli():
         with open(get_config_file(), "w") as f:
             f.write(
                 json.dumps(
-                    dict(target_endpoint=cf_cli_data["Target"], verify=not bool(cf_cli_data.get("SSLDisabled", False)), refresh_token=cf_cli_data["RefreshToken"]), indent=2
+                    dict(
+                        target_endpoint=cf_cli_data["Target"],
+                        verify=not bool(cf_cli_data.get("SSLDisabled", False)),
+                        refresh_token=cf_cli_data["RefreshToken"],
+                    ),
+                    indent=2,
                 )
             )
 
