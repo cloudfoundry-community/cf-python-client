@@ -77,7 +77,11 @@ def import_from_clf_cli():
             raise IOError("Could not load informations from cf cli configuration")
         _write_config_file(
             get_config_file(),
-            dict(target_endpoint=cf_cli_data["Target"], verify=False, refresh_token=cf_cli_data["RefreshToken"]),
+            dict(
+                target_endpoint=cf_cli_data["Target"],
+                verify=not bool(cf_cli_data.get("SSLDisabled", False)),
+                refresh_token=cf_cli_data["RefreshToken"],
+            ),
         )
 
 
