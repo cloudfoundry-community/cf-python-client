@@ -1304,14 +1304,14 @@ files = [
 
 [[package]]
 name = "oauth2-client"
-version = "1.4.2"
+version = "1.4.4"
 description = "A client library for OAuth2"
 optional = false
-python-versions = "*"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "oauth2-client-1.4.2.tar.gz", hash = "sha256:5381900448ff1ae762eb7c65c501002eac46bb5ca2f49477fdfeaf9e9969f284"},
-    {file = "oauth2_client-1.4.2-py3-none-any.whl", hash = "sha256:7b938ba8166128a3c4c15ad23ca0c95a2468f8e8b6069d019ebc73360c15c7ca"},
+    {file = "oauth2_client-1.4.4-py3-none-any.whl", hash = "sha256:e7a7fcdd649f80442f1a8bdb399bbfc00114cf82c7693cfb52fa8e781e3465a3"},
+    {file = "oauth2_client-1.4.4.tar.gz", hash = "sha256:7f62a6dc79ff86aa881c71bbd59f86d638a7b07ebc8d09ba60e236136e38a772"},
 ]
 
 [package.dependencies]
@@ -2181,4 +2181,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10"
-content-hash = "9f5b188f966d5e35e48b93d66f4e387e5e62669c70198b737c64565876010473"
+content-hash = "f979390862e5fd405a654743887483ce4b021f19d849dc73e53d4a917bf766c4"
